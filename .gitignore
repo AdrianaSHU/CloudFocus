@@ -3,8 +3,16 @@ venv/
 *.pyc
 __pycache__/
 
+# Secrets - DO NOT TRACK
+.env
+
 # Database
 db.sqlite3
+
+# Generated files
+media/
+static_root/
+contact_logs/
 
 # IDE / OS files
 .vscode/
