@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="mb-4">Welcome to your Dashboard, {{ user.username }}!</h2>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      Your Device API Key
+    </div>
+    <div class="card-body">
+      <p>Use this key in your Raspberry Pi script to send data to your account:</p>
+      <input type="text" class="form-control" value="{{ api_key }}" readonly>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      Your Focus Timeline
+    </div>
+    <div class="card-body">
+      <p>This chart shows your focus state over time.</p>
+      
+      <div style="height: 400px;">
+        <canvas id="focusChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get the data from our Django view
+    const chartData = {{ chart_data_json|safe }};
+
+    const ctx = document.getElementById('focusChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: 'Focus Level',
+          data: chartData,
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1,
+          stepped: true, // Shows changes as "blocks", good for status data
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'time', // Use the time scale
+            time: {
+              unit: 'minute', // Display time by the minute
+              tooltipFormat: 'HH:mm:ss'
+            },
+            title: {
+              display: true,
+              text: 'Time'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Focus State'
+            },
+            // This configures the Y-axis labels
+            ticks: {
+              stepSize: 1,
+              callback: function(value, index, ticks) {
+                // Show text labels instead of numbers [cite: 25]
+                switch (value) {
+                  case 0:
+                    return 'Drowsy';
+                  case 1:
+                    return 'Distracted';
+                  case 2:
+                    return 'Focused';
+                }
+              }
+            },
+            min: 0,
+            max: 2 // Set strict min/max for our 3 states
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}
