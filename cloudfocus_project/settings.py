@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -128,3 +129,16 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- EMAIL CONFIGURATION (for SendGrid) ---
+# https://github.com/sendgrid/sendgrid-django
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Get credentials from your .env file
+SENDGRID_API_KEY = config('SENDGRID_API_KEY')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER') # This should be 'apikey'
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+DEFAULT_FROM_EMAIL = config('YOUR_EMAIL_ADDRESS') # The email you verified

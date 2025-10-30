@@ -11,6 +11,11 @@ from django.contrib.auth.forms import UserCreationForm
 
 from django.contrib import messages
 from .forms import ContactForm
+from django.core.mail import send_mail
+from django.conf import settings 
+
+import os
+from django.utils import timezone
 
 # --- API View ---
 
@@ -123,10 +128,63 @@ def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            # In a real app, you'd email this data.
-            # For this project, we'll just show a success message.
-            # This fulfills the requirement without complex email setup.
-            messages.success(request, 'Your message has been sent successfully!')
+            # Get the form data
+            name = form.cleaned_data['name']
+            from_email = form.cleaned_data['email']
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+            
+            # --- 1. Save the email to a local file ---
+            try:
+                # Define the log directory path (at your project root)
+                log_dir = os.path.join(settings.BASE_DIR, 'contact_logs')
+                # Create the directory if it doesn't exist
+                os.makedirs(log_dir, exist_ok=True)
+                
+                # Create a unique filename with a timestamp
+                now_str = timezone.now().strftime('%Y-%m-%d_%H-%M-%S')
+                filename = f"{now_str}_{from_email}.txt"
+                file_path = os.path.join(log_dir, filename)
+                
+                # Format the file content
+                file_content = (
+                    f"From: {name} <{from_email}>\n"
+                    f"Date: {timezone.now().isoformat()}\n"
+                    f"Subject: {subject}\n"
+                    f"----------------------------------\n\n"
+                    f"{message}"
+                )
+                
+                # Write the file
+                with open(file_path, 'w') as f:
+                    f.write(file_content)
+                    
+            except Exception as e:
+                # If file saving fails, log it to the console but continue
+                print(f"Error saving contact email to file: {e}")
+
+            # --- 2. Send the email via SendGrid ---
+            html_message = (
+                f"<b>New message from:</b> {name} ({from_email})<br>"
+                f"<b>Subject:</b> {subject}<br>"
+                f"<hr>"
+                f"<p>{message.replace(chr(10), '<br>')}</p>" # Replace newlines with <br>
+            )
+            
+            try:
+                send_mail(
+                    subject=f"Contact Form: {subject}",
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.DEFAULT_FROM_EMAIL],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+                messages.success(request, 'Your message has been sent successfully!')
+            
+            except Exception as e:
+                messages.error(request, 'Sorry, there was an error sending your message.')
+
             return redirect('home')
     else:
         form = ContactForm()
