@@ -5,6 +5,7 @@ from .models import Device
 from .serializers import FocusLogSerializer
 from django.contrib.auth.decorators import login_required 
 import json
+from collections import Counter
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
@@ -81,43 +82,48 @@ def home_view(request):
     """ The main landing page. """
     return render(request, 'home.html')
 
-@login_required # This decorator automatically protects the page
+
+@login_required
 def dashboard_view(request):
-    
     try:
-        # Get the user's device to find their API key
         user_device = request.user.device
         api_key = user_device.api_key
-        
-        # Get all logs for that device
-        logs = user_device.logs.all().order_by('timestamp')
+        logs = list(user_device.logs.all().order_by('timestamp')) # <-- (2) Make it a list
         
     except AttributeError:
-        # This handles a case where a user might exist but their
-        # device was somehow not created (e.g., old admin user)
         api_key = "No device found. Please contact support."
         logs = []
 
-    # We map text status to a number for the chart:
-    # 2 = Focused, 1 = Distracted, 0 = Drowsy
+    # --- (3) Add this whole calculation block ---
+    total_logs = len(logs)
+    if total_logs > 0:
+        status_counts = Counter([log.status for log in logs])
+        focused_percent = (status_counts.get('FOCUSED', 0) / total_logs) * 100
+        distracted_percent = (status_counts.get('DISTRACTED', 0) / total_logs) * 100
+        drowsy_percent = (status_counts.get('DROWSY', 0) / total_logs) * 100
+    else:
+        focused_percent = 0
+        distracted_percent = 0
+        drowsy_percent = 0
+    # --- End of new block ---
+
     status_map = {'FOCUSED': 2, 'DISTRACTED': 1, 'DROWSY': 0}
-    
     chart_data = [
-        {
-            'x': log.timestamp.isoformat(), # ISO format for JavaScript
-            'y': status_map.get(log.status, 1) # Default to 'Distracted' if unknown
-        } 
+        {'x': log.timestamp.isoformat(), 'y': status_map.get(log.status, 1)} 
         for log in logs
     ]
     
     context = {
-        # Pass the API key to show on the page
         'api_key': api_key,
+        'chart_data_json': json.dumps(chart_data),
         
-        # Pass the log data as a JSON string
-        'chart_data_json': json.dumps(chart_data)
+        # --- (4) Add these to the context ---
+        'focused_percent': focused_percent,
+        'distracted_percent': distracted_percent,
+        'drowsy_percent': drowsy_percent,
     }
     return render(request, 'dashboard.html', context)
+
 
 def about_view(request):
     """ Renders the 'About' page. """

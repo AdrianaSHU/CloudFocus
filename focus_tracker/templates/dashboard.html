@@ -3,6 +3,28 @@
 {% block content %}
   <h2 class="mb-4">Welcome to your Dashboard, {{ user.username }}!</h2>
 
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="summary-card card-focused">
+        <h3>{{ focused_percent|floatformat:0 }}%</h3>
+        <p>Focused Time</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="summary-card card-distracted">
+        <h3>{{ distracted_percent|floatformat:0 }}%</h3>
+        <p>Distracted Time</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="summary-card card-drowsy">
+        <h3>{{ drowsy_percent|floatformat:0 }}%</h3>
+        <p>Drowsy Time</p>
+      </div>
+    </div>
+  </div>
+  <div class="card mb-4">
+
   <div class="card mb-4">
     <div class="card-header">
       Your Device API Key
