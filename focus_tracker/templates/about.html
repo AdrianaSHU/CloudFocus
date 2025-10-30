@@ -1,14 +1,41 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="card">
+<div class="card p-4">
   <div class="card-body">
     <h2 class="card-title">About CloudFocus</h2>
-    <p class->This project, CloudFocus, is an AI-powered attention monitoring system designed for modern learning and work environments[cite: 1].</p>
-    <p>It uses a Raspberry Pi with a camera to locally analyze facial expressions and eye state to determine if a user is 'Focused', 'Distracted', or 'Drowsy'[cite: 8, 13]. This status is then securely sent to this web application for visualization.</p>
-    
-    <h4 class="mt-4">Privacy First</h4>
-    <p>A core principle of this project is privacy. All video processing is done locally on the Raspberry Pi. No raw video or identifiable images are ever sent to the cloud[cite: 9, 32, 33]. Only the anonymous status (e.g., 'Focused') and a timestamp are stored[cite: 34].</p>
+    <p class="lead">Harnessing the power of Edge AI and Cloud Computing to enhance learning and productivity.</p>
+
+    <div class="row align-items-center my-4">
+      <div class="col-md-6">
+        <img src="{% static 'images/ai_brain.jpg' %}" class="img-fluid rounded shadow-sm" alt="AI Brain">
+      </div>
+      <div class="col-md-6">
+        <h4>Privacy-First Edge AI</h4>
+        <p>A core principle of this project is privacy. All sensitive video processing is done locally on the Raspberry Pi. The device analyzes facial landmarks and eye aspect-ratio in real-time to determine a user's focus state.</p>
+        <p>No raw video or identifiable images are ever sent to the cloud. Only the anonymous status (e.g., 'Focused', 'Distracted') and a timestamp are transmitted, ensuring user data is secure and private.</p>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="row align-items-center my-4">
+      <div class="col-md-6 order-md-2">
+        <img src="{% static 'images/student_learning-by-ai.jpg' %}" class="img-fluid rounded shadow-sm" alt="Student Learning">
+      </div>
+      <div class="col-md-6 order-md-1">
+        <h4>Data-Driven Insights</h4>
+        <p>The anonymized data is sent to a secure cloud backend, built with Django and hosted on Microsoft Azure. This web application provides a powerful dashboard for users to visualize their focus patterns over time.</p>
+        <p>By seeing when they are most focused or most distracted, users can make informed decisions about their work or study habits, leading to improved productivity and wellbeing.</p>
+        <ul>
+          <li><strong>Technology:</strong> Raspberry Pi 4, OpenCV, TensorFlow Lite.</li>
+          <li><strong>Cloud:</strong> Azure App Service, Azure MySQL, Azure Blob Storage.</li>
+          <li><strong>Framework:</strong> Django, Django REST Framework, Chart.js.</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}

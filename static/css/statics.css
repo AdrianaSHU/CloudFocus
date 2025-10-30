@@ -1,12 +1,82 @@
-/* Change the default background color */
+:root {
+    --sidebar-width: 260px;
+    --sidebar-bg: #004d40; /* Dark Teal */
+    --sidebar-link-color: rgba(255, 255, 255, 0.7);
+    --sidebar-link-hover: #fff;
+    --sidebar-link-active: #fff;
+}
+
 body {
     background-color: #f4f7f6;
 }
 
-/* Customize the navbar */
-.navbar-dark.bg-dark {
-    background-color: #004d40 !important; /* A dark teal */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    padding: 20px 15px;
+    background-color: var(--sidebar-bg);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
 }
+
+.sidebar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.sidebar .nav-link {
+    color: var(--sidebar-link-color);
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+    color: var(--sidebar-link-hover);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: var(--sidebar-link-active);
+    background-color: #00796b; /* Active link color */
+}
+
+/* Fix for logout button */
+.sidebar .nav-item form {
+    margin: 0;
+}
+.sidebar .nav-link.btn-link {
+    width: 100%;
+    text-align: left;
+    color: var(--sidebar-link-color);
+}
+.sidebar .nav-link.btn-link:hover {
+    color: var(--sidebar-link-hover);
+    background-color: rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+}
+
+.sidebar hr {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Main content area */
+.main-content {
+    /* Push content to the right to make room for the sidebar */
+    margin-left: var(--sidebar-width);
+    padding: 30px;
+}
+/* --- End of Sidebar Layout --- */
+
 
 /* Customize the primary button to match */
 .btn-primary {
@@ -19,13 +89,20 @@ body {
     border-color: #004d40;
 }
 
-/* Style the dashboard summary cards */
+/* Dashboard Summary Cards */
 .summary-card {
     border-radius: 8px;
     padding: 20px;
     color: white;
     text-align: center;
     margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .summary-card h3 {
@@ -48,4 +125,53 @@ body {
 }
 .card-drowsy {
     background-color: #ef5350; /* Red */
+}
+
+/* General Card & Form Styling */
+.card {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+form p {
+    margin-bottom: 1rem;
+}
+form p label {
+    display: block;
+    margin-bottom: .5rem;
+    font-weight: 500;
+}
+form p input,
+form p select,
+form p textarea {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+form p input:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #00796b;
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgba(0, 121, 107, 0.25);
+}
+
+form p .helptext {
+    font-size: .875em;
+    color: #6c757d;
+    margin-top: .25rem;
+}
+form p .helptext ul {
+    margin-bottom: 0;
+    padding-left: 1.5rem;
 }
