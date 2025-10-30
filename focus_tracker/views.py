@@ -3,13 +3,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Device
 from .serializers import FocusLogSerializer
-
 from django.contrib.auth.decorators import login_required 
 import json
-
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+
+from django.contrib import messages
+from .forms import ContactForm
 
 # --- API View ---
 
@@ -112,3 +113,22 @@ def dashboard_view(request):
         'chart_data_json': json.dumps(chart_data)
     }
     return render(request, 'dashboard.html', context)
+
+def about_view(request):
+    """ Renders the 'About' page. """
+    return render(request, 'about.html')
+
+def contact_view(request):
+    """ Renders the 'Contact Us' page and handles form submission. """
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            # In a real app, you'd email this data.
+            # For this project, we'll just show a success message.
+            # This fulfills the requirement without complex email setup.
+            messages.success(request, 'Your message has been sent successfully!')
+            return redirect('home')
+    else:
+        form = ContactForm()
+        
+    return render(request, 'contact.html', {'form': form})

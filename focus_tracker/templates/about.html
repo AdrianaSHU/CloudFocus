@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">About CloudFocus</h2>
+    <p class->This project, CloudFocus, is an AI-powered attention monitoring system designed for modern learning and work environments[cite: 1].</p>
+    <p>It uses a Raspberry Pi with a camera to locally analyze facial expressions and eye state to determine if a user is 'Focused', 'Distracted', or 'Drowsy'[cite: 8, 13]. This status is then securely sent to this web application for visualization.</p>
+    
+    <h4 class="mt-4">Privacy First</h4>
+    <p>A core principle of this project is privacy. All video processing is done locally on the Raspberry Pi. No raw video or identifiable images are ever sent to the cloud[cite: 9, 32, 33]. Only the anonymous status (e.g., 'Focused') and a timestamp are stored[cite: 34].</p>
+  </div>
+</div>
+{% endblock %}
