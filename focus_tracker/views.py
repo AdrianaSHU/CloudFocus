@@ -3,13 +3,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Device
 from .serializers import FocusLogSerializer
-from django.contrib.auth.decorators import login_required 
+from django.contrib.auth.decorators import login_required, user_passes_test
 import json
 from collections import Counter
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from .forms import CustomUserCreationForm
 from .forms import UserUpdateForm, ProfileUpdateForm
+from django.contrib.auth.models import User
 
 from django.contrib import messages
 from .forms import ContactForm
@@ -76,6 +77,10 @@ def home_view(request):
     """ The main landing page. """
     return render(request, 'home.html')
 
+# --- This is a check function ---
+def is_supervisor(user):
+    # Checks if the user is logged in AND is a staff member
+    return user.is_authenticated and user.is_staff
 
 @login_required
 def dashboard_view(request):
@@ -218,3 +223,63 @@ def profile_view(request):
     }
     
     return render(request, 'profile.html', context)
+
+@user_passes_test(is_supervisor) # This decorator protects the page
+def supervisor_dashboard_view(request):
+    """
+    Shows a list of all non-supervisor users.
+    """
+    # Get all users who are NOT staff, so supervisors don't see themselves
+    all_users = User.objects.filter(is_staff=False)
+    
+    context = {
+        'users': all_users
+    }
+    return render(request, 'supervisor_dashboard.html', context)
+
+
+@user_passes_test(is_supervisor) # Protect this page too
+def supervisor_user_detail_view(request, user_id):
+    """
+    Shows the detailed dashboard for a specific user.
+    """
+    try:
+        # Get the specific user the supervisor wants to see
+        target_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('supervisor_dashboard')
+
+    # --- This is the same logic from your normal dashboard_view ---
+    try:
+        user_device = target_user.device
+        logs = list(user_device.logs.all().order_by('timestamp'))
+    except AttributeError:
+        logs = []
+
+    total_logs = len(logs)
+    if total_logs > 0:
+        status_counts = Counter([log.status for log in logs])
+        focused_percent = (status_counts.get('FOCUSED', 0) / total_logs) * 100
+        distracted_percent = (status_counts.get('DISTRACTED', 0) / total_logs) * 100
+        drowsy_percent = (status_counts.get('DROWSY', 0) / total_logs) * 100
+    else:
+        focused_percent = 0
+        distracted_percent = 0
+        drowsy_percent = 0
+
+    status_map = {'FOCUSED': 2, 'DISTRACTED': 1, 'DROWSY': 0}
+    chart_data = [
+        {'x': log.timestamp.isoformat(), 'y': status_map.get(log.status, 1)} 
+        for log in logs
+    ]
+    # --- End of dashboard logic ---
+
+    context = {
+        'target_user': target_user, # Pass the user to the template
+        'chart_data_json': json.dumps(chart_data),
+        'focused_percent': focused_percent,
+        'distracted_percent': distracted_percent,
+        'drowsy_percent': drowsy_percent,
+    }
+    return render(request, 'supervisor_user_detail.html', context)

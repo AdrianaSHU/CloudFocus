@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
-    LogFocusView, register_view, home_view, dashboard_view, about_view, contact_view, profile_view
+    LogFocusView, register_view, home_view, dashboard_view, about_view, contact_view, profile_view, 
+    supervisor_dashboard_view, supervisor_user_detail_view
 )
 from django.contrib.auth import views as auth_views
 
@@ -43,4 +44,9 @@ urlpatterns = [
              template_name='password_reset_complete.html'
          ), 
          name='password_reset_complete'),
+
+    path('supervisor/', supervisor_dashboard_view, name='supervisor_dashboard'),
+    path('supervisor/user/<int:user_id>/', 
+         supervisor_user_detail_view, 
+         name='supervisor_user_detail'),
 ]

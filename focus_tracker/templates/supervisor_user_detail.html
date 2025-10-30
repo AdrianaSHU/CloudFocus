@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <a href="{% url 'supervisor_dashboard' %}" class="btn btn-secondary btn-sm mb-3">&larr; Back to User List</a>
+
+  <h2 class="mb-4">
+    Focus Dashboard for: {{ target_user.first_name }} {{ target_user.last_name }}
+  </h2>
+
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="summary-card card-focused">
+        <h3>{{ focused_percent|floatformat:0 }}%</h3>
+        <p>Focused Time</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="summary-card card-distracted">
+        <h3>{{ distracted_percent|floatformat:0 }}%</h3>
+        <p>Distracted Time</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="summary-card card-drowsy">
+        <h3>{{ drowsy_percent|floatformat:0 }}%</h3>
+        <p>Drowsy Time</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">
+      Focus Timeline
+    </div>
+    <div class="card-body">
+      <div style="height: 400px;">
+        <canvas id="focusChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chartData = {{ chart_data_json|safe }};
+    const ctx = document.getElementById('focusChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: 'Focus Level',
+          data: chartData,
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1,
+          stepped: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'time',
+            time: { unit: 'minute', tooltipFormat: 'HH:mm:ss' },
+            title: { display: true, text: 'Time' }
+          },
+          y: {
+            title: { display: true, text: 'Focus State' },
+            ticks: {
+              stepSize: 1,
+              callback: function(value, index, ticks) {
+                switch (value) {
+                  case 0: return 'Drowsy';
+                  case 1: return 'Distracted';
+                  case 2: return 'Focused';
+                }
+              }
+            },
+            min: 0,
+            max: 2
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}

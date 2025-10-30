@@ -208,3 +208,5 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # makes a request (e.g., loads a new page).
 SESSION_SAVE_EVERY_REQUEST = True
 
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/'

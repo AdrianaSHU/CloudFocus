@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2 class="mb-4">Supervisor Panel</h2>
+  <p>Select a user to view their focus dashboard.</p>
+
+  <div class="list-group">
+    {% for user in users %}
+      <a href="{% url 'supervisor_user_detail' user.id %}" class="list-group-item list-group-item-action">
+        {{ user.first_name }} {{ user.last_name }}
+        <small class="text-muted">(@{{ user.username }})</small>
+      </a>
+    {% empty %}
+      <div class="list-group-item">No users found.</div>
+    {% endfor %}
+  </div>
+{% endblock %}
