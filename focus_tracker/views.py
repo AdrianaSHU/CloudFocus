@@ -8,7 +8,8 @@ import json
 from collections import Counter
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
+from .forms import CustomUserCreationForm
+from .forms import UserUpdateForm, ProfileUpdateForm
 
 from django.contrib import messages
 from .forms import ContactForm
@@ -60,21 +61,14 @@ class LogFocusView(APIView):
 def register_view(request):
     """ Handles user registration. """
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            
-            # --- IMPORTANT ---
-            # Automatically create a Device for this new user
-            # This links their account to a unique API key
             Device.objects.create(owner=user, name=f"{user.username}'s RPi")
-            # --- END ---
-            
-            # Log the user in immediately
             login(request, user)
-            return redirect('dashboard') 
+            return redirect('dashboard')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
         
     return render(request, 'register.html', {'form': form})
 
@@ -196,3 +190,31 @@ def contact_view(request):
         form = ContactForm()
         
     return render(request, 'contact.html', {'form': form})
+
+@login_required
+def profile_view(request):
+    # Handles updating the user's profile information.
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(
+            request.POST, 
+            request.FILES, # This handles the image upload
+            instance=request.user.profile
+        )
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('profile')
+
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form
+    }
+    
+    return render(request, 'profile.html', context)

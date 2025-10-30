@@ -80,7 +80,6 @@ WSGI_APPLICATION = 'cloudfocus_project.wsgi.application'
 
 
 # --- Database Configuration ---
-# Reads connection info from your .env file
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -91,12 +90,18 @@ DATABASES = {
         'PORT': '3306',
         'OPTIONS': {
             'ssl': {
-                # This setting is required by Azure MySQL
-                'ca': 'cloudfocus_project/DigiCertGlobalRootG2.crt.pem' 
+                'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootG2.crt.pem')
             }
         }
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 # --- IMPORTANT: Download the SSL Certificate ---
 # 1. Azure requires an SSL connection.
@@ -150,12 +155,16 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# --- EMAIL CONFIGURATION (for local testing) ---
+# This prints any emails Django tries to send directly to your terminal
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # --- EMAIL CONFIGURATION (for SendGrid) ---
 # https://github.com/sendgrid/sendgrid-django
-EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+# EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+# EMAIL_HOST = 'smtp.sendgrid.net'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
 
 # Get credentials from your .env file
 SENDGRID_API_KEY = config('SENDGRID_API_KEY')
@@ -180,3 +189,22 @@ MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/'
 # This configures the storage backend
 AZURE_STORAGE_ACCOUNT_NAME = AZURE_ACCOUNT_NAME
 AZURE_STORAGE_ACCOUNT_KEY = AZURE_ACCOUNT_KEY
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# --- SESSION TIMEOUT SETTINGS ---
+# This logs the user out after a period of inactivity.
+
+# Set the session to expire after 10 minutes (in seconds)
+SESSION_COOKIE_AGE = 60 * 10  # 600 seconds = 10 minutes
+
+# This makes the session expire when the user closes their browser
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# --- IMPORTANT ---
+# This tells Django to reset the 10-minute timer *every time* the user
+# makes a request (e.g., loads a new page).
+SESSION_SAVE_EVERY_REQUEST = True
+

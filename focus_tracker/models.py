@@ -8,7 +8,14 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
     # We'll use Azure Blob Storage to store these files.
-    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    # profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+
+    profile_picture = models.ImageField(
+        upload_to='profile_pics/', 
+        default='profile_pics/default.png', # Add a default image
+        null=True, 
+        blank=True
+    )
 
     def __str__(self):
         return self.user.username
