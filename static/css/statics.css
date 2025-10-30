@@ -207,3 +207,15 @@ form p .helptext ul {
 .footer .text-muted {
     color: #6c757d !important; /* Bootstrap muted color */
 }
+
+.social-icon {
+    font-size: 1.5rem; /* Makes the icons bigger */
+    color: #6c757d;   /* Muted gray color */
+    margin-left: 15px;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.social-icon:hover {
+    color: #004d40; 
+}
