@@ -1,19 +1,70 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-  <div class="p-5 mb-4 bg-body-tertiary rounded-3">
-    <div class="container-fluid py-5">
-      <h1 class="display-5 fw-bold">Welcome to CloudFocus</h1>
-      <p class="col-md-8 fs-4">
-        Your AI-powered attention monitoring system. Register an account
-        or log in to see your personal focus dashboard.
-      </p>
-      {% if not user.is_authenticated %}
-      <a class="btn btn-primary btn-lg" href="{% url 'register' %}">Get Started</a>
-      <a class="btn btn-secondary btn-lg" href="{% url 'login' %}">Login</a>
-      {% else %}
-      <a class="btn btn-primary btn-lg" href="{% url 'dashboard' %}">Go to Dashboard</a>
-      {% endif %}
+
+<div class="card shadow-sm p-5 mb-4" style="background-color: #fff;">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <h1 class="display-4 fw-bold">Welcome to CloudFocus</h1>
+            <p class="fs-4 text-muted">Your AI-powered attention monitoring system.</p>
+            <p class="fs-5">Gain insights into your focus patterns, enhance your productivity, and protect your privacy with our secure edge-AI solution.</p>
+            
+            {% if not user.is_authenticated %}
+                <a class="btn btn-primary btn-lg mt-2" href="{% url 'register' %}">Get Started</a>
+                <a class="btn btn-secondary btn-lg mt-2" href="{% url 'login' %}">Login</a>
+            {% else %}
+                <a class="btn btn-primary btn-lg mt-2" href="{% url 'dashboard' %}">Go to Your Dashboard</a>
+            {% endif %}
+        </div>
+        <div class="col-md-5 text-center d-none d-md-block">
+            <img src="{% static 'images/ai_brain.jpg' %}" class="img-fluid rounded shadow-lg" alt="AI Brain">
+        </div>
     </div>
-  </div>
+</div>
+
+<h2 class="text-center fw-bold my-5">How It Works</h2>
+<div class="row text-center">
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 p-4">
+            <div class="card-body">
+                <i class="bi bi-cpu-fill" style="font-size: 3rem; color: #00796b;"></i>
+                <h4 class="card-title fw-bold mt-3">Privacy-First AI</h4>
+                <p class="card-text">All video is processed locally on your Raspberry Pi. No images ever leave your device. Only the anonymous status ("Focused", "Drowsy") is sent to the cloud.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 p-4">
+            <div class="card-body">
+                <i class="bi bi-bar-chart-line-fill" style="font-size: 3rem; color: #00796b;"></i>
+                <h4 class="card-title fw-bold mt-3">Personal Dashboard</h4>
+                <p class="card-text">Log in to your secure dashboard to see your focus patterns over time. The interactive chart and summary cards help you understand when you are most productive.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 p-4">
+            <div class="card-body">
+                <i class="bi bi-people-fill" style="font-size: 3rem; color: #00796b;"></i>
+                <h4 class="card-title fw-bold mt-3">Supervisor Access</h4>
+                <p class="card-text">For educational or work settings, supervisors can be granted special permission to view team dashboards and monitor overall engagement levels.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not user.is_authenticated %}
+<div class="card text-center p-5 my-4">
+    <h3 class="fw-bold">Ready to take control of your focus?</h3>
+    <p class="fs-5 text-muted">Create your free account today.</p>
+    <div class="d-flex justify-content-center">
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg mt-3">Sign Up Now</a>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
