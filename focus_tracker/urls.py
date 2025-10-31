@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     LogFocusView, register_view, home_view, dashboard_view, about_view, contact_view, profile_view, 
-    supervisor_dashboard_view, supervisor_user_detail_view
+    supervisor_dashboard_view, supervisor_user_detail_view, start_session_view, end_session_view
 )
 from django.contrib.auth import views as auth_views
 
@@ -19,6 +19,9 @@ urlpatterns = [
     path('about/', about_view, name='about'),
     path('contact/', contact_view, name='contact'),
     path('profile/', profile_view, name='profile'),
+
+    path('session/start/<int:device_id>/', start_session_view, name='start_session'),
+    path('session/end/', end_session_view, name='end_session'),
 
     # --- THIS BLOCK IS FOR PASSWORD RESET ---
     path('password-reset/', 
@@ -46,7 +49,6 @@ urlpatterns = [
          name='password_reset_complete'),
 
     path('supervisor/', supervisor_dashboard_view, name='supervisor_dashboard'),
-    path('supervisor/user/<int:user_id>/', 
-         supervisor_user_detail_view, 
+    path('supervisor/user/<int:user_id>/', supervisor_user_detail_view, 
          name='supervisor_user_detail'),
 ]

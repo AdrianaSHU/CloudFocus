@@ -3,6 +3,7 @@
 {% block content %}
   <h2 class="mb-4">Welcome to your Dashboard, {{ user.username }}!</h2>
 
+  <!-- (1) Summary Cards -->
   <div class="row">
     <div class="col-lg-4">
       <div class="summary-card card-focused">
@@ -24,16 +25,57 @@
     </div>
   </div>
 
+  <!-- (2) NEW Session Management Card -->
+  <!-- This card REPLACES the old API Key card -->
   <div class="card mb-4">
     <div class="card-header">
-      Your Device API Key
+      <span>Session Management</span>
     </div>
     <div class="card-body">
-      <p>Use this key in your Raspberry Pi script to send data to your account:</p>
-      <input type="text" class="form-control" value="{{ api_key }}" readonly>
+
+      <!-- This logic checks if the user has an active session -->
+      {% if active_session %}
+
+        <!-- If session is ACTIVE, show this: -->
+        <h5 class="text-success">Session Active</h5>
+        <p>You are currently "Checked In" to the device: 
+          <strong>{{ active_session.device.name }}</strong>
+        </p>
+        <p>All data from this device is being saved to your account.</p>
+
+        <!-- End Session Button -->
+        <form method="POST" action="{% url 'end_session' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-danger">End My Session</button>
+        </form>
+
+      {% else %}
+
+        <!-- If session is INACTIVE, show this: -->
+        <h5 class="text-danger">You have no active session.</h5>
+        <p>Please select a device to "Check In" and start recording data.</p>
+
+        <div class="list-group">
+          {% for device in all_devices %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <strong>{{ device.name }}</strong>
+              <!-- Start Session Button -->
+              <form method="POST" action="{% url 'start_session' device.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Start Session</button>
+              </form>
+            </div>
+          {% empty %}
+            <p class="text-muted">No devices are registered in the system. Please contact your supervisor.</p>
+          {% endfor %}
+        </div>
+
+      {% endif %}
+
     </div>
   </div>
 
+  <!-- (3) Focus Timeline Chart -->
   <div class="card">
     <div class="card-header">
       Your Focus Timeline
@@ -47,6 +89,7 @@
     </div>
   </div>
 
+  <!-- (4) Chart.js Script (Your code is perfect) -->
   <script>
     // Get the data from our Django view
     const chartData = {{ chart_data_json|safe }};
@@ -87,7 +130,7 @@
             ticks: {
               stepSize: 1,
               callback: function(value, index, ticks) {
-                // Show text labels instead of numbers [cite: 25]
+                // Show text labels instead of numbers
                 switch (value) {
                   case 0:
                     return 'Drowsy';

@@ -7,59 +7,65 @@ import uuid # For generating unique API keys
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
-    # We'll use Azure Blob Storage to store these files.
-    # profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
-
     profile_picture = models.ImageField(
-        upload_to='profile_pics/', 
-        default='profile_pics/default.png', # Add a default image
-        null=True, 
-        blank=True
-    )
+    upload_to='profile_pics/', 
+    null=True, 
+    blank=True
+)
 
     def __str__(self):
         return self.user.username
 
-# These two functions (called "signals") automatically create and save
-# a Profile whenever a new User is created.
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+
+# --- These models are correct for our "Shared Device" system ---
 
 class Device(models.Model):
-    """ 
-    Represents a physical RPi device, owned by a user.
-    We use OneToOneField for a strict single-device-per-user link.
     """
-    owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='device')
-    
-    name = models.CharField(max_length=100, default='My Raspberry Pi')
+    Represents a physical device/station (e.g., "Classroom RPi").
+    Created by an admin.
+    """
+    name = models.CharField(max_length=100, default='Classroom RPi')
     device_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    
-    # This is the secret key your RPi will use to authenticate
     api_key = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
     def __str__(self):
-        return f"{self.name} ({self.owner.username})"
+        return self.name
+
+class Session(models.Model):
+    """
+    Links a User to a Device for a period of time.
+    Created when the user clicks "Start Session".
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='sessions')
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.user.username} @ {self.device.name} (Active: {self.is_active})"
 
 class FocusLog(models.Model):
+    """
+    A single data point, linked to an active session.
+    """
     STATUS_CHOICES = [
         ('FOCUSED', 'Focused'),
         ('DISTRACTED', 'Distracted'),
         ('DROWSY', 'Drowsy'),
     ]
     
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='logs')
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='logs')
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
 
     def __str__(self):
-        return f"{self.device.owner.username} was {self.status} at {self.timestamp}"
+        return f"{self.session.user.username} was {self.status} at {self.timestamp}"
 
     class Meta:
-        ordering = ['-timestamp'] # Show newest logs first
+        ordering = ['-timestamp']

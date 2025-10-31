@@ -1,31 +1,38 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Device
+# We need to import all our models for the views
+from .models import Device, Session, FocusLog
 from .serializers import FocusLogSerializer
+
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+
 import json
 from collections import Counter
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from .forms import CustomUserCreationForm
-from .forms import UserUpdateForm, ProfileUpdateForm
-from django.contrib.auth.models import User
-
 from django.contrib import messages
-from .forms import ContactForm
 from django.core.mail import send_mail
-from django.conf import settings 
-
+from django.conf import settings
+from django.views.decorators.http import require_POST
 import os
 from django.utils import timezone
 
-# --- API View ---
+# Import all forms at once
+from .forms import (
+    CustomUserCreationForm, 
+    UserUpdateForm, 
+    ProfileUpdateForm, 
+    ContactForm
+)
 
+
+# --- API View ---
 class LogFocusView(APIView):
     """
     API endpoint for the RPi to POST focus data.
-    Requires 'API-Key' in the headers for authentication.
+    This view uses the "Shared Device" (Check-In) model.
     """
     
     def post(self, request, *args, **kwargs):
@@ -37,41 +44,65 @@ class LogFocusView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        # 2. Find the device (and owner) with this key
+        # 2. Find the *Device* (not the user)
         try:
-            # We use .select_related('owner') for a more efficient
-            # database query, as we know we'll need the owner.
-            device = Device.objects.select_related('owner').get(api_key=api_key)
+            device = Device.objects.get(api_key=api_key)
         except Device.DoesNotExist:
             return Response(
-                {'error': 'Invalid API-Key.'}, 
+                {'error': 'Invalid API-Key. This device is not registered.'}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        # 3. Validate and save the data
+        # 3. Find the *active session* for this device
+        try:
+            active_session = Session.objects.get(
+                device=device, 
+                is_active=True
+            )
+        except Session.DoesNotExist:
+            # This is a key error: the RPi is on, but no user
+            # is "checked in" on the website.
+            return Response(
+                {'error': 'No active session found for this device. Please "Start Session" on the website.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        except Session.MultipleObjectsReturned:
+            # This is a data error, but we should handle it.
+            # It means two users are somehow active on one device.
+            return Response(
+                {'error': 'Data conflict. Multiple active sessions found.'}, 
+                status=status.HTTP_409_CONFLICT
+            )
+
+        # 4. Validate and save the data
         serializer = FocusLogSerializer(data=request.data)
         if serializer.is_valid():
-            # Save the log, associating it with the authenticated device
-            # This automatically links it to the device's owner
-            serializer.save(device=device)
+            # Save the log, linking it to the active session
+            serializer.save(session=active_session)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
-        # If data is bad (e.g., status="SLEEPING")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# --- THIS IS THE CORRECTED VIEW ---
 def register_view(request):
     """ Handles user registration. """
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            Device.objects.create(owner=user, name=f"{user.username}'s RPi")
+            
+            # --- THIS LINE IS NOW REMOVED ---
+            # In our new model, Devices are created by the admin,
+            # not by the user on registration.
+            
             login(request, user)
             return redirect('dashboard')
     else:
         form = CustomUserCreationForm()
         
     return render(request, 'register.html', {'form': form})
+# --- END OF CORRECTION ---
 
 def home_view(request):
     """ The main landing page. """
@@ -84,16 +115,26 @@ def is_supervisor(user):
 
 @login_required
 def dashboard_view(request):
-    try:
-        user_device = request.user.device
-        api_key = user_device.api_key
-        logs = list(user_device.logs.all().order_by('timestamp')) # <-- (2) Make it a list
-        
-    except AttributeError:
-        api_key = "No device found. Please contact support."
-        logs = []
+    """ 
+    The main dashboard for the "Shared Device" model.
+    Shows session controls and the user's personal data.
+    """
+    
+    # 1. Get the user's current active session, if one exists
+    active_session = Session.objects.filter(
+        user=request.user, 
+        is_active=True
+    ).first() # .first() safely returns one or None
+    
+    # 2. Get all available devices to start a session
+    all_devices = Device.objects.all()
+    
+    # 3. Get all logs from *all* of the user's sessions (past and present)
+    logs = list(FocusLog.objects.filter(
+        session__user=request.user
+    ).order_by('timestamp'))
 
-    # --- (3) Add this whole calculation block ---
+    # --- This calculation logic is the same as before ---
     total_logs = len(logs)
     if total_logs > 0:
         status_counts = Counter([log.status for log in logs])
@@ -104,7 +145,6 @@ def dashboard_view(request):
         focused_percent = 0
         distracted_percent = 0
         drowsy_percent = 0
-    # --- End of new block ---
 
     status_map = {'FOCUSED': 2, 'DISTRACTED': 1, 'DROWSY': 0}
     chart_data = [
@@ -113,10 +153,9 @@ def dashboard_view(request):
     ]
     
     context = {
-        'api_key': api_key,
+        'active_session': active_session,
+        'all_devices': all_devices,
         'chart_data_json': json.dumps(chart_data),
-        
-        # --- (4) Add these to the context ---
         'focused_percent': focused_percent,
         'distracted_percent': distracted_percent,
         'drowsy_percent': drowsy_percent,
@@ -238,25 +277,26 @@ def supervisor_dashboard_view(request):
     return render(request, 'supervisor_dashboard.html', context)
 
 
-@user_passes_test(is_supervisor) # Protect this page too
+@user_passes_test(is_supervisor)
 def supervisor_user_detail_view(request, user_id):
     """
-    Shows the detailed dashboard for a specific user.
+    Shows the detailed dashboard for a specific user,
+    using the new "Session" data model.
     """
     try:
-        # Get the specific user the supervisor wants to see
         target_user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         messages.error(request, 'User not found.')
         return redirect('supervisor_dashboard')
 
-    # --- This is the same logic from your normal dashboard_view ---
-    try:
-        user_device = target_user.device
-        logs = list(user_device.logs.all().order_by('timestamp'))
-    except AttributeError:
-        logs = []
+    # --- THIS IS THE UPDATED LOGIC ---
+    # Get all logs from all of this user's sessions
+    logs = list(FocusLog.objects.filter(
+        session__user=target_user
+    ).order_by('timestamp'))
+    # --- END OF UPDATED LOGIC ---
 
+    # --- This calculation logic is the same as before ---
     total_logs = len(logs)
     if total_logs > 0:
         status_counts = Counter([log.status for log in logs])
@@ -273,13 +313,66 @@ def supervisor_user_detail_view(request, user_id):
         {'x': log.timestamp.isoformat(), 'y': status_map.get(log.status, 1)} 
         for log in logs
     ]
-    # --- End of dashboard logic ---
 
     context = {
-        'target_user': target_user, # Pass the user to the template
+        'target_user': target_user,
         'chart_data_json': json.dumps(chart_data),
         'focused_percent': focused_percent,
         'distracted_percent': distracted_percent,
         'drowsy_percent': drowsy_percent,
     }
     return render(request, 'supervisor_user_detail.html', context)
+
+@login_required
+@require_POST # Ensures this can only be called by our form button
+def start_session_view(request, device_id):
+    """
+    Starts a new session for the logged-in user on a specific device.
+    """
+    try:
+        device_to_start = Device.objects.get(id=device_id)
+
+        # --- Business Logic ---
+        # 1. End any other active sessions for THIS USER
+        Session.objects.filter(user=request.user, is_active=True).update(
+            is_active=False, 
+            end_time=timezone.now()
+        )
+
+        # 2. End any other active sessions on THIS DEVICE (kicks off other user)
+        Session.objects.filter(device=device_to_start, is_active=True).update(
+            is_active=False, 
+            end_time=timezone.now()
+        )
+
+        # 3. Create the new session
+        Session.objects.create(
+            user=request.user,
+            device=device_to_start,
+            is_active=True
+        )
+
+        messages.success(request, f"Session started on {device_to_start.name}.")
+
+    except Device.DoesNotExist:
+        messages.error(request, "Device not found.")
+
+    return redirect('dashboard')
+
+
+@login_required
+@require_POST
+def end_session_view(request):
+    """
+    Ends the user's current active session.
+    """
+    try:
+        active_session = Session.objects.get(user=request.user, is_active=True)
+        active_session.is_active = False
+        active_session.end_time = timezone.now()
+        active_session.save()
+        messages.info(request, "Your session has been ended.")
+    except Session.DoesNotExist:
+        messages.error(request, "You have no active session to end.")
+
+    return redirect('dashboard')

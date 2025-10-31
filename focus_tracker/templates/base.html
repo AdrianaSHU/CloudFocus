@@ -43,10 +43,10 @@
               {% if user.profile.profile_picture %}
                 {{ user.profile.profile_picture.url }}
               {% else %}
-                {% static 'images/default.png' %}
+                {% static 'images/default.png' %} 
               {% endif %}
-            " 
-            class="rounded-circle sidebar-profile-pic">
+             
+            "class="rounded-circle sidebar-profile-pic">
             
             <span class="d-block sidebar-user-name">
                 {{ user.first_name }} {{ user.last_name }}

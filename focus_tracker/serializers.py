@@ -4,5 +4,6 @@ from .models import FocusLog
 class FocusLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = FocusLog
-        # We only need the RPi to send us the 'status'
+        # The RPi still only sends the 'status'
+        # The 'session' will be added by the view
         fields = ['status']
