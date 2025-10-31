@@ -197,7 +197,7 @@ form p .helptext ul {
 
 .footer {
     padding: 20px 0;
-    margin-top: 30px; /* Space above the footer */
+    margin-top: 20px; /* Space above the footer */
     border-top: 1px solid #e0e0e0; /* A light line to separate it */
     background-color: #fff; /* Match the card background */
     text-align: center;
@@ -206,4 +206,34 @@ form p .helptext ul {
 
 .footer .text-muted {
     color: #6c757d !important; /* Bootstrap muted color */
+}
+
+/* --- Footer Social Icons --- */
+.social-icon {
+    display: inline-block;  /* Change to inline-block for stacking */
+    vertical-align: top;    /* Aligns the tops of the blocks */
+    text-align: center;     /* Centers the icon and text */
+    width: 80px;            /* Gives each icon a set width */
+    font-size: 1.8rem;
+    color: #6c757d;
+    margin-left: 15px;      /* Space between each block */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.social-icon:hover {
+    color: #004d40; /* Your main theme color on hover */
+}
+
+/* This targets the <i> icon tag */
+.social-icon i {
+    display: block; /* Makes the icon take its own line */
+}
+
+/* This targets the new <span> text */
+.social-icon span {
+    display: block;       /* Makes the text take its own line */
+    font-size: 0.75rem;   /* Makes the text small */
+    font-weight: 500;
+    margin-top: 4px;      /* Adds a small space below the icon */
 }
