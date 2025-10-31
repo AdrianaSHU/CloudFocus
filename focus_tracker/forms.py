@@ -13,6 +13,8 @@ class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
+    profile_picture = forms.ImageField(required=False, label="Profile Picture (Optional)")
+
 
     class Meta(UserCreationForm.Meta):
         model = User
