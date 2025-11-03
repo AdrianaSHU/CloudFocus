@@ -23,13 +23,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_^^er1r(8_4&*3@+%l7webd3nt%d+_6!^93ubj_07l+v@dsm5z'
+# SECRET_KEY = 'django-insecure-_^^er1r(8_4&*3@+%l7webd3nt%d+_6!^93ubj_07l+v@dsm5z'
+SECRET_KEY = config('SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = []
+# --- (2) DEBUG ---
+DEBUG = config('DEBUG', default=False, cast=bool)
 
+# --- (3) ALLOWED HOSTS ---
+# This tells your app which domains it's allowed to serve.
+ALLOWED_HOSTS = [
+    'cloudfocus-d8frducfd6fjgdbx.uksouth-01.azurewebsites.net', # <-- REPLACE WITH YOUR APP'S URL
+    '127.0.0.1', # For local testing
+]
 
 # Application definition
 
@@ -49,8 +58,12 @@ INSTALLED_APPS = [
     'storages',
 ]
 
+# --- (4) MIDDLEWARE ---
+# We must add WhiteNoise here to serve static files
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Add WhiteNoise right after SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -96,21 +109,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-# --- IMPORTANT: Download the SSL Certificate ---
-# 1. Azure requires an SSL connection.
-# 2. You must download the certificate file here: 
-#    https://dl.cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem
-# 3. Save this file (DigiCertGlobalRootG2.crt.pem) in your project's root folder
-#    (same place as manage.py).
-# 4. Then, update the 'ca' path above to:
-#    'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootG2.crt.pem')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -136,77 +134,60 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# --- (6) STATIC FILES (CSS, JavaScript, Images) ---
+# This is the setup for WhiteNoise (production static files)
 STATIC_URL = 'static/'
-
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# This is the folder where 'collectstatic' will put all files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
+# This tells WhiteNoise to serve files from that folder
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- EMAIL CONFIGURATION (for local testing) ---
-# This prints any emails Django tries to send directly to your terminal
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# --- (7) EMAIL (SendGrid) ---
+# This is production email setup.
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
-# --- EMAIL CONFIGURATION (for SendGrid) ---
-# https://github.com/sendgrid/sendgrid-django
-# EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-# EMAIL_HOST = 'smtp.sendgrid.net'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-
-# Get credentials from your .env file
+# Get credentials from .env file
 SENDGRID_API_KEY = config('SENDGRID_API_KEY')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER') # This should be 'apikey'
-EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
-DEFAULT_FROM_EMAIL = config('YOUR_EMAIL_ADDRESS') 
+EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
+DEFAULT_FROM_EMAIL = config('YOUR_EMAIL_ADDRESS') # The email you verified with SendGrid
 
-# --- Azure Blob Storage Settings ---
-# These are read from your .env file
+
+# --- (8) MEDIA / AZURE BLOB STORAGE ---
+# The conflicting local settings (MEDIA_URL = '/media/') are removed.
 AZURE_ACCOUNT_NAME = config('AZURE_ACCOUNT_NAME')
 AZURE_ACCOUNT_KEY = config('AZURE_ACCOUNT_KEY')
 AZURE_CONTAINER = config('AZURE_CONTAINER')
 
 AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
-
-# This tells Django to use the 'storages' package for media files
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-
-# This is the base URL for your media files
 MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/'
-
-# This configures the storage backend
 AZURE_STORAGE_ACCOUNT_NAME = AZURE_ACCOUNT_NAME
 AZURE_STORAGE_ACCOUNT_KEY = AZURE_ACCOUNT_KEY
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# --- SESSION TIMEOUT SETTINGS ---
-# This logs the user out after a period of inactivity.
-
-# Set the session to expire after 10 minutes (in seconds)
+# --- (9) SESSION & LOGIN SETTINGS (Unchanged) ---
 SESSION_COOKIE_AGE = 60 * 10  # 600 seconds = 10 minutes
-
-# This makes the session expire when the user closes their browser
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-# --- IMPORTANT ---
-# This tells Django to reset the 10-minute timer *every time* the user
-# makes a request (e.g., loads a new page).
 SESSION_SAVE_EVERY_REQUEST = True
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
