@@ -23,6 +23,19 @@ urlpatterns = [
     path('session/start/<int:device_id>/', start_session_view, name='start_session'),
     path('session/end/', end_session_view, name='end_session'),
 
+    # --- THIS BLOCK IS FOR PASSWORD CHANGE ---
+    path('password-change/', 
+         auth_views.PasswordChangeView.as_view(
+             template_name='change_password.html',
+             success_url='/password-change/done/' # Redirect to our success page
+         ), 
+         name='password_change'),
+    path('password-change/done/', 
+         auth_views.PasswordChangeDoneView.as_view(
+             template_name='change_password_done.html'
+         ), 
+         name='password_change_done'),
+
     # --- THIS BLOCK IS FOR PASSWORD RESET ---
     path('password-reset/', 
          auth_views.PasswordResetView.as_view(
@@ -48,6 +61,7 @@ urlpatterns = [
          ), 
          name='password_reset_complete'),
 
+    # Supervisor
     path('supervisor/', supervisor_dashboard_view, name='supervisor_dashboard'),
     path('supervisor/user/<int:user_id>/', supervisor_user_detail_view, 
          name='supervisor_user_detail'),

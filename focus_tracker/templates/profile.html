@@ -8,7 +8,6 @@
       <div class="card-body">
         
         <h2 class="card-title text-center">Edit Your Profile</h2>
-
         <div class="text-center mb-4">
           <img src="
             {% if user.profile.profile_picture %}
@@ -17,8 +16,7 @@
               {% static 'images/default.png' %}
             {% endif %}
           " 
-          class="rounded-circle" 
-          style="width: 150px; height: 150px; object-fit: cover;">
+          class="rounded-circle sidebar-profile-pic">
         </div>
 
         <form method="POST" enctype="multipart/form-data">
@@ -26,21 +24,55 @@
           
           <fieldset class="mb-4">
             <legend class="border-bottom mb-3">User Info</legend>
-            {{ user_form.as_p }}
+            
+            <div class="mb-3">
+              <label class="form-label">Username (Cannot be changed)</label>
+              <input type="text" class="form-control" value="{{ user.username }}" readonly disabled>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email (Cannot be changed)</label>
+              <input type="email" class="form-control" value="{{ user.email }}" readonly disabled>
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ user_form.first_name.id_for_label }}" class="form-label">First name</label>
+              {{ user_form.first_name }}
+            </div>
+            <div class="mb-3">
+              <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Last name</label>
+              {{ user_form.last_name }}
+            </div>
+
           </fieldset>
-          
+
           <fieldset class="mb-4">
             <legend class="border-bottom mb-3">Profile Details</legend>
-            {{ profile_form.as_p }}
+
+            <div class="mb-3">
+              <label for="{{ profile_form.profile_picture.id_for_label }}" class="form-label">Change Profile Picture</label>
+              {{ profile_form.profile_picture }}
+            </div>
+
           </fieldset>
           
           <div class="d-grid">
             <button type="submit" class="btn btn-primary">Update Profile</button>
           </div>
         </form>
+
+        <hr class="my-4">
         
+        <fieldset>
+          <legend class="border-bottom mb-3">Security</legend>
+          <a href="{% url 'password_change' %}" class="btn btn-outline-danger">
+            Change Your Password
+          </a>
+        </fieldset>
+
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
+

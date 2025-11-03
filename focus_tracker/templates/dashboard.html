@@ -3,36 +3,35 @@
 {% block content %}
   <h2 class="mb-4">Welcome to your Dashboard, {{ user.username }}!</h2>
 
-  <!-- (1) NEW Session Management Card -->
-  <!-- This card REPLACES the old API Key card -->
+  <!-- (1) Session Management Card -->
   <div class="card mb-4">
     <div class="card-header">
       <span>Session Management</span>
     </div>
     <div class="card-body">
-
+      
       <!-- This logic checks if the user has an active session -->
       {% if active_session %}
-
+      
         <!-- If session is ACTIVE, show this: -->
         <h5 class="text-success">Session Active</h5>
         <p>You are currently "Checked In" to the device: 
           <strong>{{ active_session.device.name }}</strong>
         </p>
         <p>All data from this device is being saved to your account.</p>
-
+        
         <!-- End Session Button -->
         <form method="POST" action="{% url 'end_session' %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline-danger">End My Session</button>
         </form>
-
+        
       {% else %}
-
+      
         <!-- If session is INACTIVE, show this: -->
         <h5 class="text-danger">You have no active session.</h5>
         <p>Please select a device to "Check In" and start recording data.</p>
-
+        
         <div class="list-group">
           {% for device in all_devices %}
             <div class="list-group-item d-flex justify-content-between align-items-center">
@@ -47,16 +46,17 @@
             <p class="text-muted">No devices are registered in the system. Please contact your supervisor.</p>
           {% endfor %}
         </div>
-
+        
       {% endif %}
-
+      
     </div>
   </div>
 
-  <!-- (2) NEW ROW FOR SENSOR DATA (Sense HAT) -->
+  <!-- === (2) UPDATED SENSOR DATA ROW === -->
   <div class="row">
     <div class="col-lg-6">
-      <div class="summary-card" style="background-color: #42a5f5;"> <!-- Blue -->
+      <!-- Changed style to 'warning' color -->
+      <div class="summary-card" style="background-color: #ffa726;"> <!-- Orange -->
         <h3>
           {% if latest_log and latest_log.temperature is not None %}
             {{ latest_log.temperature|floatformat:1 }}°C
@@ -64,7 +64,7 @@
             --
           {% endif %}
         </h3>
-        <p>Current Room Temperature</p>
+        <p>Device Temperature</p>
       </div>
     </div>
     <div class="col-lg-6">
@@ -76,13 +76,12 @@
             --
           {% endif %}
         </h3>
-        <p>Current Room Humidity</p>
+        <p>Device Humidity</p>
       </div>
     </div>
   </div>
-  <!-- === END OF NEW ROW === -->
 
-  <!-- (3) Summary Cards (% Cards) -->
+  <!-- (3) Summary Cards -->
   <div class="row">
     <div class="col-lg-4">
       <div class="summary-card card-focused">
@@ -105,13 +104,11 @@
   </div>
 
   <!-- (4) Focus Timeline Chart -->
-  <div class="card">
+  <div class="card mt-4">
     <div class="card-header">
       Your Focus Timeline
     </div>
     <div class="card-body">
-      <p>This chart shows your focus state over time.</p>
-      
       <div style="height: 400px;">
         <canvas id="focusChart"></canvas>
       </div>
@@ -178,4 +175,3 @@
     });
   </script>
 {% endblock %}
-
