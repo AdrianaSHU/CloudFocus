@@ -3,24 +3,20 @@
 {% block content %}
   <h2 class="mb-4">Welcome to your Dashboard, {{ user.username }}!</h2>
 
-  <!-- (1) Session Management Card -->
   <div class="card mb-4">
     <div class="card-header">
       <span>Session Management</span>
     </div>
     <div class="card-body">
       
-      <!-- This logic checks if the user has an active session -->
       {% if active_session %}
       
-        <!-- If session is ACTIVE, show this: -->
         <h5 class="text-success">Session Active</h5>
         <p>You are currently "Checked In" to the device: 
           <strong>{{ active_session.device.name }}</strong>
         </p>
         <p>All data from this device is being saved to your account.</p>
         
-        <!-- End Session Button -->
         <form method="POST" action="{% url 'end_session' %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline-danger">End My Session</button>
@@ -28,7 +24,6 @@
         
       {% else %}
       
-        <!-- If session is INACTIVE, show this: -->
         <h5 class="text-danger">You have no active session.</h5>
         <p>Please select a device to "Check In" and start recording data.</p>
         
@@ -36,7 +31,6 @@
           {% for device in all_devices %}
             <div class="list-group-item d-flex justify-content-between align-items-center">
               <strong>{{ device.name }}</strong>
-              <!-- Start Session Button -->
               <form method="POST" action="{% url 'start_session' device.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-success">Start Session</button>
@@ -52,12 +46,9 @@
     </div>
   </div>
 
-  <!-- === (2) UPDATED SENSOR DATA ROW === -->
   <div class="row">
     <div class="col-lg-6">
-      <!-- Changed style to 'warning' color -->
-      <div class="summary-card" style="background-color: #ffa726;"> <!-- Orange -->
-        <h3>
+      <div class="summary-card" style="background-color: #ffa726;"> <h3 id="temp-value">
           {% if latest_log and latest_log.temperature is not None %}
             {{ latest_log.temperature|floatformat:1 }}°C
           {% else %}
@@ -68,8 +59,7 @@
       </div>
     </div>
     <div class="col-lg-6">
-      <div class="summary-card" style="background-color: #66bb6a;"> <!-- Greenish -->
-        <h3>
+      <div class="summary-card" style="background-color: #66bb6a;"> <h3 id="humidity-value">
           {% if latest_log and latest_log.humidity is not None %}
             {{ latest_log.humidity|floatformat:1 }}%
           {% else %}
@@ -81,32 +71,30 @@
     </div>
   </div>
 
-  <!-- (3) Summary Cards -->
   <div class="row">
     <div class="col-lg-4">
       <div class="summary-card card-focused">
-        <h3>{{ focused_percent|floatformat:0 }}%</h3>
+        <h3 id="focused-percent">{{ focused_percent|floatformat:0 }}%</h3>
         <p>Focused Time</p>
       </div>
     </div>
     <div class="col-lg-4">
       <div class="summary-card card-distracted">
-        <h3>{{ distracted_percent|floatformat:0 }}%</h3>
+        <h3 id="distracted-percent">{{ distracted_percent|floatformat:0 }}%</h3>
         <p>Distracted Time</p>
       </div>
     </div>
     <div class="col-lg-4">
       <div class="summary-card card-drowsy">
-        <h3>{{ drowsy_percent|floatformat:0 }}%</h3>
+        <h3 id="drowsy-percent">{{ drowsy_percent|floatformat:0 }}%</h3>
         <p>Drowsy Time</p>
       </div>
     </div>
   </div>
 
-  <!-- (4) Focus Timeline Chart -->
   <div class="card mt-4">
     <div class="card-header">
-      Your Focus Timeline
+      Your Focus Timeline (Last 7 Days)
     </div>
     <div class="card-body">
       <div style="height: 400px;">
@@ -115,11 +103,50 @@
     </div>
   </div>
 
-  <!-- (5) Chart.js Script -->
   <script>
-    // Get the data from our Django view
-    const chartData = {{ chart_data_json|safe }};
+    // --- (A) GET ALL THE CARD ELEMENTS ---
+    const focusedCard = document.getElementById('focused-percent');
+    const distractedCard = document.getElementById('distracted-percent');
+    const drowsyCard = document.getElementById('drowsy-percent');
+    const tempCard = document.getElementById('temp-value');
+    const humidityCard = document.getElementById('humidity-value');
+    
+    
+    // --- (B) FUNCTION TO UPDATE THE CARDS ---
+    function updateDashboardData() {
+        console.log("Fetching live data...");
+        fetch("{% url 'api-live-data' %}")
+            .then(response => response.json())
+            .then(data => {
+                console.log("Data received:", data);
+                
+                focusedCard.innerText = `${data.focused_percent}%`;
+                distractedCard.innerText = `${data.distracted_percent}%`;
+                drowsyCard.innerText = `${data.drowsy_percent}%`;
 
+                if (data.latest_temp !== null) {
+                    tempCard.innerText = `${data.latest_temp.toFixed(1)}°C`;
+                } else {
+                    tempCard.innerText = '--';
+                }
+
+                if (data.latest_humidity !== null) {
+                    humidityCard.innerText = `${data.latest_humidity.toFixed(1)}%`;
+                } else {
+                    humidityCard.innerText = '--';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching live data:', error);
+            });
+    }
+
+    // --- (C) DRAW THE MAIN CHART (On initial page load) ---
+    const chartData = {{ chart_data_json|safe }};
+    
+    // --- (B) DATE UPDATED ---
+    const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7));
+    
     const ctx = document.getElementById('focusChart').getContext('2d');
     const myChart = new Chart(ctx, {
       type: 'line',
@@ -129,7 +156,7 @@
           data: chartData,
           borderColor: 'rgb(75, 192, 192)',
           tension: 0.1,
-          stepped: true, // Shows changes as "blocks", good for status data
+          stepped: true,
         }]
       },
       options: {
@@ -137,11 +164,13 @@
         maintainAspectRatio: false,
         scales: {
           x: {
-            type: 'time', // Use the time scale
+            type: 'time',
             time: {
-              unit: 'minute', // Display time by the minute
-              tooltipFormat: 'HH:mm:ss'
+              unit: 'hour', 
+              tooltipFormat: 'HH:mm - dd MMM'
             },
+            // --- (C) MINIMUM TIME UPDATED ---
+            min: oneWeekAgo,
             title: {
               display: true,
               text: 'Time'
@@ -152,26 +181,25 @@
               display: true,
               text: 'Focus State'
             },
-            // This configures the Y-axis labels
             ticks: {
               stepSize: 1,
-              callback: function(value, index, ticks) {
-                // Show text labels instead of numbers
+              callback: function(value) {
                 switch (value) {
-                  case 0:
-                    return 'Drowsy';
-                  case 1:
-                    return 'Distracted';
-                  case 2:
-                    return 'Focused';
+                  case 0: return 'Drowsy';
+                  case 1: return 'Distracted';
+                  case 2: return 'Focused';
                 }
               }
             },
             min: 0,
-            max: 2 // Set strict min/max for our 3 states
+            max: 2
           }
         }
       }
     });
+
+    // --- (D) START THE 10-SECOND POLLING ---
+    setInterval(updateDashboardData, 10000);
+
   </script>
 {% endblock %}

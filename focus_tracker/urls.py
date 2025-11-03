@@ -1,13 +1,15 @@
 from django.urls import path
 from .views import (
     LogFocusView, register_view, home_view, dashboard_view, about_view, contact_view, profile_view, 
-    supervisor_dashboard_view, supervisor_user_detail_view, start_session_view, end_session_view
+    supervisor_dashboard_view, supervisor_user_detail_view, start_session_view, end_session_view, 
+    get_live_dashboard_data
 )
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # API Endpoint
     path('api/log_focus/', LogFocusView.as_view(), name='api-log-focus'),
+    path('api/live_data/', get_live_dashboard_data, name='api-live-data'),
 
     # Web Pages
     path('', home_view, name='home'),

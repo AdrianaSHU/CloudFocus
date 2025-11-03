@@ -18,3 +18,5 @@ contact_logs/
 .vscode/
 .idea/
 .DS_Store
+# Auto-generated build folder
+staticfiles_build/

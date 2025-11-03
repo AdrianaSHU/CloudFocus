@@ -30,7 +30,7 @@
 
   <div class="card mt-4">
     <div class="card-header">
-      Focus Timeline
+      User Focus Timeline (Last 7 Days)
     </div>
     <div class="card-body">
       <div style="height: 400px;">
@@ -41,6 +41,10 @@
 
   <script>
     const chartData = {{ chart_data_json|safe }};
+    
+    // --- (B) DATE UPDATED ---
+    const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7));
+    
     const ctx = document.getElementById('focusChart').getContext('2d');
     const myChart = new Chart(ctx, {
       type: 'line',
@@ -59,11 +63,22 @@
         scales: {
           x: {
             type: 'time',
-            time: { unit: 'minute', tooltipFormat: 'HH:mm:ss' },
-            title: { display: true, text: 'Time' }
+            time: {
+              unit: 'hour',
+              tooltipFormat: 'HH:mm - dd MMM'
+            },
+            // --- (C) MINIMUM TIME UPDATED ---
+            min: oneWeekAgo,
+            title: {
+              display: true,
+              text: 'Time'
+            }
           },
           y: {
-            title: { display: true, text: 'Focus State' },
+            title: {
+              display: true,
+              text: 'Focus State'
+            },
             ticks: {
               stepSize: 1,
               callback: function(value, index, ticks) {
