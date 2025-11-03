@@ -63,4 +63,4 @@ jobs:
         with:
           app-name: 'CloudFocus'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E259194BEBF04E98AE792A04A6D503A1 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E802C39DBFF7469C837E07DF598CB7E2 }}
