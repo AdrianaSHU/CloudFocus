@@ -1,3 +1,4 @@
+/* --- Root Variables & Base --- */
 :root {
     --sidebar-width: 260px;
     --sidebar-bg: #004d40; /* Dark Teal */
@@ -10,6 +11,7 @@ body {
     background-color: #f4f7f6;
 }
 
+/* --- SIDEBAR STYLES (Desktop) --- */
 .sidebar {
     position: fixed;
     top: 0;
@@ -21,6 +23,7 @@ body {
     color: #fff;
     display: flex;
     flex-direction: column;
+    z-index: 998; /* Below the mobile menu button */
 }
 
 .sidebar-brand {
@@ -75,10 +78,31 @@ body {
     margin-left: var(--sidebar-width);
     padding: 30px;
 }
-/* --- End of Sidebar Layout --- */
+/* --- End of Sidebar Styles --- */
 
 
-/* Customize the primary button to match */
+/* --- PROFILE IMAGE & NAME --- */
+.sidebar-profile-pic {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.sidebar-user-name {
+    color: #fff;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.sidebar-user-handle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+
+/* --- GENERAL STYLES --- */
 .btn-primary {
     background-color: #00796b;
     border-color: #00796b;
@@ -100,6 +124,7 @@ body {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Hover effect for cards */
 .summary-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
@@ -133,6 +158,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* Form Styling */
 form p {
     margin-bottom: 1rem;
 }
@@ -141,6 +167,8 @@ form p label {
     margin-bottom: .5rem;
     font-weight: 500;
 }
+/* This targets all form inputs rendered by as_p or manual input */
+.form-control,
 form p input,
 form p select,
 form p textarea {
@@ -158,82 +186,133 @@ form p textarea {
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
-form p input:focus {
-    color: #212529;
-    background-color: #fff;
-    border-color: #00796b;
-    outline: 0;
-    box-shadow: 0 0 0 .25rem rgba(0, 121, 107, 0.25);
+/* Fix for form fields inside our new profile form */
+.form-label {
+    font-weight: 500;
 }
+.form-control:disabled, .form-control[readonly] {
+    background-color: #e9ecef;
+    opacity: 1;
+}
+/* End of Form Styling */
 
-form p .helptext {
-    font-size: .875em;
-    color: #6c757d;
-    margin-top: .25rem;
-}
-form p .helptext ul {
-    margin-bottom: 0;
-    padding-left: 1.5rem;
-}
-
-.sidebar-profile-pic {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.7);
-}
-
-.sidebar-user-name {
-    color: #fff;
-    font-weight: 700;
-    margin-top: 0.5rem;
-    font-size: 1.1rem;
-}
-
-.sidebar-user-handle {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-}
-
+/* Footer Styles */
 .footer {
     padding: 20px 0;
-    margin-top: 20px; /* Space above the footer */
-    border-top: 1px solid #e0e0e0; /* A light line to separate it */
-    background-color: #fff; /* Match the card background */
+    margin-top: 30px; 
+    border-top: 1px solid #e0e0e0; 
+    background-color: #fff; 
     text-align: center;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03); /* Subtle shadow */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .footer .text-muted {
-    color: #6c757d !important; /* Bootstrap muted color */
+    color: #6c757d !important; 
 }
 
-/* --- Footer Social Icons --- */
+/* Footer Social Icons (Fixes placement and size) */
 .social-icon {
-    display: inline-block;  /* Change to inline-block for stacking */
-    vertical-align: top;    /* Aligns the tops of the blocks */
-    text-align: center;     /* Centers the icon and text */
-    width: 80px;            /* Gives each icon a set width */
-    font-size: 1.8rem;
-    color: #6c757d;
-    margin-left: 15px;      /* Space between each block */
+    display: inline-flex; /* Use flex to align icon and text */
+    flex-direction: column; /* Stack icon and text vertically */
+    align-items: center;
+    font-size: 1.8rem; 
+    color: #6c757d;   
+    margin-left: 20px; 
     text-decoration: none;
     transition: color 0.2s ease;
+    text-align: center;
 }
 
 .social-icon:hover {
-    color: #004d40; /* Your main theme color on hover */
+    color: #004d40; 
 }
 
-/* This targets the <i> icon tag */
 .social-icon i {
-    display: block; /* Makes the icon take its own line */
+    margin-bottom: 5px; /* Space between icon and text */
 }
 
-/* This targets the new <span> text */
-.social-icon span {
-    display: block;       /* Makes the text take its own line */
-    font-size: 0.75rem;   /* Makes the text small */
+.social-icon-text {
+    font-size: 0.8rem; /* Small text underneath */
     font-weight: 500;
-    margin-top: 4px;      /* Adds a small space below the icon */
 }
+
+
+/*
+====================================
+MOBILE RESPONSIVENESS FIXES
+====================================
+*/
+
+/* 1. Show/Hide Mobile Components */
+.mobile-nav-toggle {
+    display: none; /* Hidden by default on desktop */
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    z-index: 1000; /* On top of everything */
+    font-size: 1rem;
+    background-color: var(--sidebar-bg);
+    color: white;
+}
+
+.sidebar.mobile-show {
+    /* This class is toggled by JavaScript */
+    display: flex !important; /* Forces sidebar to show as an overlay */
+    left: 0; /* Slides it in */
+}
+
+/* --- (2) Media Query for screens 768px or smaller (tablets/phones) --- */
+@media (max-width: 768px) {
+    
+    /* SHOW mobile menu button */
+    .mobile-nav-toggle {
+        display: block;
+    }
+    
+    /* HIDE the sidebar by default and position for sliding */
+    .sidebar {
+        display: none;
+        position: fixed;
+        width: 80%; /* Takes up 80% of the screen */
+        height: 100%;
+        left: -80%; /* Hide off-screen initially */
+        transition: left 0.3s ease;
+        z-index: 999;
+    }
+
+    /* Remove the fixed desktop margin */
+    .main-content {
+        margin-left: 0;
+        padding: 15px; /* Use smaller padding for mobile */
+        /* Push content down so it doesn't hide under the button */
+        padding-top: 70px; 
+    }
+
+    /* Adjust size of dashboard cards so they stack */
+    .summary-card h3 {
+        font-size: 2.2rem; 
+    }
+    
+    /* Ensure footer looks neat by putting items in a column */
+    .footer .d-flex {
+        flex-direction: column;
+    }
+    
+    /* Hide the icon text on small screens */
+    .social-icon-text {
+        display: none;
+    }
+
+    .footer .social-icon {
+        margin: 10px 10px 0 10px; /* Adjust spacing when stacked */
+        font-size: 1.6rem;
+    }
+    
+    .footer div:first-child {
+        margin-bottom: 10px; /* Space between copyright and icons */
+    }
+}
+
