@@ -161,3 +161,18 @@ LOGOUT_REDIRECT_URL = '/'
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
+# --- (2) ENABLE SECURE COOKIES (CRITICAL) ---
+# This forces Django to mark its session/security cookies as 'secure',
+# which fixes the conflict with the HTTPS connection on Azure.
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# --- (3) HSTS (Recommended for production security) ---
+# Tells browsers to only use HTTPS for future visits.
+SECURE_HSTS_SECONDS = 31536000 # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# --- (4) REDIRECT HTTP to HTTPS ---
+# Ensures that even if a user types http://, they get redirected securely.
+SECURE_SSL_REDIRECT = True
