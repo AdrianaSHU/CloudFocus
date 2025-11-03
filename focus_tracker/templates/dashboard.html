@@ -3,29 +3,7 @@
 {% block content %}
   <h2 class="mb-4">Welcome to your Dashboard, {{ user.username }}!</h2>
 
-  <!-- (1) Summary Cards -->
-  <div class="row">
-    <div class="col-lg-4">
-      <div class="summary-card card-focused">
-        <h3>{{ focused_percent|floatformat:0 }}%</h3>
-        <p>Focused Time</p>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="summary-card card-distracted">
-        <h3>{{ distracted_percent|floatformat:0 }}%</h3>
-        <p>Distracted Time</p>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="summary-card card-drowsy">
-        <h3>{{ drowsy_percent|floatformat:0 }}%</h3>
-        <p>Drowsy Time</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- (2) NEW Session Management Card -->
+  <!-- (1) NEW Session Management Card -->
   <!-- This card REPLACES the old API Key card -->
   <div class="card mb-4">
     <div class="card-header">
@@ -75,7 +53,58 @@
     </div>
   </div>
 
-  <!-- (3) Focus Timeline Chart -->
+  <!-- (2) NEW ROW FOR SENSOR DATA (Sense HAT) -->
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="summary-card" style="background-color: #42a5f5;"> <!-- Blue -->
+        <h3>
+          {% if latest_log and latest_log.temperature is not None %}
+            {{ latest_log.temperature|floatformat:1 }}°C
+          {% else %}
+            --
+          {% endif %}
+        </h3>
+        <p>Current Room Temperature</p>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="summary-card" style="background-color: #66bb6a;"> <!-- Greenish -->
+        <h3>
+          {% if latest_log and latest_log.humidity is not None %}
+            {{ latest_log.humidity|floatformat:1 }}%
+          {% else %}
+            --
+          {% endif %}
+        </h3>
+        <p>Current Room Humidity</p>
+      </div>
+    </div>
+  </div>
+  <!-- === END OF NEW ROW === -->
+
+  <!-- (3) Summary Cards (% Cards) -->
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="summary-card card-focused">
+        <h3>{{ focused_percent|floatformat:0 }}%</h3>
+        <p>Focused Time</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="summary-card card-distracted">
+        <h3>{{ distracted_percent|floatformat:0 }}%</h3>
+        <p>Distracted Time</p>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="summary-card card-drowsy">
+        <h3>{{ drowsy_percent|floatformat:0 }}%</h3>
+        <p>Drowsy Time</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- (4) Focus Timeline Chart -->
   <div class="card">
     <div class="card-header">
       Your Focus Timeline
@@ -89,7 +118,7 @@
     </div>
   </div>
 
-  <!-- (4) Chart.js Script (Your code is perfect) -->
+  <!-- (5) Chart.js Script -->
   <script>
     // Get the data from our Django view
     const chartData = {{ chart_data_json|safe }};
@@ -149,3 +178,4 @@
     });
   </script>
 {% endblock %}
+

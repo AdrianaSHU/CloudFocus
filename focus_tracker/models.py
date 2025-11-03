@@ -22,8 +22,6 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
 
 
-# --- These models are correct for our "Shared Device" system ---
-
 class Device(models.Model):
     """
     Represents a physical device/station (e.g., "Classroom RPi").
@@ -63,6 +61,9 @@ class FocusLog(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='logs')
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+
+    temperature = models.FloatField(null=True, blank=True)
+    humidity = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.session.user.username} was {self.status} at {self.timestamp}"

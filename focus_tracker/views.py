@@ -124,6 +124,8 @@ def dashboard_view(request):
         session__user=request.user
     ).order_by('timestamp'))
 
+    latest_log = FocusLog.objects.filter(session__user=request.user).order_by('-timestamp').first()
+
     total_logs = len(logs)
     if total_logs > 0:
         status_counts = Counter([log.status for log in logs])
@@ -148,6 +150,7 @@ def dashboard_view(request):
         'focused_percent': focused_percent,
         'distracted_percent': distracted_percent,
         'drowsy_percent': drowsy_percent,
+        'latest_log': latest_log
     }
     return render(request, 'dashboard.html', context)
 

@@ -6,4 +6,4 @@ class FocusLogSerializer(serializers.ModelSerializer):
         model = FocusLog
         # The RPi still only sends the 'status'
         # The 'session' will be added by the view
-        fields = ['status']
+        fields = ['status', 'temperature', 'humidity']
