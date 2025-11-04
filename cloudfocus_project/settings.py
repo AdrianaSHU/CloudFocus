@@ -111,18 +111,18 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Read Blob Storage credentials from Azure config
 AZURE_ACCOUNT_NAME = config('AZURE_ACCOUNT_NAME')
 AZURE_ACCOUNT_KEY = config('AZURE_ACCOUNT_KEY')
-AZURE_CONTAINER = config('AZURE_CONTAINER')
+AZURE_CONTAINER = config('AZURE_CONTAINER') # <-- Your variable name is correct
 
 # This is the storage backend Django will use for all user uploads.
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
 
 # This is the base URL for media files.
-# Your model's 'upload_to' (e.g., 'profile_pics/') will be appended to this.
 MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
 
-# These settings are required by django-storages
+# We must assign our variables to the names django-storages expects
 AZURE_STORAGE_ACCOUNT_NAME = AZURE_ACCOUNT_NAME
 AZURE_STORAGE_ACCOUNT_KEY = AZURE_ACCOUNT_KEY
+AZURE_STORAGE_CONTAINER = AZURE_CONTAINER # <-- THIS LINE WAS MISSING
 
 
 # --- (5) EMAIL (SendGrid) ---
@@ -132,7 +132,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 SENDGRID_API_KEY = config('SENDGRID_API_KEY')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER') # This should be 'apikey'
-EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 DEFAULT_FROM_EMAIL = config('YOUR_EMAIL_ADDRESS')
 
 
@@ -146,6 +146,6 @@ LOGOUT_REDIRECT_URL = '/'
 
 
 # --- (7) FINAL AZURE PROXY/CSRF FIX ---
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'httpsClick here to go to Environment Variables menu')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
