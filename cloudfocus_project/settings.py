@@ -107,11 +107,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # --- (4) MEDIA FILES (For User Uploads - Handled by Azure Blob Storage) ---
-
-# Read Blob Storage credentials from Azure config
 AZURE_ACCOUNT_NAME = config('AZURE_ACCOUNT_NAME')
 AZURE_ACCOUNT_KEY = config('AZURE_ACCOUNT_KEY')
-AZURE_CONTAINER = config('AZURE_CONTAINER') # <-- Your variable name is correct
+AZURE_CONTAINER = config('AZURE_CONTAINER')
 
 # This is the storage backend Django will use for all user uploads.
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
@@ -122,7 +120,7 @@ MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINE
 # We must assign our variables to the names django-storages expects
 AZURE_STORAGE_ACCOUNT_NAME = AZURE_ACCOUNT_NAME
 AZURE_STORAGE_ACCOUNT_KEY = AZURE_ACCOUNT_KEY
-AZURE_STORAGE_CONTAINER = AZURE_CONTAINER # <-- THIS LINE WAS MISSING
+AZURE_STORAGE_CONTAINER = AZURE_CONTAINER 
 
 
 # --- (5) EMAIL (SendGrid) ---
