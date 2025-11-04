@@ -98,31 +98,28 @@ USE_TZ = True
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# --- (3) STATIC FILES (For CSS/JS - Handled by WhiteNoise) ---
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-
-# --- (4) MEDIA FILES (For User Uploads - Handled by Azure Blob Storage) ---
-AZURE_ACCOUNT_NAME = config('AZURE_ACCOUNT_NAME')
-AZURE_ACCOUNT_KEY = config('AZURE_ACCOUNT_KEY')
-AZURE_CONTAINER = config('AZURE_CONTAINER')
-
 # This is the storage backend Django will use for all user uploads.
-# DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-DEFAULT_FILE_STORAGE = MEDIA_URL
-
-# This is the base URL for media files.
-MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
+DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
 
 # We must assign our variables to the names django-storages expects
 AZURE_STORAGE_ACCOUNT_NAME = AZURE_ACCOUNT_NAME
 AZURE_STORAGE_ACCOUNT_KEY = AZURE_ACCOUNT_KEY
 AZURE_STORAGE_CONTAINER = AZURE_CONTAINER 
 
+# --- (3) MEDIA FILES (For User Uploads - Handled by Azure Blob Storage) ---
+AZURE_ACCOUNT_NAME = config('AZURE_ACCOUNT_NAME')
+AZURE_ACCOUNT_KEY = config('AZURE_ACCOUNT_KEY')
+AZURE_CONTAINER = config('AZURE_CONTAINER')
+
+# This is the base URL for media files.
+MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
+
+
+# --- (4) STATIC FILES (For CSS/JS - Handled by WhiteNoise) ---
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # --- (5) EMAIL (SendGrid) ---
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
