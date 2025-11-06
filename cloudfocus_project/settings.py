@@ -101,15 +101,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # This is the storage backend Django will use for all user uploads.
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
 
-# We must assign our variables to the names django-storages expects
-AZURE_STORAGE_ACCOUNT_NAME = AZURE_ACCOUNT_NAME
-AZURE_STORAGE_ACCOUNT_KEY = AZURE_ACCOUNT_KEY
-AZURE_STORAGE_CONTAINER = AZURE_CONTAINER 
 
 # --- (3) MEDIA FILES (For User Uploads - Handled by Azure Blob Storage) ---
 AZURE_ACCOUNT_NAME = config('AZURE_ACCOUNT_NAME')
 AZURE_ACCOUNT_KEY = config('AZURE_ACCOUNT_KEY')
 AZURE_CONTAINER = config('AZURE_CONTAINER')
+
+# We must assign our variables to the names django-storages expects
+AZURE_STORAGE_ACCOUNT_NAME = AZURE_ACCOUNT_NAME
+AZURE_STORAGE_ACCOUNT_KEY = AZURE_ACCOUNT_KEY
+AZURE_STORAGE_CONTAINER = AZURE_CONTAINER 
 
 # This is the base URL for media files.
 MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
