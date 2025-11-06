@@ -109,6 +109,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # --- (4) MEDIA FILES (For User Uploads - Handled by Azure Blob Storage) ---
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
 
+AZURE_ACCOUNT_NAME = AZURE_STORAGE_ACCOUNT_NAME
+AZURE_ACCOUNT_KEY = AZURE_STORAGE_ACCOUNT_KEY
+AZURE_CONTAINER = AZURE_STORAGE_CONTAINER
 # These are read directly from your Azure Application Settings
 AZURE_STORAGE_ACCOUNT_NAME = config('AZURE_STORAGE_ACCOUNT_NAME')
 AZURE_STORAGE_ACCOUNT_KEY = config('AZURE_STORAGE_ACCOUNT_KEY')
