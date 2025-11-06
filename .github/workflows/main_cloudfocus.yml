@@ -23,15 +23,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
-      - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
-        with:
-          app-name: 'CloudFocus'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F92C0860C1A746C5B13268F9F835403B }}
-          package: .
+
+      - name: Install system dependencies for mysqlclient
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-dev default-libmysqlclient-dev gcc
 
       # 🛠️ Local Build Section (Optional)
       # The following section in your workflow is designed to catch build issues early on the client side, before deployment. This can be helpful for debugging and validation. However, if this step significantly increases deployment time and early detection is not critical for your workflow, you may remove this section to streamline the deployment process.
@@ -49,7 +45,6 @@ jobs:
           path: |
             .
             !antenv/
-
       # 🚫 Opting Out of Oryx Build
       # If you prefer to disable the Oryx build process during deployment, follow these steps:
       # 1. Remove the SCM_DO_BUILD_DURING_DEPLOYMENT app setting from your Azure App Service Environment variables.
@@ -72,5 +67,5 @@ jobs:
         with:
           app-name: 'CloudFocus'
           slot-name: 'Production'
-
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CC1472EB520E489B88E00C68A6AB5D48 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F92C0860C1A746C5B13268F9F835403B }}
+          package: .
