@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
-from captcha.fields import ReCaptchaField
+from django_recaptcha.fields import ReCaptchaField
 
 # (1) We keep your ContactForm (it's already styled)
 class ContactForm(forms.Form):

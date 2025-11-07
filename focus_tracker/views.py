@@ -304,7 +304,21 @@ def get_live_dashboard_data(request):
     A lightweight API endpoint to be polled.
     Returns stats from the last 7 days.
     """
-    
+
+    # We check the user's profile.
+    # We use .profile.all().first() as a safe check in case the profile doesn't exist
+    profile = request.user.profile
+    if profile and not profile.has_seen_security_update:
+        messages.success(request, (
+            "<b>What's New:</b> Your account is now more secure! "
+            "We've added brute-force protection and reCAPTCHA to all forms."
+        ), extra_tags='safe') # 'safe' tag allows the <b> tag to render
+        
+        # Set the flag to True so they don't see this again
+        profile.has_seen_security_update = True
+        profile.save()
+
+
     # --- NEW: Calculate 7 days ago ---
     history = timezone.now() - timedelta(days=7)
     
