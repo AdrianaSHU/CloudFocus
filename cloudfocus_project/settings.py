@@ -127,6 +127,10 @@ else:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
+    # --- (FIX) reCAPTCHA keys only in production ---
+    RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
+    RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
+
 
 # --- (3) STATIC FILES (Same for both) ---
 STATIC_URL = 'static/'
@@ -135,35 +139,33 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-# --- (4) OTHER SETTINGS (Same for both) ---
+# --- (4.A) AXES (BRUTE FORCE) SETTINGS ---
+# This is the new, correct setting.
+# It locks out based on USERNAME only.
+AXES_LOCK_OUT_BY = "username"
+AXES_FAILURE_LIMIT = 5  # Lock out after 5 failed attempts
+AXES_COOLOFF_TIME = 0.25 # Lock them out for 15 minutes (0.25 hours)
+
+# This is the required backend setting
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# --- (4.B) OTHER SETTINGS (Same for both) ---
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-
-# --- (C) ADDED reCAPTCHA KEYS ---
-RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
-RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
-
-# --- (D) ADDED AXES SETTINGS ---
-AXES_LOCK_OUT_BY = "username"
-
-# --- AUTHENTICATION BACKENDS ---
-# This is required for django-axes (brute force protection) to work correctly
-AUTHENTICATION_BACKENDS = [
-    # AxesBackend has been renamed to AxesStandaloneBackend
-    'axes.backends.AxesStandaloneBackend',
-    
-    'django.contrib.auth.backends.ModelBackend',
-]
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Europe/London'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 SESSION_COOKIE_AGE = 60 * 10
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -172,6 +174,3 @@ SESSION_SAVE_EVERY_REQUEST = True
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# --- (X) reCAPTCHA SETTINGS ---
-RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
-RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')

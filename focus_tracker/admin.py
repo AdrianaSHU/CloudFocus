@@ -28,5 +28,5 @@ class FocusLogAdmin(admin.ModelAdmin):
 # --- Register your models ---
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Session, SessionAdmin)
-admin.site.register(FocusLog)
+admin.site.register(FocusLog, FocusLogAdmin)
 admin.site.register(Profile, ProfileAdmin)

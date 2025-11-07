@@ -1,32 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2 class="mb-4">Welcome to your Dashboard, {{ user.username }}!</h2>
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Welcome to your Dashboard, {{ user.username }}!</h2>
+  </div>
 
   <div class="card mb-4">
     <div class="card-header">
       <span>Session Management</span>
     </div>
     <div class="card-body">
-      
       {% if active_session %}
-      
         <h5 class="text-success">Session Active</h5>
         <p>You are currently "Checked In" to the device: 
           <strong>{{ active_session.device.name }}</strong>
         </p>
         <p>All data from this device is being saved to your account.</p>
-        
         <form method="POST" action="{% url 'end_session' %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline-danger">End My Session</button>
         </form>
-        
       {% else %}
-      
         <h5 class="text-danger">You have no active session.</h5>
         <p>Please select a device to "Check In" and start recording data.</p>
-        
         <div class="list-group">
           {% for device in all_devices %}
             <div class="list-group-item d-flex justify-content-between align-items-center">
@@ -40,31 +37,27 @@
             <p class="text-muted">No devices are registered in the system. Please contact your supervisor.</p>
           {% endfor %}
         </div>
-        
       {% endif %}
-      
     </div>
   </div>
 
   <div class="row">
     <div class="col-lg-6">
-      <div class="summary-card" style="background-color: #ffa726;"> <h3 id="temp-value">
+      <div class="summary-card" style="background-color: #ffa726;">
+        <h3 id="temp-value">
           {% if latest_log and latest_log.temperature is not None %}
             {{ latest_log.temperature|floatformat:1 }}°C
-          {% else %}
-            --
-          {% endif %}
+          {% else %}--{% endif %}
         </h3>
         <p>Device Temperature</p>
       </div>
     </div>
     <div class="col-lg-6">
-      <div class="summary-card" style="background-color: #66bb6a;"> <h3 id="humidity-value">
+      <div class="summary-card" style="background-color: #66bb6a;">
+        <h3 id="humidity-value">
           {% if latest_log and latest_log.humidity is not None %}
             {{ latest_log.humidity|floatformat:1 }}%
-          {% else %}
-            --
-          {% endif %}
+          {% else %}--{% endif %}
         </h3>
         <p>Device Humidity</p>
       </div>
@@ -91,14 +84,32 @@
       </div>
     </div>
   </div>
-
+  <div>
+    <form method="GET" action="{% url 'dashboard' %}" class="d-flex align-items-center">
+      <div class="me-2">
+        <label for="start" class="form-label-sm">From:</label>
+        <input type="date" class="form-control" 
+               id="start" name="start" value="{{ start_date_str }}">
+      </div>
+      <div class="me-3">
+        <label for="end" class="form-label-sm">To:</label>
+        <input type="date" class="form-control" 
+               id="end" name="end" value="{{ end_date_str }}">
+      </div>
+      <button type="submit" class="btn btn-primary align-self-end">Filter</button>
+    </form>
+  </div>
   <div class="card mt-4">
     <div class="card-header">
-      Your Focus Timeline (Last 7 Days)
+      Your Focus Timeline (from {{ start_date_str }} to {{ end_date_str }})
     </div>
     <div class="card-body">
       <div style="height: 400px;">
-        <canvas id="focusChart"></canvas>
+        <canvas id="focusChart" 
+                data-start-date="{{ start_date_str }}" 
+                data-end-date="{{ end_date_str }}"
+                data-chart-min-date="{{ chart_min_date }}">
+        </canvas>
       </div>
     </div>
   </div>
@@ -111,11 +122,17 @@
     const tempCard = document.getElementById('temp-value');
     const humidityCard = document.getElementById('humidity-value');
     
-    
     // --- (B) FUNCTION TO UPDATE THE CARDS ---
     function updateDashboardData() {
         console.log("Fetching live data...");
-        fetch("{% url 'api-live-data' %}")
+        
+        // NEW: Read the current date range from the chart canvas
+        const canvas = document.getElementById('focusChart');
+        const startDate = canvas.dataset.startDate;
+        const endDate = canvas.dataset.endDate;
+
+        // Pass the dates to the API
+        fetch(`{% url 'api-live-data' %}?start=${startDate}&end=${endDate}`)
             .then(response => response.json())
             .then(data => {
                 console.log("Data received:", data);
@@ -143,11 +160,11 @@
 
     // --- (C) DRAW THE MAIN CHART (On initial page load) ---
     const chartData = {{ chart_data_json|safe }};
+    const ctx = document.getElementById('focusChart');
     
-    // --- (B) DATE UPDATED ---
-    const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7));
+    // NEW: Get min date from the canvas data attribute
+    const minDate = ctx.dataset.chartMinDate;
     
-    const ctx = document.getElementById('focusChart').getContext('2d');
     const myChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -166,11 +183,10 @@
           x: {
             type: 'time',
             time: {
-              unit: 'hour', 
+              unit: 'hour', // Default to hour
               tooltipFormat: 'HH:mm - dd MMM'
             },
-            // --- (C) MINIMUM TIME UPDATED ---
-            min: oneWeekAgo,
+            min: minDate, // Set dynamic minimum date
             title: {
               display: true,
               text: 'Time'
