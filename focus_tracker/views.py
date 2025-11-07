@@ -1,7 +1,9 @@
+# focus_tracker/views.py
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Device, Session, FocusLog # Make sure Device is imported
+from .models import Device, Session, FocusLog
 from .serializers import FocusLogSerializer
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
@@ -16,11 +18,13 @@ from django.views.decorators.http import require_POST
 import os
 from django.utils import timezone
 import uuid 
-from rest_framework.decorators import api_view 
-
+from rest_framework.decorators import api_view
 from datetime import timedelta 
 
-# Import all forms at once
+# --- (1) IMPORT YOUR NEW UTILS ---
+from .dashboard_utils import get_dashboard_data
+
+# Import all forms
 from .forms import (
     CustomUserCreationForm, 
     UserUpdateForm, 
@@ -28,94 +32,56 @@ from .forms import (
     ContactForm
 )
 
-
-# --- API View  ---
+# --- API View (Unchanged) ---
 class LogFocusView(APIView):
-    """
-    API endpoint for the RPi to POST focus data.
-    This view uses the "Shared Device" (Check-In) model.
-    """
-    
     def post(self, request, *args, **kwargs):
-        # 1. Get the API key from the request headers
         api_key = request.headers.get('API-Key')
         if not api_key:
-            return Response(
-                {'error': 'API-Key header is required.'}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        # 2. Find the *Device* (not the user)
+            return Response({'error': 'API-Key header is required.'}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             device = Device.objects.get(api_key=api_key)
         except Device.DoesNotExist:
-            return Response(
-                {'error': 'Invalid API-Key. This device is not registered.'}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        # 3. Find the *active session* for this device
+            return Response({'error': 'Invalid API-Key. This device is not registered.'}, status=status.HTTP_401_UNAUTHORIZED)
         try:
-            active_session = Session.objects.get(
-                device=device, 
-                is_active=True
-            )
+            active_session = Session.objects.get(device=device, is_active=True)
         except Session.DoesNotExist:
-            return Response(
-                {'error': 'No active session found for this device. Please "Start Session" on the website.'}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({'error': 'No active session found. Please "Start Session" on the website.'}, status=status.HTTP_403_FORBIDDEN)
         except Session.MultipleObjectsReturned:
-            return Response(
-                {'error': 'Data conflict. Multiple active sessions found.'}, 
-                status=status.HTTP_409_CONFLICT
-            )
+            return Response({'error': 'Data conflict. Multiple active sessions found.'}, status=status.HTTP_409_CONFLICT)
 
-        # 4. Validate and save the data
         serializer = FocusLogSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(session=active_session)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-# --- Register View ---
+# --- Register View (Unchanged) ---
 def register_view(request):
-    """ Handles user registration. """
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST, request.FILES)
-        
         if form.is_valid():
             user = form.save()
-            
             profile_picture = form.cleaned_data.get('profile_picture')
-            
             if profile_picture:
                 user.profile.profile_picture = profile_picture
                 user.profile.save()
-            
             login(request, user)
             return redirect('dashboard')
     else:
         form = CustomUserCreationForm()
-        
     return render(request, 'register.html', {'form': form})
 
-# --- Other Views  ---
+# --- Other Views (Unchanged) ---
 def home_view(request):
-    """ The main landing page. """
     return render(request, 'home.html')
 
 def is_supervisor(user):
     return user.is_authenticated and user.is_staff
 
 def about_view(request):
-    """ Renders the 'About' page. """
     return render(request, 'about.html')
 
 def contact_view(request):
-    """ Renders the 'Contact Us' page and handles form submission. """
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
@@ -131,11 +97,8 @@ def contact_view(request):
                 filename = f"{now_str}_{from_email}.txt"
                 file_path = os.path.join(log_dir, filename)
                 file_content = (
-                    f"From: {name} <{from_email}>\n"
-                    f"Date: {timezone.now().isoformat()}\n"
-                    f"Subject: {subject}\n"
-                    f"----------------------------------\n\n"
-                    f"{message}"
+                    f"From: {name} <{from_email}>\nDate: {timezone.now().isoformat()}\n"
+                    f"Subject: {subject}\n----------------------------------\n\n{message}"
                 )
                 with open(file_path, 'w') as f:
                     f.write(file_content)
@@ -144,40 +107,28 @@ def contact_view(request):
 
             html_message = (
                 f"<b>New message from:</b> {name} ({from_email})<br>"
-                f"<b>Subject:</b> {subject}<br>"
-                f"<hr>"
-                f"<p>{message.replace(chr(10), '<br>')}</p>"
+                f"<b>Subject:</b> {subject}<br><hr><p>{message.replace(chr(10), '<br>')}</p>"
             )
-            
             try:
                 send_mail(
-                    subject=f"Contact Form: {subject}",
-                    message=message,
+                    subject=f"Contact Form: {subject}", message=message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[settings.DEFAULT_FROM_EMAIL],
-                    html_message=html_message,
-                    fail_silently=False,
+                    html_message=html_message, fail_silently=False,
                 )
                 messages.success(request, 'Your message has been sent successfully!')
             except Exception as e:
                 messages.error(request, 'Sorry, there was an error sending your message.')
-
             return redirect('home')
     else:
         form = ContactForm()
-        
     return render(request, 'contact.html', {'form': form})
 
 @login_required
 def profile_view(request):
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = ProfileUpdateForm(
-            request.POST, 
-            request.FILES, 
-            instance=request.user.profile
-        )
-        
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
@@ -186,74 +137,43 @@ def profile_view(request):
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
-
-    context = {
-        'user_form': user_form,
-        'profile_form': profile_form
-    }
-    
+    context = {'user_form': user_form, 'profile_form': profile_form}
     return render(request, 'profile.html', context)
 
-# --- (2)  dashboard_view ---
+
+# --- (2) UPDATED dashboard_view ---
 @login_required
 def dashboard_view(request):
     """ 
-    The main dashboard, now filtering for the last 7 days.
+    The main dashboard, now with period filters.
     """
     
-    # ---  Calculate 7 days ago ---
-    history = timezone.now() - timedelta(days=7)
+    # --- NEW: Pass the request.GET to the util function ---
+    # This gets all our stats (focused %, chart_data, etc.)
+    # and also gets the 'start_date_str' and 'end_date_str'
+    data = get_dashboard_data(request.user, request.GET)
     
+    # Get session data (this is separate from the stats)
     active_session = Session.objects.filter(
         user=request.user, 
         is_active=True
     ).first() 
-    
     all_devices = Device.objects.all()
     
-    # ---  Filter logs for last 7 days ---
-    logs = list(FocusLog.objects.filter(
-        session__user=request.user,
-        timestamp__gte=history  # <-- Filter added
-    ).order_by('timestamp'))
-    
-    # Get latest log (for sensors) - this query is fine
-    latest_log = FocusLog.objects.filter(session__user=request.user).order_by('-timestamp').first()
-
-    # This calculation now correctly uses the 7-day log data
-    total_logs = len(logs)
-    if total_logs > 0:
-        status_counts = Counter([log.status for log in logs])
-        focused_percent = (status_counts.get('FOCUSED', 0) / total_logs) * 100
-        distracted_percent = (status_counts.get('DISTRACTED', 0) / total_logs) * 100
-        drowsy_percent = (status_counts.get('DROWSY', 0) / total_logs) * 100
-    else:
-        focused_percent = 0
-        distracted_percent = 0
-        drowsy_percent = 0
-
-    status_map = {'FOCUSED': 2, 'DISTRACTED': 1, 'DROWSY': 0}
-    chart_data = [
-        {'x': log.timestamp.isoformat(), 'y': status_map.get(log.status, 1)} 
-        for log in logs
-    ]
-    
+    # Add all data to the context
     context = {
         'active_session': active_session,
         'all_devices': all_devices,
-        'chart_data_json': json.dumps(chart_data),
-        'focused_percent': focused_percent,
-        'distracted_percent': distracted_percent,
-        'drowsy_percent': drowsy_percent,
-        'latest_log': latest_log 
+        **data # This unpacks all the keys from get_dashboard_data
     }
     return render(request, 'dashboard.html', context)
 
-# --- (3)  supervisor_user_detail_view ---
+
+# --- (3) UPDATED supervisor_user_detail_view ---
 @user_passes_test(is_supervisor)
 def supervisor_user_detail_view(request, user_id):
     """
-    Shows the detailed dashboard for a specific user, filtered for 7 days.
+    Shows the detailed dashboard for a specific user, with period filters.
     """
     try:
         target_user = User.objects.get(id=user_id)
@@ -261,105 +181,40 @@ def supervisor_user_detail_view(request, user_id):
         messages.error(request, 'User not found.')
         return redirect('supervisor_dashboard')
         
-    # ---  Calculate 7 days ago ---
-    history = timezone.now() - timedelta(days=7)
-
-    # ---  Filter logs for last 7 days ---
-    logs = list(FocusLog.objects.filter(
-        session__user=target_user,
-        timestamp__gte=history # <-- Filter added
-    ).order_by('timestamp'))
-
-    total_logs = len(logs)
-    if total_logs > 0:
-        status_counts = Counter([log.status for log in logs])
-        focused_percent = (status_counts.get('FOCUSED', 0) / total_logs) * 100
-        distracted_percent = (status_counts.get('DISTRACTED', 0) / total_logs) * 100
-        drowsy_percent = (status_counts.get('DROWSY', 0) / total_logs) * 100
-    else:
-        focused_percent = 0
-        distracted_percent = 0
-        drowsy_percent = 0
-
-    status_map = {'FOCUSED': 2, 'DISTRACTED': 1, 'DROWSY': 0}
-    chart_data = [
-        {'x': log.timestamp.isoformat(), 'y': status_map.get(log.status, 1)} 
-        for log in logs
-    ]
-
+    # --- NEW: Pass the request.GET to the util function ---
+    data = get_dashboard_data(target_user, request.GET)
+    
     context = {
         'target_user': target_user,
-        'chart_data_json': json.dumps(chart_data),
-        'focused_percent': focused_percent,
-        'distracted_percent': distracted_percent,
-        'drowsy_percent': drowsy_percent,
+        **data # This unpacks all the keys from get_dashboard_data
     }
     return render(request, 'supervisor_user_detail.html', context)
 
-# --- (4)  get_live_dashboard_data ---
+
+# --- (4) UPDATED get_live_dashboard_data ---
 @api_view(['GET'])
 @login_required
 def get_live_dashboard_data(request):
     """
     A lightweight API endpoint to be polled.
-    Returns stats from the last 7 days.
+    Returns stats from the user-selected time period.
     """
-
-    # We check the user's profile.
-    # We use .profile.all().first() as a safe check in case the profile doesn't exist
-    profile = request.user.profile
-    if profile and not profile.has_seen_security_update:
-        messages.success(request, (
-            "<b>What's New:</b> Your account is now more secure! "
-            "We've added brute-force protection and reCAPTCHA to all forms."
-        ), extra_tags='safe') # 'safe' tag allows the <b> tag to render
-        
-        # Set the flag to True so they don't see this again
-        profile.has_seen_security_update = True
-        profile.save()
-
-
-    # --- NEW: Calculate 7 days ago ---
-    history = timezone.now() - timedelta(days=7)
     
-    # ---  Filter logs for last 7 days ---
-    logs = list(FocusLog.objects.filter(
-        session__user=request.user,
-        timestamp__gte=history # <-- Filter added
-    ))
+    # --- NEW: Pass the request.GET to the util function ---
+    data = get_dashboard_data(request.user, request.GET)
     
-    # latest_log query is fine, it just shows current conditions
-    latest_log = FocusLog.objects.filter(session__user=request.user).order_by('-timestamp').first()
-
-    # This calculation now correctly uses the 7-day log data
-    total_logs = len(logs)
-    if total_logs > 0:
-        status_counts = Counter([log.status for log in logs])
-        focused_percent = (status_counts.get('FOCUSED', 0) / total_logs) * 100
-        distracted_percent = (status_counts.get('DISTRACTED', 0) / total_logs) * 100
-        drowsy_percent = (status_counts.get('DROWSY', 0) / total_logs) * 100
-    else:
-        focused_percent = 0
-        distracted_percent = 0
-        drowsy_percent = 0
-
-    latest_temp = None
-    latest_humidity = None
-    if latest_log:
-        latest_temp = latest_log.temperature
-        latest_humidity = latest_log.humidity
-
-    data = {
-        'focused_percent': round(focused_percent, 0),
-        'distracted_percent': round(distracted_percent, 0),
-        'drowsy_percent': round(drowsy_percent, 0),
-        'latest_temp': latest_temp,
-        'latest_humidity': latest_humidity,
+    # We only need to return the keys that are being updated
+    live_data = {
+        'focused_percent': data['focused_percent'],
+        'distracted_percent': data['distracted_percent'],
+        'drowsy_percent': data['drowsy_percent'],
+        'latest_temp': data['latest_temp'],
+        'latest_humidity': data['latest_humidity'],
     }
     
-    return Response(data)
+    return Response(live_data)
 
-# --- Session Views ---
+# --- Session Views (Unchanged) ---
 @user_passes_test(is_supervisor)
 def supervisor_dashboard_view(request):
     all_users = User.objects.filter(is_staff=False)
@@ -406,4 +261,3 @@ def end_session_view(request):
         messages.error(request, "You have no active session to end.")
         
     return redirect('dashboard')
-

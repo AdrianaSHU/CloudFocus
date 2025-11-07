@@ -1,11 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <a href="{% url 'supervisor_dashboard' %}" class="btn btn-secondary btn-sm mb-3">&larr; Back to User List</a>
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <a href="{% url 'supervisor_dashboard' %}" class="btn btn-secondary btn-sm mb-2">&larr; Back to User List</a>
+      <h2 class="mb-0">
+        Focus Dashboard for: {{ target_user.first_name }} {{ target_user.last_name }}
+      </h2>
+    </div>
+    
+    <form method="GET" action="{% url 'supervisor_user_detail' target_user.id %}" class="d-flex align-items-center">
+      <div class="me-2">
+        <label for="start" class="form-label-sm">From:</label>
+        <input type="date" class="form-control" 
+               id="start" name="start" value="{{ start_date_str }}">
+      </div>
+      <div class="me-3">
+        <label for="end" class="form-label-sm">To:</label>
+        <input type="date" class="form-control" 
+               id="end" name="end" value="{{ end_date_str }}">
+      </div>
+      <button type="submit" class="btn btn-primary align-self-end">Filter</button>
+    </form>
+  </div>
 
-  <h2 class="mb-4">
-    Focus Dashboard for: {{ target_user.first_name }} {{ target_user.last_name }}
-  </h2>
 
   <div class="row">
     <div class="col-lg-4">
@@ -30,22 +49,22 @@
 
   <div class="card mt-4">
     <div class="card-header">
-      User Focus Timeline (Last 7 Days)
+      User Focus Timeline (from {{ start_date_str }} to {{ end_date_str }})
     </div>
     <div class="card-body">
       <div style="height: 400px;">
-        <canvas id="focusChart"></canvas>
+        <canvas id="focusChart" data-chart-min-date="{{ chart_min_date }}"></canvas>
       </div>
     </div>
   </div>
 
   <script>
     const chartData = {{ chart_data_json|safe }};
+    const ctx = document.getElementById('focusChart');
     
-    // --- (B) DATE UPDATED ---
-    const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7));
+    // NEW: Get min date from the canvas data attribute
+    const minDate = ctx.dataset.chartMinDate;
     
-    const ctx = document.getElementById('focusChart').getContext('2d');
     const myChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -64,11 +83,10 @@
           x: {
             type: 'time',
             time: {
-              unit: 'hour',
+              unit: 'hour', // Default to hour
               tooltipFormat: 'HH:mm - dd MMM'
             },
-            // --- (C) MINIMUM TIME UPDATED ---
-            min: oneWeekAgo,
+            min: minDate, // Set dynamic minimum date
             title: {
               display: true,
               text: 'Time'

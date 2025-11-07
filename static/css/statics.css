@@ -1,35 +1,48 @@
-/* --- Root Variables & Base --- */
+/* --- (1) ROOT VARIABLES (Default Light Theme) --- */
 :root {
-    --sidebar-width: 260px;
-    --sidebar-bg: #004d40; /* Dark Teal */
+    --bg-color: #f4f7f6;
+    --card-bg-color: #ffffff;
+    --text-color: #212529;
+    --text-muted-color: #6c757d;
+    --border-color: #e0e0e0;
+    --link-color: #00796b;
+    --link-hover-color: #004d40;
+    --sidebar-bg: #004d40;
     --sidebar-link-color: rgba(255, 255, 255, 0.7);
     --sidebar-link-hover: #fff;
-    --sidebar-link-active: #fff;
+    --sidebar-link-active: #00796b;
+    --sidebar-brand-color: #fff;
+    --sidebar-user-name: #fff;
+    --sidebar-user-handle: rgba(255, 255, 255, 0.7);
+    --sidebar-hr-color: rgba(255, 255, 255, 0.2);
 }
 
 body {
-    background-color: #f4f7f6;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* --- SIDEBAR STYLES (Desktop) --- */
+/* --- (2) SIDEBAR STYLES (Now uses variables) --- */
 .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
-    width: var(--sidebar-width);
+    width: 260px; /* Kept fixed width */
     padding: 20px 15px;
     background-color: var(--sidebar-bg);
-    color: #fff;
+    color: var(--sidebar-brand-color);
     display: flex;
     flex-direction: column;
-    z-index: 998; /* Below the mobile menu button */
+    z-index: 998;
+    border-right: 1px solid var(--border-color);
 }
 
 .sidebar-brand {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--sidebar-brand-color);
     text-decoration: none;
     text-align: center;
     margin-bottom: 1.5rem;
@@ -50,7 +63,7 @@ body {
 
 .sidebar .nav-link.active {
     color: var(--sidebar-link-active);
-    background-color: #00796b; /* Active link color */
+    background-color: var(--bg-color);
 }
 
 /* Fix for logout button */
@@ -69,105 +82,46 @@ body {
 }
 
 .sidebar hr {
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid var(--sidebar-hr-color);
 }
 
-/* Main content area */
-.main-content {
-    /* Push content to the right to make room for the sidebar */
-    margin-left: var(--sidebar-width);
-    padding: 30px;
-}
-/* --- End of Sidebar Styles --- */
-
-
-/* --- PROFILE IMAGE & NAME --- */
 .sidebar-profile-pic {
     width: 60px;
     height: 60px;
     object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.7);
+    border: 2px solid var(--sidebar-link-color);
 }
-
 .sidebar-user-name {
-    color: #fff;
+    color: var(--sidebar-user-name);
     font-weight: 700;
     margin-top: 0.5rem;
     font-size: 1.1rem;
 }
-
 .sidebar-user-handle {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--sidebar-user-handle);
     font-size: 0.9rem;
 }
 
 
-/* --- GENERAL STYLES --- */
-.btn-primary {
-    background-color: #00796b;
-    border-color: #00796b;
-}
-
-.btn-primary:hover {
-    background-color: #004d40;
-    border-color: #004d40;
-}
-
-/* Dashboard Summary Cards */
-.summary-card {
-    border-radius: 8px;
-    padding: 20px;
-    color: white;
-    text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* Hover effect for cards */
-.summary-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.summary-card h3 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.summary-card p {
-    font-size: 1.1rem;
-    margin: 0;
-}
-
-.card-focused {
-    background-color: #26a69a; /* Teal */
-}
-.card-distracted {
-    background-color: #ffca28; /* Amber */
-    color: #333;
-}
-.card-drowsy {
-    background-color: #ef5350; /* Red */
+/* --- (3) MAIN CONTENT STYLES (Now uses variables) --- */
+.main-content {
+    margin-left: 260px; /* Kept fixed width */
+    padding: 30px;
 }
 
 /* General Card & Form Styling */
 .card {
-    border: none;
+    border: 1px solid var(--border-color);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
 }
 
 /* Form Styling */
-form p {
-    margin-bottom: 1rem;
-}
-form p label {
-    display: block;
-    margin-bottom: .5rem;
+.form-label {
     font-weight: 500;
+    color: var(--text-color);
 }
-/* This targets all form inputs rendered by as_p or manual input */
 .form-control,
 form p input,
 form p select,
@@ -178,141 +132,191 @@ form p textarea {
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
-    color: #212529;
-    background-color: #fff;
+    color: var(--text-color);
+    background-color: var(--bg-color);
     background-clip: padding-box;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--border-color);
     border-radius: .375rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
-
-/* Fix for form fields inside our new profile form */
-.form-label {
-    font-weight: 500;
-}
 .form-control:disabled, .form-control[readonly] {
-    background-color: #e9ecef;
-    opacity: 1;
+    background-color: var(--bg-color);
+    opacity: 0.7;
 }
-/* End of Form Styling */
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--link-color);
+    border-color: var(--link-color);
+}
+.btn-primary:hover {
+    background-color: var(--link-hover-color);
+    border-color: var(--link-hover-color);
+}
 
 /* Footer Styles */
 .footer {
     padding: 20px 0;
     margin-top: 30px; 
-    border-top: 1px solid #e0e0e0; 
-    background-color: #fff; 
+    border-top: 1px solid var(--border-color); 
+    background-color: var(--card-bg-color); 
     text-align: center;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
-
 .footer .text-muted {
-    color: #6c757d !important; 
+    color: var(--text-muted-color) !important; 
 }
 
-/* Footer Social Icons (Fixes placement and size) */
+/* Footer Social Icons */
 .social-icon {
-    display: inline-flex; /* Use flex to align icon and text */
-    flex-direction: column; /* Stack icon and text vertically */
+    display: inline-flex;
+    flex-direction: column;
     align-items: center;
     font-size: 1.8rem; 
-    color: #6c757d;   
+    color: var(--text-muted-color);   
     margin-left: 20px; 
     text-decoration: none;
     transition: color 0.2s ease;
     text-align: center;
 }
-
 .social-icon:hover {
-    color: #004d40; 
+    color: var(--link-hover-color); 
 }
-
 .social-icon i {
-    margin-bottom: 5px; /* Space between icon and text */
+    margin-bottom: 5px;
 }
-
 .social-icon-text {
-    font-size: 0.8rem; /* Small text underneath */
+    font-size: 0.8rem;
     font-weight: 500;
 }
 
 
-/*
-====================================
-MOBILE RESPONSIVENESS FIXES
-====================================
-*/
-
-/* 1. Show/Hide Mobile Components */
+/* --- (4) MOBILE RESPONSIVENESS (Unchanged) --- */
 .mobile-nav-toggle {
-    display: none; /* Hidden by default on desktop */
+    display: none;
     position: fixed;
     top: 15px;
     left: 15px;
     padding: 8px 12px;
     border: none;
     border-radius: 6px;
-    z-index: 1000; /* On top of everything */
+    z-index: 1000;
     font-size: 1rem;
     background-color: var(--sidebar-bg);
     color: white;
 }
-
 .sidebar.mobile-show {
-    /* This class is toggled by JavaScript */
-    display: flex !important; /* Forces sidebar to show as an overlay */
-    left: 0; /* Slides it in */
+    display: flex !important;
+    left: 0;
 }
 
-/* --- (2) Media Query for screens 768px or smaller (tablets/phones) --- */
 @media (max-width: 768px) {
-    
-    /* SHOW mobile menu button */
     .mobile-nav-toggle {
         display: block;
     }
-    
-    /* HIDE the sidebar by default and position for sliding */
     .sidebar {
         display: none;
         position: fixed;
-        width: 80%; /* Takes up 80% of the screen */
+        width: 80%;
         height: 100%;
-        left: -80%; /* Hide off-screen initially */
+        left: -80%;
         transition: left 0.3s ease;
         z-index: 999;
     }
-
-    /* Remove the fixed desktop margin */
     .main-content {
         margin-left: 0;
-        padding: 15px; /* Use smaller padding for mobile */
-        /* Push content down so it doesn't hide under the button */
+        padding: 15px;
         padding-top: 70px; 
     }
-
-    /* Adjust size of dashboard cards so they stack */
+    /* ... (other mobile styles) ... */
     .summary-card h3 {
         font-size: 2.2rem; 
     }
-    
-    /* Ensure footer looks neat by putting items in a column */
     .footer .d-flex {
         flex-direction: column;
     }
-    
-    /* Hide the icon text on small screens */
     .social-icon-text {
         display: none;
     }
-
     .footer .social-icon {
-        margin: 10px 10px 0 10px; /* Adjust spacing when stacked */
+        margin: 10px 10px 0 10px;
         font-size: 1.6rem;
     }
-    
     .footer div:first-child {
-        margin-bottom: 10px; /* Space between copyright and icons */
+        margin-bottom: 10px;
     }
+}
+
+
+/*
+====================================
+--- (5) NEW THEME DEFINITIONS ---
+====================================
+*/
+
+/* --- THEME 2: DARK MODE --- */
+.theme-dark {
+    --bg-color: #121212;
+    --card-bg-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --text-muted-color: #888888;
+    --border-color: #333333;
+    --link-color: #26a69a; /* Light Teal */
+    --link-hover-color: #80cbc4; /* Lighter Teal */
+    
+    /* Keep sidebar dark */
+    --sidebar-bg: #1e1e1e;
+    --sidebar-link-color: rgba(255, 255, 255, 0.7);
+    --sidebar-link-hover: #fff;
+    --sidebar-link-active: #26a69a;
+    --sidebar-brand-color: #fff;
+    --sidebar-user-name: #fff;
+    --sidebar-user-handle: rgba(255, 255, 255, 0.7);
+    --sidebar-hr-color: #333333;
+}
+
+/* --- THEME 3: HIGH-CONTRAST --- */
+.theme-high-contrast {
+    --bg-color: #000000;
+    --card-bg-color: #000000;
+    --text-color: #ffffff;
+    --text-muted-color: #cccccc;
+    --border-color: #ffffff;
+    --link-color: #ffff00; /* Bright Yellow */
+    --link-hover-color: #ffffff;
+
+    --sidebar-bg: #000000;
+    --sidebar-link-color: #ffffff;
+    --sidebar-link-hover: #ffff00;
+    --sidebar-link-active: #ffff00;
+    --sidebar-brand-color: #ffff00;
+    --sidebar-user-name: #ffffff;
+    --sidebar-user-handle: #cccccc;
+    --sidebar-hr-color: #ffffff;
+}
+
+/* High-contrast cards and inputs need borders */
+.theme-high-contrast .card,
+.theme-high-contrast .form-control,
+.theme-high-contrast .footer {
+    border: 1px solid var(--border-color);
+}
+
+.theme-high-contrast .btn-primary {
+    background-color: var(--link-color);
+    border-color: var(--link-color);
+    color: #000000; /* Black text on yellow button */
+}
+.theme-high-contrast .btn-primary:hover {
+    background-color: var(--link-hover-color);
+    border-color: var(--link-hover-color);
+    color: #000000;
+}
+
+.theme-high-contrast .social-icon {
+    color: var(--text-muted-color);
+}
+.theme-high-contrast .social-icon:hover {
+    color: var(--link-color); 
 }
 
