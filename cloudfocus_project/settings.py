@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'storages', # For Azure Blob Storage
     'axes', # For brute force security
-    'captcha',
+    'django_recaptcha',
 ]
 
 MIDDLEWARE = [
@@ -142,6 +142,23 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
+
+# --- (C) ADDED reCAPTCHA KEYS ---
+RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
+
+# --- (D) ADDED AXES SETTINGS ---
+AXES_LOCK_OUT_BY = "username"
+
+# --- AUTHENTICATION BACKENDS ---
+# This is required for django-axes (brute force protection) to work correctly
+AUTHENTICATION_BACKENDS = [
+    # AxesBackend has been renamed to AxesStandaloneBackend
+    'axes.backends.AxesStandaloneBackend',
+    
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Europe/London'
 USE_I18N = True
