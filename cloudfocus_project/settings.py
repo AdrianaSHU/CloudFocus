@@ -34,11 +34,13 @@ INSTALLED_APPS = [
     'focus_tracker.apps.FocusTrackerConfig',
     'rest_framework',
     'storages', # For Azure Blob Storage
+    'axes', # For brute force security
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', # For static files
+    'axes.middleware.AxesMiddleware', # For brute force 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
