@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'storages', # For Azure Blob Storage
     'axes', # For brute force security
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -154,3 +155,6 @@ SESSION_SAVE_EVERY_REQUEST = True
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
+# --- (X) reCAPTCHA SETTINGS ---
+RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
+from captcha.fields import ReCaptchaField
 
 # (1) We keep your ContactForm (it's already styled)
 class ContactForm(forms.Form):
@@ -9,6 +10,7 @@ class ContactForm(forms.Form):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
     subject = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     message = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}), required=True)
+    captcha = ReCaptchaField()
 
 # (2) We update CustomUserCreationForm to add styling
 class CustomUserCreationForm(UserCreationForm):
@@ -16,7 +18,8 @@ class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     profile_picture = forms.ImageField(required=False, label="Profile Picture (Optional)", widget=forms.FileInput(attrs={'class': 'form-control'}))
-
+    captcha = ReCaptchaField()
+    
     class Meta(UserCreationForm.Meta):
         model = User
         fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
