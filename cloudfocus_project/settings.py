@@ -1,6 +1,6 @@
 """
 Django settings for cloudfocus_project project.
-FINAL - Production Ready
+FINAL - Dual-Mode (Production & Local)
 """
 
 from pathlib import Path
@@ -20,8 +20,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = [
     'cloudfocus-d8frducfd6fjgdbx.uksouth-01.azurewebsites.net',
     '127.0.0.1',
-    '10.0.0.22', 
-    'localhost', 
+    '10.0.0.22', # Your VM's local IP
 ]
 
 # Application definition
@@ -73,20 +72,14 @@ WSGI_APPLICATION = 'cloudfocus_project.wsgi.application'
 if DEBUG:
     # --- LOCAL DEVELOPMENT SETTINGS ---
     print("Running in LOCAL DEBUG mode")
-    
-    # Use local SQLite database
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-    
-    # Use local file storage
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    
-    # Use console for emails
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 else:
@@ -110,15 +103,11 @@ else:
         }
     }
     
-    # --- THIS IS THE FIX ---
-    # Use Azure Blob Storage
-    DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-    # Read the *exact* variable names you set in Azure
-    AZURE_STORAGE_ACCOUNT_NAME = config('AZURE_STORAGE_ACCOUNT_NAME')
-    AZURE_STORAGE_ACCOUNT_KEY = config('AZURE_STORAGE_ACCOUNT_KEY')
-    AZURE_STORAGE_CONTAINER = config('AZURE_STORAGE_CONTAINER')
-    MEDIA_URL = f'https://{AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_STORAGE_CONTAINER}/'
-    # --- END OF FIX ---
+    # Use our new custom Azure Storage class
+    DEFAULT_FILE_STORAGE = 'cloudfocus_project.custom_storage.AzureMediaStorage'
+    
+    # Build the MEDIA_URL
+    MEDIA_URL = f"https://{config('AZURE_STORAGE_ACCOUNT_NAME')}.blob.core.windows.net/{config('AZURE_STORAGE_CONTAINER')}/"
     
     # Use SendGrid for emails
     EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
