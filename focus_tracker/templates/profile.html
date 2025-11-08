@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block content %}
+
+<!-- This is the card for editing your profile -->
 <div class="row">
   <div class="col-md-8 offset-md-2">
     <div class="card">
-      <div class="card-body">
+      <div class="card-body p-4">
         
         <h2 class="card-title text-center">Edit Your Profile</h2>
+
+        <!-- Profile Picture Display -->
         <div class="text-center mb-4">
           <img src="
             {% if user.profile.profile_picture %}
@@ -15,10 +19,9 @@
             {% else %}
               {% static 'images/default.png' %}
             {% endif %}
-          " 
-          class="rounded-circle sidebar-profile-pic">
+          " class="rounded-circle sidebar-profile-pic">
         </div>
-
+        
         <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           
@@ -29,28 +32,32 @@
               <label class="form-label">Username (Cannot be changed)</label>
               <input type="text" class="form-control" value="{{ user.username }}" readonly disabled>
             </div>
-
             <div class="mb-3">
               <label class="form-label">Email (Cannot be changed)</label>
               <input type="email" class="form-control" value="{{ user.email }}" readonly disabled>
             </div>
 
+            <!-- (FIX: These fields now correctly use the .form-control class) -->
             <div class="mb-3">
               <label for="{{ user_form.first_name.id_for_label }}" class="form-label">First name</label>
+              <!-- This will now be styled by your new statics.css file -->
               {{ user_form.first_name }}
             </div>
             <div class="mb-3">
               <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Last name</label>
+              <!-- This will now be styled by your new statics.css file -->
               {{ user_form.last_name }}
             </div>
-
+            
           </fieldset>
-
+          
           <fieldset class="mb-4">
             <legend class="border-bottom mb-3">Profile Details</legend>
-
+            
+            <!-- (FIX: This field also uses .form-control) -->
             <div class="mb-3">
               <label for="{{ profile_form.profile_picture.id_for_label }}" class="form-label">Change Profile Picture</label>
+              <!-- This will now be styled by statics.css file -->
               {{ profile_form.profile_picture }}
             </div>
 
@@ -75,4 +82,3 @@
   </div>
 </div>
 {% endblock %}
-

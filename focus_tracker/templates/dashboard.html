@@ -1,221 +1,195 @@
 {% extends 'base.html' %}
-
 {% block content %}
-  
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Welcome to your Dashboard, {{ user.username }}!</h2>
-  </div>
 
-  <div class="card mb-4">
-    <div class="card-header">
-      <span>Session Management</span>
-    </div>
-    <div class="card-body">
-      {% if active_session %}
-        <h5 class="text-success">Session Active</h5>
-        <p>You are currently "Checked In" to the device: 
-          <strong>{{ active_session.device.name }}</strong>
-        </p>
-        <p>All data from this device is being saved to your account.</p>
-        <form method="POST" action="{% url 'end_session' %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline-danger">End My Session</button>
-        </form>
-      {% else %}
-        <h5 class="text-danger">You have no active session.</h5>
-        <p>Please select a device to "Check In" and start recording data.</p>
-        <div class="list-group">
-          {% for device in all_devices %}
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-              <strong>{{ device.name }}</strong>
-              <form method="POST" action="{% url 'start_session' device.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success">Start Session</button>
-              </form>
-            </div>
-          {% empty %}
-            <p class="text-muted">No devices are registered in the system. Please contact your supervisor.</p>
-          {% endfor %}
-        </div>
-      {% endif %}
-    </div>
-  </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold text-primary">Welcome to your Dashboard, {{ user.username }}!</h2>
+</div>
 
-  <div class="row">
-    <div class="col-lg-6">
-      <div class="summary-card" style="background-color: #ffa726;">
-        <h3 id="temp-value">
-          {% if latest_log and latest_log.temperature is not None %}
-            {{ latest_log.temperature|floatformat:1 }}°C
-          {% else %}--{% endif %}
-        </h3>
-        <p>Device Temperature</p>
-      </div>
-    </div>
-    <div class="col-lg-6">
-      <div class="summary-card" style="background-color: #66bb6a;">
-        <h3 id="humidity-value">
-          {% if latest_log and latest_log.humidity is not None %}
-            {{ latest_log.humidity|floatformat:1 }}%
-          {% else %}--{% endif %}
-        </h3>
-        <p>Device Humidity</p>
-      </div>
-    </div>
+<!-- SESSION MANAGEMENT -->
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-gradient bg-primary text-white fw-semibold">
+    <i class="bi bi-person-check me-2"></i> Session Management
   </div>
+  <div class="card-body">
+    {% if active_session %}
+      <h5 class="text-success fw-bold">Session Active</h5>
+      <p>
+        You are currently <strong>"Checked In"</strong> to the device: 
+        <strong class="text-primary">{{ active_session.device.name }}</strong>
+      </p>
+      <p class="fs-6">>All data from this device is being saved to your account.</p>
+      <form method="POST" action="{% url 'end_session' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger btn-sm px-4">
+          <i class="bi bi-power"></i> End My Session
+        </button>
+      </form>
+    {% else %}
+      <h5 class="text-danger fw-bold">No Active Session</h5>
+      <p class="fs-6">Select a device to start recording data.</p>
+      <div class="list-group">
+        {% for device in all_devices %}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>{{ device.name }}</strong>
+            <form method="POST" action="{% url 'start_session' device.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success btn-sm">
+                <i class="bi bi-play-circle"></i> Start
+              </button>
+            </form>
+          </div>
+        {% empty %}
+          <p class="fs-6">No devices registered. Please contact your supervisor.</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
 
-  <div class="row">
-    <div class="col-lg-4">
-      <div class="summary-card card-focused">
-        <h3 id="focused-percent">{{ focused_percent|floatformat:0 }}%</h3>
-        <p>Focused Time</p>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="summary-card card-distracted">
-        <h3 id="distracted-percent">{{ distracted_percent|floatformat:0 }}%</h3>
-        <p>Distracted Time</p>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="summary-card card-drowsy">
-        <h3 id="drowsy-percent">{{ drowsy_percent|floatformat:0 }}%</h3>
-        <p>Drowsy Time</p>
-      </div>
+<!-- TEMPERATURE / HUMIDITY -->
+<div class="row mb-4">
+  <div class="col-lg-6">
+    <div class="summary-card p-4 text-white text-center rounded shadow-sm" style="background: linear-gradient(135deg, #ff7043, #ffa726);">
+      <h3 id="temp-value" class="fw-bold">
+        {% if latest_log and latest_log.temperature is not None %}
+          {{ latest_log.temperature|floatformat:1 }}°C
+        {% else %}--{% endif %}
+      </h3>
+      <p class="mb-0">Device Temperature</p>
     </div>
   </div>
-  <div>
-    <form method="GET" action="{% url 'dashboard' %}" class="d-flex align-items-center">
-      <div class="me-2">
-        <label for="start" class="form-label-sm">From:</label>
-        <input type="date" class="form-control" 
-               id="start" name="start" value="{{ start_date_str }}">
+  <div class="col-lg-6">
+    <div class="summary-card p-4 text-white text-center rounded shadow-sm" style="background: linear-gradient(135deg, #43a047, #81c784);">
+      <h3 id="humidity-value" class="fw-bold">
+        {% if latest_log and latest_log.humidity is not None %}
+          {{ latest_log.humidity|floatformat:1 }}%
+        {% else %}--{% endif %}
+      </h3>
+      <p class="mb-0">Device Humidity</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOCUS CARDS -->
+<div class="row text-white mb-4">
+  <div class="col-lg-4 mb-3">
+    <div class="summary-card p-4 text-center rounded shadow-sm" style="background: linear-gradient(135deg, #2196f3, #64b5f6);">
+      <h3 id="focused-percent" class="fw-bold">{{ focused_percent|floatformat:0 }}%</h3>
+      <p>Focused Time</p>
+    </div>
+  </div>
+  <div class="col-lg-4 mb-3">
+    <div class="summary-card p-4 text-center rounded shadow-sm" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+      <h3 id="distracted-percent" class="fw-bold">{{ distracted_percent|floatformat:0 }}%</h3>
+      <p>Distracted Time</p>
+    </div>
+  </div>
+  <div class="col-lg-4 mb-3">
+    <div class="summary-card p-4 text-center rounded shadow-sm" style="background: linear-gradient(135deg, #9c27b0, #ba68c8);">
+      <h3 id="drowsy-percent" class="fw-bold">{{ drowsy_percent|floatformat:0 }}%</h3>
+      <p>Drowsy Time</p>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER FORM -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="GET" action="{% url 'dashboard' %}" class="d-flex align-items-end flex-wrap gap-3">
+      <div>
+        <label for="start" class="form-label">From:</label>
+        <input type="date" class="form-control form-control-sm" id="start" name="start" value="{{ start_date_str }}">
       </div>
-      <div class="me-3">
-        <label for="end" class="form-label-sm">To:</label>
-        <input type="date" class="form-control" 
-               id="end" name="end" value="{{ end_date_str }}">
+      <div>
+        <label for="end" class="form-label">To:</label>
+        <input type="date" class="form-control form-control-sm" id="end" name="end" value="{{ end_date_str }}">
       </div>
-      <button type="submit" class="btn btn-primary align-self-end">Filter</button>
+      <button type="submit" class="btn btn-primary mt-3 px-4">
+        <i class="bi bi-funnel-fill"></i> Filter
+      </button>
     </form>
   </div>
-  <div class="card mt-4">
-    <div class="card-header">
-      Your Focus Timeline (from {{ start_date_str }} to {{ end_date_str }})
-    </div>
-    <div class="card-body">
-      <div style="height: 400px;">
-        <canvas id="focusChart" 
-                data-start-date="{{ start_date_str }}" 
-                data-end-date="{{ end_date_str }}"
-                data-chart-min-date="{{ chart_min_date }}">
-        </canvas>
-      </div>
+</div>
+
+<!-- CHART -->
+<div class="card border-0 shadow-sm mb-5">
+  <div class="card-header bg-secondary text-white fw-semibold">
+    <i class="bi bi-graph-up"></i> Your Focus Timeline ({{ start_date_str }} – {{ end_date_str }})
+  </div>
+  <div class="card-body">
+    <div style="height: 400px;">
+      <canvas id="focusChart" 
+              data-start-date="{{ start_date_str }}" 
+              data-end-date="{{ end_date_str }}"
+              data-chart-min-date="{{ chart_min_date }}">
+      </canvas>
     </div>
   </div>
+</div>
 
-  <script>
-    // --- (A) GET ALL THE CARD ELEMENTS ---
-    const focusedCard = document.getElementById('focused-percent');
-    const distractedCard = document.getElementById('distracted-percent');
-    const drowsyCard = document.getElementById('drowsy-percent');
-    const tempCard = document.getElementById('temp-value');
-    const humidityCard = document.getElementById('humidity-value');
-    
-    // --- (B) FUNCTION TO UPDATE THE CARDS ---
-    function updateDashboardData() {
-        console.log("Fetching live data...");
-        
-        // NEW: Read the current date range from the chart canvas
-        const canvas = document.getElementById('focusChart');
-        const startDate = canvas.dataset.startDate;
-        const endDate = canvas.dataset.endDate;
+<script>
+  const focusedCard = document.getElementById('focused-percent');
+  const distractedCard = document.getElementById('distracted-percent');
+  const drowsyCard = document.getElementById('drowsy-percent');
+  const tempCard = document.getElementById('temp-value');
+  const humidityCard = document.getElementById('humidity-value');
+  
+  function updateDashboardData() {
+      const canvas = document.getElementById('focusChart');
+      const startDate = canvas.dataset.startDate;
+      const endDate = canvas.dataset.endDate;
+      fetch(`{% url 'api-live-data' %}?start=${startDate}&end=${endDate}`)
+          .then(response => response.json())
+          .then(data => {
+              focusedCard.innerText = `${data.focused_percent}%`;
+              distractedCard.innerText = `${data.distracted_percent}%`;
+              drowsyCard.innerText = `${data.drowsy_percent}%`;
+              tempCard.innerText = data.latest_temp !== null ? `${data.latest_temp.toFixed(1)}°C` : '--';
+              humidityCard.innerText = data.latest_humidity !== null ? `${data.latest_humidity.toFixed(1)}%` : '--';
+          })
+          .catch(error => console.error('Error fetching live data:', error));
+  }
 
-        // Pass the dates to the API
-        fetch(`{% url 'api-live-data' %}?start=${startDate}&end=${endDate}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log("Data received:", data);
-                
-                focusedCard.innerText = `${data.focused_percent}%`;
-                distractedCard.innerText = `${data.distracted_percent}%`;
-                drowsyCard.innerText = `${data.drowsy_percent}%`;
+  const chartData = {{ chart_data_json|safe }};
+  const ctx = document.getElementById('focusChart');
+  const minDate = ctx.dataset.chartMinDate;
 
-                if (data.latest_temp !== null) {
-                    tempCard.innerText = `${data.latest_temp.toFixed(1)}°C`;
-                } else {
-                    tempCard.innerText = '--';
-                }
-
-                if (data.latest_humidity !== null) {
-                    humidityCard.innerText = `${data.latest_humidity.toFixed(1)}%`;
-                } else {
-                    humidityCard.innerText = '--';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching live data:', error);
-            });
-    }
-
-    // --- (C) DRAW THE MAIN CHART (On initial page load) ---
-    const chartData = {{ chart_data_json|safe }};
-    const ctx = document.getElementById('focusChart');
-    
-    // NEW: Get min date from the canvas data attribute
-    const minDate = ctx.dataset.chartMinDate;
-    
-    const myChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        datasets: [{
-          label: 'Focus Level',
-          data: chartData,
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.1,
-          stepped: true,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            type: 'time',
-            time: {
-              unit: 'hour', // Default to hour
-              tooltipFormat: 'HH:mm - dd MMM'
-            },
-            min: minDate, // Set dynamic minimum date
-            title: {
-              display: true,
-              text: 'Time'
-            }
+  const myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'Focus Level',
+        data: chartData,
+        borderColor: '#42a5f5',
+        backgroundColor: 'rgba(66,165,245,0.2)',
+        tension: 0.3,
+        stepped: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'hour', tooltipFormat: 'HH:mm - dd MMM' },
+          min: minDate,
+          title: { display: true, text: 'Time' }
+        },
+        y: {
+          title: { display: true, text: 'Focus State' },
+          ticks: {
+            stepSize: 1,
+            callback: value => ({ 0: 'Drowsy', 1: 'Distracted', 2: 'Focused' }[value])
           },
-          y: {
-            title: {
-              display: true,
-              text: 'Focus State'
-            },
-            ticks: {
-              stepSize: 1,
-              callback: function(value) {
-                switch (value) {
-                  case 0: return 'Drowsy';
-                  case 1: return 'Distracted';
-                  case 2: return 'Focused';
-                }
-              }
-            },
-            min: 0,
-            max: 2
-          }
+          min: 0,
+          max: 2
         }
       }
-    });
+    }
+  });
 
-    // --- (D) START THE 10-SECOND POLLING ---
-    setInterval(updateDashboardData, 10000);
+  setInterval(updateDashboardData, 10000);
+</script>
 
-  </script>
 {% endblock %}

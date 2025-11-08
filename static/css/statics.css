@@ -1,3 +1,9 @@
+/*
+====================================
+CLOUDFOCUS THEME SYSTEM (IMPROVED)
+====================================
+*/
+
 /* --- (1) ROOT VARIABLES (Default Light Theme) --- */
 :root {
     --bg-color: #f4f7f6;
@@ -9,51 +15,66 @@
     --link-hover-color: #004d40;
     --sidebar-bg: #004d40;
     --sidebar-link-color: rgba(255, 255, 255, 0.7);
-    --sidebar-link-hover: #fff;
-    --sidebar-link-active: #00796b;
-    --sidebar-brand-color: #fff;
-    --sidebar-user-name: #fff;
+    --sidebar-link-hover: #ffffff;
+    --sidebar-link-active: #00bfa5;
+    --sidebar-brand-color: #ffffff;
+    --sidebar-user-name: #ffffff;
     --sidebar-user-handle: rgba(255, 255, 255, 0.7);
     --sidebar-hr-color: rgba(255, 255, 255, 0.2);
+    --radius: 12px;
+    --transition: 0.25s ease;
 }
 
+/* Smooth transitions globally */
+* {
+    transition: background-color var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+/* --- (2) BASE STYLES --- */
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    transition: background-color 0.2s ease, color 0.2s ease;
+    font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
 }
 
-/* --- (2) SIDEBAR STYLES (Now uses variables) --- */
+/* --- (3) SIDEBAR --- */
 .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
-    width: 260px; /* Kept fixed width */
+    width: 260px;
     padding: 20px 15px;
-    background-color: var(--sidebar-bg);
+    background: var(--sidebar-bg);
     color: var(--sidebar-brand-color);
     display: flex;
     flex-direction: column;
-    z-index: 998;
     border-right: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-brand {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     font-weight: 700;
-    color: var(--sidebar-brand-color);
-    text-decoration: none;
     text-align: center;
     margin-bottom: 1.5rem;
+    text-decoration: none;
+    color: var(--sidebar-brand-color);
+    letter-spacing: 0.5px;
 }
 
 .sidebar .nav-link {
+    display: block;
     color: var(--sidebar-link-color);
     padding: 10px 15px;
-    border-radius: 6px;
+    border-radius: var(--radius);
     font-weight: 500;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-bottom: 4px;
+    transition: background-color var(--transition), color var(--transition);
 }
 
 .sidebar .nav-link:hover {
@@ -63,135 +84,149 @@ body {
 
 .sidebar .nav-link.active {
     color: var(--sidebar-link-active);
-    background-color: var(--bg-color);
+    background-color: rgba(255, 255, 255, 0.15);
+    border-left: 4px solid var(--sidebar-link-active);
+    font-weight: 600;
 }
 
-/* Fix for logout button */
+/* Logout button fix */
 .sidebar .nav-item form {
     margin: 0;
 }
 .sidebar .nav-link.btn-link {
-    width: 100%;
     text-align: left;
+    width: 100%;
     color: var(--sidebar-link-color);
 }
 .sidebar .nav-link.btn-link:hover {
     color: var(--sidebar-link-hover);
     background-color: rgba(255, 255, 255, 0.1);
-    text-decoration: none;
 }
 
 .sidebar hr {
     border-top: 1px solid var(--sidebar-hr-color);
+    margin: 1rem 0;
 }
 
 .sidebar-profile-pic {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     object-fit: cover;
     border: 2px solid var(--sidebar-link-color);
+    border-radius: 50%;
+    margin: 0 auto;
 }
+
 .sidebar-user-name {
     color: var(--sidebar-user-name);
     font-weight: 700;
-    margin-top: 0.5rem;
+    margin-top: 0.6rem;
+    text-align: center;
     font-size: 1.1rem;
 }
 .sidebar-user-handle {
     color: var(--sidebar-user-handle);
     font-size: 0.9rem;
+    text-align: center;
 }
 
-
-/* --- (3) MAIN CONTENT STYLES (Now uses variables) --- */
+/* --- (4) MAIN CONTENT --- */
 .main-content {
-    margin-left: 260px; /* Kept fixed width */
+    margin-left: 260px;
     padding: 30px;
 }
 
-/* General Card & Form Styling */
+/* --- (5) CARDS --- */
 .card {
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     background-color: var(--card-bg-color);
-    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 20px;
 }
 
-/* Form Styling */
-.form-label {
+/* --- (6) FORMS --- */
+.form-label,
+form p label {
     font-weight: 500;
     color: var(--text-color);
+    margin-bottom: 0.4rem;
 }
+
 .form-control,
 form p input,
 form p select,
 form p textarea {
-    display: block;
     width: 100%;
-    padding: .375rem .75rem;
+    padding: 0.5rem 0.75rem;
     font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
     color: var(--text-color);
     background-color: var(--bg-color);
-    background-clip: padding-box;
     border: 1px solid var(--border-color);
-    border-radius: .375rem;
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    border-radius: var(--radius);
 }
-.form-control:disabled, .form-control[readonly] {
-    background-color: var(--bg-color);
+
+.form-control:focus,
+form p input:focus {
+    background-color: var(--card-bg-color);
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25);
+    outline: none;
+}
+
+.form-control:disabled {
+    background-color: #e9ecef;
     opacity: 0.7;
 }
 
-/* Buttons */
+form p .helptext {
+    font-size: 0.85em;
+    color: var(--text-muted-color);
+}
+
+/* --- (7) BUTTONS --- */
 .btn-primary {
     background-color: var(--link-color);
-    border-color: var(--link-color);
+    border: none;
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0, 121, 107, 0.2);
 }
 .btn-primary:hover {
     background-color: var(--link-hover-color);
-    border-color: var(--link-hover-color);
+    box-shadow: 0 4px 12px rgba(0, 121, 107, 0.3);
 }
 
-/* Footer Styles */
+/* --- (8) FOOTER --- */
 .footer {
     padding: 20px 0;
-    margin-top: 30px; 
-    border-top: 1px solid var(--border-color); 
-    background-color: var(--card-bg-color); 
+    margin-top: 30px;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--card-bg-color);
     text-align: center;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 }
 .footer .text-muted {
-    color: var(--text-muted-color) !important; 
+    color: var(--text-muted-color) !important;
 }
 
-/* Footer Social Icons */
 .social-icon {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    font-size: 1.8rem; 
-    color: var(--text-muted-color);   
-    margin-left: 20px; 
+    font-size: 1.8rem;
+    color: var(--text-muted-color);
+    margin-left: 20px;
     text-decoration: none;
-    transition: color 0.2s ease;
-    text-align: center;
 }
 .social-icon:hover {
-    color: var(--link-hover-color); 
-}
-.social-icon i {
-    margin-bottom: 5px;
-}
-.social-icon-text {
-    font-size: 0.8rem;
-    font-weight: 500;
+    color: var(--link-hover-color);
 }
 
-
-/* --- (4) MOBILE RESPONSIVENESS (Unchanged) --- */
+/* --- (9) MOBILE RESPONSIVENESS --- */
 .mobile-nav-toggle {
     display: none;
     position: fixed;
@@ -200,10 +235,9 @@ form p textarea {
     padding: 8px 12px;
     border: none;
     border-radius: 6px;
-    z-index: 1000;
-    font-size: 1rem;
     background-color: var(--sidebar-bg);
     color: white;
+    z-index: 1000;
 }
 .sidebar.mobile-show {
     display: flex !important;
@@ -216,21 +250,14 @@ form p textarea {
     }
     .sidebar {
         display: none;
-        position: fixed;
         width: 80%;
-        height: 100%;
         left: -80%;
         transition: left 0.3s ease;
-        z-index: 999;
     }
     .main-content {
         margin-left: 0;
         padding: 15px;
-        padding-top: 70px; 
-    }
-    /* ... (other mobile styles) ... */
-    .summary-card h3 {
-        font-size: 2.2rem; 
+        padding-top: 70px;
     }
     .footer .d-flex {
         flex-direction: column;
@@ -238,85 +265,200 @@ form p textarea {
     .social-icon-text {
         display: none;
     }
-    .footer .social-icon {
-        margin: 10px 10px 0 10px;
-        font-size: 1.6rem;
-    }
-    .footer div:first-child {
-        margin-bottom: 10px;
-    }
 }
-
 
 /*
 ====================================
---- (5) NEW THEME DEFINITIONS ---
+(10) THEME DEFINITIONS
 ====================================
 */
 
-/* --- THEME 2: DARK MODE --- */
-.theme-dark {
-    --bg-color: #121212;
-    --card-bg-color: #1e1e1e;
-    --text-color: #e0e0e0;
-    --text-muted-color: #888888;
-    --border-color: #333333;
-    --link-color: #26a69a; /* Light Teal */
-    --link-hover-color: #80cbc4; /* Lighter Teal */
-    
-    /* Keep sidebar dark */
-    --sidebar-bg: #1e1e1e;
+/* --- DARK MODE --- */
+[data-theme="dark"] {
+    --bg-color: #28292b;
+    --card-bg-color: #161b22;
+    --text-color: #e6edf3;
+    --text-muted-color: #8b949e;
+    --border-color: #30363d;
+    --link-color: #58a6ff;
+    --link-hover-color: #79c0ff;
+    --sidebar-bg: linear-gradient(180deg, #616464 0%, #020303 100%);
     --sidebar-link-color: rgba(255, 255, 255, 0.7);
-    --sidebar-link-hover: #fff;
-    --sidebar-link-active: #26a69a;
-    --sidebar-brand-color: #fff;
-    --sidebar-user-name: #fff;
-    --sidebar-user-handle: rgba(255, 255, 255, 0.7);
-    --sidebar-hr-color: #333333;
-}
-
-/* --- THEME 3: HIGH-CONTRAST --- */
-.theme-high-contrast {
-    --bg-color: #000000;
-    --card-bg-color: #000000;
-    --text-color: #ffffff;
-    --text-muted-color: #cccccc;
-    --border-color: #ffffff;
-    --link-color: #ffff00; /* Bright Yellow */
-    --link-hover-color: #ffffff;
-
-    --sidebar-bg: #000000;
-    --sidebar-link-color: #ffffff;
-    --sidebar-link-hover: #ffff00;
-    --sidebar-link-active: #ffff00;
-    --sidebar-brand-color: #ffff00;
+    --sidebar-link-hover: #ffffff;
+    --sidebar-link-active: #58a6ff;
+    --sidebar-brand-color: #ffffff;
     --sidebar-user-name: #ffffff;
-    --sidebar-user-handle: #cccccc;
-    --sidebar-hr-color: #ffffff;
+    --sidebar-user-handle: rgba(255, 255, 255, 0.6);
+    --sidebar-hr-color: #031404a2;
+
 }
 
-/* High-contrast cards and inputs need borders */
-.theme-high-contrast .card,
-.theme-high-contrast .form-control,
-.theme-high-contrast .footer {
-    border: 1px solid var(--border-color);
+/* --- MODERN SOFT TEAL THEME --- */
+[data-theme="soft-teal"] {
+    --bg-color: #e9f9f7;
+    --card-bg-color: #ffffff;
+    --text-color: #1e3d39;
+    --text-muted-color: #6c757d;
+    --border-color: #b2dfdb;
+    --link-color: #009688;
+    --link-hover-color: #019684;
+    --sidebar-bg: linear-gradient(180deg, #43e9cd 0%, #00695c 100%);
+    --sidebar-link-color: rgba(255, 255, 255, 0.8);
+    --sidebar-link-hover: #ffffff;
+    --sidebar-link-active: #b2dfdb;
+    --sidebar-brand-color: #ffffff;
+    --sidebar-user-name: #ffffff;
+    --sidebar-user-handle: rgba(255, 255, 255, 0.8);
+    --sidebar-hr-color: rgba(255, 255, 255, 0.3);
+}
+/*
+====================================
+(11) DASHBOARD & SUMMARY STYLING
+====================================
+*/
+
+/* --- Summary Cards (Unified) --- */
+.summary-card {
+  border-radius: var(--radius);
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+.summary-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-.theme-high-contrast .btn-primary {
-    background-color: var(--link-color);
-    border-color: var(--link-color);
-    color: #000000; /* Black text on yellow button */
+/* --- Themed Gradient Cards --- */
+.card-temp {
+  background: linear-gradient(135deg, #ff7043, #ffa726);
 }
-.theme-high-contrast .btn-primary:hover {
-    background-color: var(--link-hover-color);
-    border-color: var(--link-hover-color);
-    color: #000000;
+.card-humidity {
+  background: linear-gradient(135deg, #43a047, #81c784);
+}
+.card-focused {
+  background: linear-gradient(135deg, #2196f3, #64b5f6);
+}
+.card-distracted {
+  background: linear-gradient(135deg, #ff9800, #ffb74d);
+}
+.card-drowsy {
+  background: linear-gradient(135deg, #9c27b0, #ba68c8);
 }
 
-.theme-high-contrast .social-icon {
-    color: var(--text-muted-color);
-}
-.theme-high-contrast .social-icon:hover {
-    color: var(--link-color); 
+/* --- Chart Containers --- */
+.chart-container {
+  background: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 15px;
 }
 
+/* --- Theme Compatibility for Charts --- */
+[data-theme="dark"] canvas {
+  background-color: #1e1e1e;
+}
+[data-theme="soft-teal"] canvas {
+  background-color: #f0fdfa;
+}
+
+/* --- Responsive Card Layout --- */
+@media (max-width: 992px) {
+  .summary-card {
+    margin-bottom: 15px;
+  }
+}
+
+/*
+====================================
+(12) ADDITIONAL UI ENHANCEMENTS
+====================================
+*/
+
+/* Text & header consistency */
+h2, h3, h4, h5 {
+  font-weight: 600;
+  color: var(--text-color);
+}
+p, label, span {
+  color: var(--text-color);
+}
+
+/* Hover and focus improvements */
+.btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Form shadow refinement */
+.form-control:focus {
+  box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25);
+}
+
+/* Smooth chart card transitions */
+.chart-container {
+  transition: background-color var(--transition), box-shadow var(--transition);
+}
+
+/* --- Footer polish --- */
+.footer {
+  backdrop-filter: blur(6px);
+}
+
+/* --- Optional: remove strong high-contrast look in dark mode --- */
+[data-theme="dark"] .summary-card {
+  filter: brightness(0.95);
+}
+[data-theme="soft-teal"] .summary-card {
+  filter: brightness(1);
+}
+.lead {
+  color: var(--text-muted-color) !important; /* <--- THIS IS THE BUG */
+  font-size: 1.15rem;
+}
+/*
+====================================
+(13) TEXT VISIBILITY IMPROVEMENTS (Dark Mode)
+====================================
+*/
+
+/* Make bold text and headers slightly brighter in dark mode */
+[data-theme="dark"] b,
+[data-theme="dark"] strong,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+    color: #ffffff; /* full white for clarity */
+}
+
+/* Slightly brighten emphasized text or active labels */
+[data-theme="dark"] .form-label,
+[data-theme="dark"] label,
+[data-theme="dark"] .active {
+    color: #f0f6fc;
+}
+
+/* Optional: give gradient cards slightly stronger text contrast */
+[data-theme="dark"] .summary-card {
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .summary-card p {
+    color: #ffffff; /* Make sure summary card text is white */
+}
+
+/* Optional: add a glow to important text (for modern feel) */
+[data-theme="dark"] .highlight,
+[data-Dtheme="dark"] .important {
+    color: #ffffff;
+    text-shadow: 0 0 6px rgba(88, 166, 255, 0.5);
+}
