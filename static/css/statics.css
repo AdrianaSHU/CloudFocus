@@ -1,434 +1,358 @@
 /*
 ====================================
-CLOUDFOCUS THEME SYSTEM (IMPROVED)
+CLOUDFOCUS THEME SYSTEM (IMPROVED + FIXED)
 ====================================
 */
 
 /* --- (1) ROOT VARIABLES (Default Light Theme) --- */
 :root {
-    --bg-color: #f4f7f6;
-    --card-bg-color: #ffffff;
-    --text-color: #212529;
-    --text-muted-color: #6c757d;
-    --border-color: #e0e0e0;
-    --link-color: #00796b;
-    --link-hover-color: #004d40;
-    --sidebar-bg: #004d40;
-    --sidebar-link-color: rgba(255, 255, 255, 0.7);
-    --sidebar-link-hover: #ffffff;
-    --sidebar-link-active: #00bfa5;
-    --sidebar-brand-color: #ffffff;
-    --sidebar-user-name: #ffffff;
-    --sidebar-user-handle: rgba(255, 255, 255, 0.7);
-    --sidebar-hr-color: rgba(255, 255, 255, 0.2);
-    --radius: 12px;
-    --transition: 0.25s ease;
+  --bg-color: #f4f7f6;
+  --bg-image: url("/static/images/root.webp");
+  --sidebar-bg-image: none;
+  --card-bg-color: #ffffff;
+  --text-color: #212529;
+  --text-muted-color: #6c757d;
+  --border-color: #e0e0e0;
+  --link-color: #00796b;
+  --link-hover-color: #004d40;
+  --sidebar-bg: linear-gradient(180deg, #153a33 0%, #baebe5 100%);
+  --sidebar-link-color: rgba(255, 255, 255, 0.7);
+  --sidebar-link-hover: #ffffff;
+  --sidebar-link-active: #00bfa5;
+  --sidebar-brand-color: #ffffff;
+  --sidebar-user-name: #ffffff;
+  --sidebar-user-handle: rgba(255, 255, 255, 0.7);
+  --sidebar-hr-color: rgba(255, 255, 255, 0.2);
+  --radius: 12px;
+  --transition: 0.25s ease;
+  --mobile-toggle-bg: var(--sidebar-bg);
 }
 
-/* Smooth transitions globally */
+/* --- (2) GLOBAL STYLES --- */
 * {
-    transition: background-color var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  transition: background-color var(--transition), color var(--transition),
+              border-color var(--transition), box-shadow var(--transition);
 }
 
-/* --- (2) BASE STYLES --- */
 body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: "Inter", "Segoe UI", Roboto, sans-serif;
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
+  background-color: var(--bg-color);
+  background-image: var(--bg-image), linear-gradient(var(--bg-color), var(--bg-color));
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: var(--text-color);
+  font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
 }
 
-/* --- (3) SIDEBAR --- */
+/*
+====================================
+(3) SIDEBAR STYLING
+====================================
+*/
 .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 260px;
-    padding: 20px 15px;
-    background: var(--sidebar-bg);
-    color: var(--sidebar-brand-color);
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--border-color);
-    backdrop-filter: blur(10px);
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 260px;
+  padding: 20px 15px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-brand-color);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+  z-index: 2000;
+  background-image: var(--sidebar-bg-image), var(--sidebar-bg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .sidebar-brand {
-    font-size: 1.7rem;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    text-decoration: none;
-    color: var(--sidebar-brand-color);
-    letter-spacing: 0.5px;
+  font-size: 1.7rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--sidebar-brand-color);
+  text-decoration: none;
 }
 
 .sidebar .nav-link {
-    display: block;
-    color: var(--sidebar-link-color);
-    padding: 10px 15px;
-    border-radius: var(--radius);
-    font-weight: 500;
-    margin-bottom: 4px;
-    transition: background-color var(--transition), color var(--transition);
+  color: var(--sidebar-link-color);
+  padding: 10px 15px;
+  border-radius: var(--radius);
+  font-weight: 500;
+  margin-bottom: 4px;
+  transition: background-color var(--transition), color var(--transition);
+  white-space: normal;
+  word-break: break-word;
 }
-
 .sidebar .nav-link:hover {
-    color: var(--sidebar-link-hover);
-    background-color: rgba(255, 255, 255, 0.1);
+  color: var(--sidebar-link-hover);
+  background-color: rgba(255, 255, 255, 0.1);
 }
-
 .sidebar .nav-link.active {
-    color: var(--sidebar-link-active);
-    background-color: rgba(255, 255, 255, 0.15);
-    border-left: 4px solid var(--sidebar-link-active);
-    font-weight: 600;
+  color: var(--sidebar-link-active);
+  background-color: rgba(255, 255, 255, 0.15);
+  border-left: 4px solid var(--sidebar-link-active);
 }
-
-/* Logout button fix */
 .sidebar .nav-item form {
-    margin: 0;
+  margin: 0;
 }
 .sidebar .nav-link.btn-link {
-    text-align: left;
-    width: 100%;
-    color: var(--sidebar-link-color);
+  text-align: left;
+  width: 100%;
+  color: var(--sidebar-link-color);
 }
 .sidebar .nav-link.btn-link:hover {
-    color: var(--sidebar-link-hover);
-    background-color: rgba(255, 255, 255, 0.1);
+  color: var(--sidebar-link-hover);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar hr {
-    border-top: 1px solid var(--sidebar-hr-color);
-    margin: 1rem 0;
+  border-top: 1px solid var(--sidebar-hr-color);
+  margin: 1rem 0;
 }
 
 .sidebar-profile-pic {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    border: 2px solid var(--sidebar-link-color);
-    border-radius: 50%;
-    margin: 0 auto;
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border: 2px solid var(--sidebar-link-color);
+  border-radius: 50%;
+  margin: 0 auto;
 }
 
 .sidebar-user-name {
-    color: var(--sidebar-user-name);
-    font-weight: 700;
-    margin-top: 0.6rem;
-    text-align: center;
-    font-size: 1.1rem;
+  color: var(--sidebar-user-name);
+  font-weight: 700;
+  margin-top: 0.6rem;
+  text-align: center;
+  font-size: 1.1rem;
 }
 .sidebar-user-handle {
-    color: var(--sidebar-user-handle);
-    font-size: 0.9rem;
-    text-align: center;
+  color: var(--sidebar-user-handle);
+  font-size: 0.9rem;
+  text-align: center;
 }
 
-/* --- (4) MAIN CONTENT --- */
+/*
+====================================
+(4) MAIN CONTENT & CARDS
+====================================
+*/
 .main-content {
-    margin-left: 260px;
-    padding: 30px;
+  margin-left: 260px;
+  padding: 30px;
+  position: relative;
+  z-index: 1;
 }
 
-/* --- (5) CARDS --- */
 .card {
-    background-color: var(--card-bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    padding: 20px;
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  position: relative;
+  z-index: 1
 }
 
-/* --- (6) FORMS --- */
+/*
+====================================
+(5) FORMS & BUTTONS
+====================================
+*/
 .form-label,
 form p label {
-    font-weight: 500;
-    color: var(--text-color);
-    margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: var(--text-color);
 }
 
 .form-control,
 form p input,
 form p select,
 form p textarea {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
-    color: var(--text-color);
-    background-color: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius);
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
 }
 
-.form-control:focus,
-form p input:focus {
-    background-color: var(--card-bg-color);
-    border-color: var(--link-color);
-    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25);
-    outline: none;
+.form-control:focus {
+  background-color: var(--card-bg-color);
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25);
+  outline: none;
 }
 
-.form-control:disabled {
-    background-color: #e9ecef;
-    opacity: 0.7;
-}
-
-form p .helptext {
-    font-size: 0.85em;
-    color: var(--text-muted-color);
-}
-
-/* --- (7) BUTTONS --- */
 .btn-primary {
-    background-color: var(--link-color);
-    border: none;
-    color: #fff;
-    border-radius: var(--radius);
-    padding: 10px 20px;
-    font-weight: 500;
-    box-shadow: 0 2px 6px rgba(0, 121, 107, 0.2);
+  background-color: var(--link-color);
+  border: none;
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 121, 107, 0.2);
 }
 .btn-primary:hover {
-    background-color: var(--link-hover-color);
-    box-shadow: 0 4px 12px rgba(0, 121, 107, 0.3);
+  background-color: var(--link-hover-color);
+  box-shadow: 0 4px 12px rgba(0, 121, 107, 0.3);
 }
 
-/* --- (8) FOOTER --- */
+/*
+====================================
+(6) FOOTER
+====================================
+*/
 .footer {
-    padding: 20px 0;
-    margin-top: 30px;
-    border-top: 1px solid var(--border-color);
-    background-color: var(--card-bg-color);
-    text-align: center;
-    border-radius: var(--radius) var(--radius) 0 0;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px 0;
+  margin-top: 30px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--card-bg-color);
+  text-align: center;
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(6px);
 }
 .footer .text-muted {
-    color: var(--text-muted-color) !important;
+  color: var(--text-muted-color) !important;
 }
 
-.social-icon {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 1.8rem;
-    color: var(--text-muted-color);
-    margin-left: 20px;
-    text-decoration: none;
-}
-.social-icon:hover {
-    color: var(--link-hover-color);
-}
-
-/* --- (9) MOBILE RESPONSIVENESS --- */
+/*
+====================================
+(7) MOBILE RESPONSIVENESS
+====================================
+*/
 .mobile-nav-toggle {
-    display: none;
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    background-color: var(--sidebar-bg);
-    color: white;
-    z-index: 1000;
-}
-.sidebar.mobile-show {
-    display: flex !important;
-    left: 0;
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--mobile-toggle-bg);  
+  color: white;
+  z-index: 3000;
 }
 
 @media (max-width: 768px) {
-    .mobile-nav-toggle {
-        display: block;
-    }
-    .sidebar {
-        display: none;
-        width: 80%;
-        left: -80%;
-        transition: left 0.3s ease;
-    }
-    .main-content {
-        margin-left: 0;
-        padding: 15px;
-        padding-top: 70px;
-    }
-    .footer .d-flex {
-        flex-direction: column;
-    }
-    .social-icon-text {
-        display: none;
-    }
-}
+  .mobile-nav-toggle {
+    display: block;
+    font-size: 1.4rem;
+    margin-top: 0.8rem;
+  }
 
-/*
-====================================
-(10) THEME DEFINITIONS
-====================================
-*/
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    left: -50%;
+    top: 0;
+    height: 100%;
+    transition: left 0.3s ease;
+    z-index: 3000;
+  }
 
-/* --- DARK MODE --- */
-[data-theme="dark"] {
-    --bg-color: #28292b;
-    --card-bg-color: #161b22;
-    --text-color: #e6edf3;
-    --text-muted-color: #8b949e;
-    --border-color: #30363d;
-    --link-color: #58a6ff;
-    --link-hover-color: #79c0ff;
-    --sidebar-bg: linear-gradient(180deg, #616464 0%, #020303 100%);
-    --sidebar-link-color: rgba(255, 255, 255, 0.7);
-    --sidebar-link-hover: #ffffff;
-    --sidebar-link-active: #58a6ff;
-    --sidebar-brand-color: #ffffff;
-    --sidebar-user-name: #ffffff;
-    --sidebar-user-handle: rgba(255, 255, 255, 0.6);
-    --sidebar-hr-color: #031404a2;
+  .sidebar.mobile-show {
+    left: 0;
+  }
 
-}
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+    padding-top: 70px;
+  }
 
-/* --- MODERN SOFT TEAL THEME --- */
-[data-theme="soft-teal"] {
-    --bg-color: #e9f9f7;
-    --card-bg-color: #ffffff;
-    --text-color: #1e3d39;
-    --text-muted-color: #6c757d;
-    --border-color: #b2dfdb;
-    --link-color: #009688;
-    --link-hover-color: #019684;
-    --sidebar-bg: linear-gradient(180deg, #43e9cd 0%, #00695c 100%);
-    --sidebar-link-color: rgba(255, 255, 255, 0.8);
-    --sidebar-link-hover: #ffffff;
-    --sidebar-link-active: #b2dfdb;
-    --sidebar-brand-color: #ffffff;
-    --sidebar-user-name: #ffffff;
-    --sidebar-user-handle: rgba(255, 255, 255, 0.8);
-    --sidebar-hr-color: rgba(255, 255, 255, 0.3);
-}
-/*
-====================================
-(11) DASHBOARD & SUMMARY STYLING
-====================================
-*/
+  .sidebar .nav-link {
+    font-size: 1,rem;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+  }
 
-/* --- Summary Cards (Unified) --- */
-.summary-card {
-  border-radius: var(--radius);
-  color: #fff;
-  padding: 20px;
+  .sidebar-brand .app-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sidebar-brand-color);
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-.summary-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* --- Themed Gradient Cards --- */
-.card-temp {
-  background: linear-gradient(135deg, #ff7043, #ffa726);
-}
-.card-humidity {
-  background: linear-gradient(135deg, #43a047, #81c784);
-}
-.card-focused {
-  background: linear-gradient(135deg, #2196f3, #64b5f6);
-}
-.card-distracted {
-  background: linear-gradient(135deg, #ff9800, #ffb74d);
-}
-.card-drowsy {
-  background: linear-gradient(135deg, #9c27b0, #ba68c8);
+.sidebar .sidebar-brand {
+    margin-top: 100px; /* Adjust this value as needed */
 }
 
-/* --- Chart Containers --- */
-.chart-container {
-  background: var(--card-bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 15px;
-}
+  .sidebar-profile-pic {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0.5rem;
+  }
 
-/* --- Theme Compatibility for Charts --- */
-[data-theme="dark"] canvas {
-  background-color: #1e1e1e;
-}
-[data-theme="soft-teal"] canvas {
-  background-color: #f0fdfa;
-}
+  .sidebar-user-name {
+    font-size: 1rem;
+  }
 
-/* --- Responsive Card Layout --- */
-@media (max-width: 992px) {
-  .summary-card {
-    margin-bottom: 15px;
+  .sidebar-user-handle {
+    font-size: 0.8rem;
   }
 }
 
+
 /*
 ====================================
-(12) ADDITIONAL UI ENHANCEMENTS
+(8) THEMES
 ====================================
 */
-
-/* Text & header consistency */
-h2, h3, h4, h5 {
-  font-weight: 600;
-  color: var(--text-color);
-}
-p, label, span {
-  color: var(--text-color);
-}
-
-/* Hover and focus improvements */
-.btn:hover {
-  opacity: 0.95;
-  transform: translateY(-1px);
-}
-.btn:active {
-  transform: scale(0.98);
+/* --- DARK MODE --- */
+[data-theme="dark"] {
+  --bg-color: #28292b;
+  --bg-image: url("/static/images/dark.webp");
+  --sidebar-bg-image: url("/static/images/sidebar_dark.webp");
+  --card-bg-color: #161b22;
+  --text-color: #e6edf3;
+  --text-muted-color: #b9c1ca;
+  --border-color: #30363d;
+  --link-color: #58a6ff;
+  --link-hover-color: #79c0ff;
+  --sidebar-bg: linear-gradient(180deg, #616464 0%, #020303 100%);
+  --sidebar-link-active: #58a6ff;
+  --mobile-toggle-bg: var(--sidebar-bg);
 }
 
-/* Form shadow refinement */
-.form-control:focus {
-  box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25);
+/* --- SOFT TEAL THEME --- */
+[data-theme="soft-teal"] {
+  --bg-color: #e9f9f7;
+  --bg-image:url("/static/images/soft_teal.webp");
+  --sidebar-bg-image: url("/static/images/sidebar_root.webp");
+  --card-bg-color: #ffffff;
+  --text-color: #1e3d39;
+  --text-muted-color: #6c757d;
+  --border-color: #b2dfdb;
+  --link-color: #009688;
+  --link-hover-color: #019684;
+  --sidebar-bg: linear-gradient(180deg, #43e9cd 0%, #00695c 100%);
+  --mobile-toggle-bg: #00695b;
 }
 
-/* Smooth chart card transitions */
-.chart-container {
-  transition: background-color var(--transition), box-shadow var(--transition);
-}
-
-/* --- Footer polish --- */
-.footer {
-  backdrop-filter: blur(6px);
-}
-
-/* --- Optional: remove strong high-contrast look in dark mode --- */
-[data-theme="dark"] .summary-card {
-  filter: brightness(0.95);
-}
-[data-theme="soft-teal"] .summary-card {
-  filter: brightness(1);
-}
-.lead {
-  color: var(--text-muted-color) !important; /* <--- THIS IS THE BUG */
-  font-size: 1.15rem;
-}
 /*
 ====================================
-(13) TEXT VISIBILITY IMPROVEMENTS (Dark Mode)
+(9) TEXT VISIBILITY & DARK FIXES
 ====================================
 */
+.lead,
+p,
+span {
+  color: var(--text-color);
+}
 
-/* Make bold text and headers slightly brighter in dark mode */
 [data-theme="dark"] b,
 [data-theme="dark"] strong,
 [data-theme="dark"] h1,
@@ -437,28 +361,14 @@ p, label, span {
 [data-theme="dark"] h4,
 [data-theme="dark"] h5,
 [data-theme="dark"] h6 {
-    color: #ffffff; /* full white for clarity */
+  color: #ffffff;
 }
 
-/* Slightly brighten emphasized text or active labels */
-[data-theme="dark"] .form-label,
-[data-theme="dark"] label,
-[data-theme="dark"] .active {
-    color: #f0f6fc;
+[data-theme="dark"] .lead,
+[data-theme="dark"] p {
+  color: #e6edf3;
 }
 
-/* Optional: give gradient cards slightly stronger text contrast */
-[data-theme="dark"] .summary-card {
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-}
-[data-theme="dark"] .summary-card p {
-    color: #ffffff; /* Make sure summary card text is white */
-}
-
-/* Optional: add a glow to important text (for modern feel) */
-[data-theme="dark"] .highlight,
-[data-Dtheme="dark"] .important {
-    color: #ffffff;
-    text-shadow: 0 0 6px rgba(88, 166, 255, 0.5);
+[data-theme="dark"] .form-label {
+  color: #f0f6fc;
 }
