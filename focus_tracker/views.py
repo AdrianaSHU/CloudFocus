@@ -61,15 +61,12 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
-            profile_picture = form.cleaned_data.get('profile_picture')
-            if profile_picture:
-                user.profile.profile_picture = profile_picture
-                user.profile.save()
             login(request, user)
             return redirect('dashboard')
     else:
         form = CustomUserCreationForm()
     return render(request, 'register.html', {'form': form})
+
 
 # --- Other Views (Unchanged) ---
 def home_view(request):
