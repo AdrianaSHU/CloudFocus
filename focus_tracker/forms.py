@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
 from django_recaptcha.fields import ReCaptchaField
+from .image_utils import handle_profile_picture_upload
+
 
 
 # (1) We keep your ContactForm (it's already styled)
@@ -47,14 +49,8 @@ class UserUpdateForm(forms.ModelForm):
 
 # (4) We update ProfileUpdateForm to add styling
 class ProfileUpdateForm(forms.ModelForm):
-    profile_picture = forms.ImageField(
-        required=False,
-        widget=forms.FileInput(attrs={'class': 'form-control'})
-    )
+    profile_picture = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Profile
         fields = ['profile_picture']
-
-
-
