@@ -193,15 +193,20 @@
     <script>
         // --- (FIX) Theme Switcher Logic ---
         function setTheme(themeName) {
-            localStorage.setItem('theme', themeName);
-            
-            // This sets the data-theme attribute, which matches your CSS
-            if (themeName === 'theme-light') {
-              document.documentElement.removeAttribute('data-theme');
-            } else {
-              document.documentElement.setAttribute('data-theme', themeName);
-            }
+        localStorage.setItem('theme', themeName);
+
+        // Apply theme
+        if (themeName === 'light') {
+            document.documentElement.removeAttribute('data-theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', themeName);
         }
+
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('mobile-show')) {
+            sidebar.classList.remove('mobile-show');
+        }
+    }
         
         // --- Mobile Menu Toggle Logic ---
         document.addEventListener('DOMContentLoaded', function () {
@@ -213,7 +218,7 @@
                 toggleButton.addEventListener('click', function () {
                     sidebar.classList.toggle('mobile-show');
                 });
-                
+
                 // Hide menu when a link is clicked (useful on mobile)
                 const navLinks = sidebar.querySelectorAll('.nav-link');
                 navLinks.forEach(link => {

@@ -55,17 +55,21 @@ class LogFocusView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# --- Register View (Unchanged) ---
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
+            profile_picture = form.cleaned_data.get('profile_picture')
+            if profile_picture:
+                user.profile.profile_picture.save(profile_picture.name, profile_picture)
+                user.profile.save()
             login(request, user)
             return redirect('dashboard')
     else:
         form = CustomUserCreationForm()
     return render(request, 'register.html', {'form': form})
+
 
 
 # --- Other Views (Unchanged) ---
@@ -128,7 +132,12 @@ def profile_view(request):
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
-            profile_form.save()
+            
+            profile_picture = request.FILES.get('profile_picture')
+            if profile_picture:
+                request.user.profile.profile_picture.save(profile_picture.name, profile_picture)
+            request.user.profile.save()
+
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
     else:
@@ -136,6 +145,7 @@ def profile_view(request):
         profile_form = ProfileUpdateForm(instance=request.user.profile)
     context = {'user_form': user_form, 'profile_form': profile_form}
     return render(request, 'profile.html', context)
+
 
 
 # --- (2) UPDATED dashboard_view ---
