@@ -27,6 +27,8 @@ class AzureMediaStorage(AzureStorage):
     account_name = config('AZURE_STORAGE_ACCOUNT_NAME')
     account_key = config('AZURE_STORAGE_ACCOUNT_KEY')
     azure_container = config('AZURE_STORAGE_CONTAINER')
+    location = 'profile_pics'          # Folder inside the container
+    file_overwrite = False             # Avoid overwriting files with same name
     
     # Ensure uploaded files are permanent and URLs do not expire
     expiration_secs = None
