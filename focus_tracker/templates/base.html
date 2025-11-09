@@ -151,35 +151,69 @@
         {% endblock %}
 
         <!-- Footer -->
-        <footer class="footer">
+        <footer class="footer mt-auto py-4 bg-footer">
           <div class="container-fluid">
-            
-            <div class="d-flex justify-content-between align-items-center">
-              
-              <div>
-                <span class="text-muted">© 2025 CloudFocus App. All rights reserved.</span>
+
+            <div class="row">
+
+              <!-- Column 1: Quick Links -->
+              <div class="col-md-4 mb-3">
+                <h6 class="text-uppercase fw-bold">Quick Links</h6>
+                <ul class="list-unstyled">
+                  <li><a href="{% url 'home' %}" class="text-decoration-none text-white">Home</a></li>
+                  <li><a href="{% url 'about' %}" class="text-decoration-none text-white">About</a></li>
+                  <li><a href="{% url 'contact' %}" class="text-decoration-none text-white">Contact</a></li>
+                  {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}" class="text-decoration-none text-white">Dashboard</a></li>
+                  {% endif %}
+                </ul>
               </div>
 
-              <div>
-                <!-- === (3) FIX: Added class="social-icon-text" === -->
-                <a href="https://github.com" target="_blank" class="social-icon" title="GitHub">
+              <!-- Column 2: Contact -->
+              <div class="col-md-4 mb-3">
+                <h6 class="text-uppercase fw-bold">Contact</h6>
+                <p class="text-white mb-0">
+                  Email: support@cloudfocus.com<br>
+                  Phone: +44 123 456 7890
+                </p>
+              </div>
+
+              <!-- Column 3: Social Links -->
+              <div class="col-md-4 mb-3">
+                <h6 class="text-uppercase fw-bold">Follow Us</h6>
+                <div class="d-flex flex-column gap-2 mt-2">
+                  
+                  <a href="https://github.com" target="_blank" class="social-icon" title="GitHub">
                     <i class="bi bi-github"></i>
                     <span class="social-icon-text">GitHub</span>
-                </a>
-                
-                <a href="https://linkedin.com" target="_blank" class="social-icon" title="LinkedIn">
+                  </a>
+                  
+                  <a href="https://linkedin.com" target="_blank" class="social-icon" title="LinkedIn">
                     <i class="bi bi-linkedin"></i>
                     <span class="social-icon-text">LinkedIn</span>
-                </a>
-                
-                <a href="https://twitter.com" target="_blank" class="social-icon" title="X (Twitter)">
+                  </a>
+                  
+                  <a href="https://twitter.com" target="_blank" class="social-icon" title="X (Twitter)">
                     <i class="bi bi-twitter-x"></i>
                     <span class="social-icon-text">X (Twitter)</span>
-                </a>
+                  </a>
+
+                </div>
               </div>
 
+            </div> <!-- /row -->
+
+            <hr class="bg-white">
+
+            <div class="d-flex justify-content-between flex-column flex-md-row">
+              <span class="text-white">&copy; 2025 CloudFocus App. All rights reserved.</span>
+              <button id="back-to-top" class="btn btn-sm btn-secondary mt-2 mt-md-0"
+                      onclick="window.scrollTo({top:0, behavior:'smooth'});">
+                ↑ Top
+              </button>
             </div>
-          </div>
+
+          </div> <!-- /container-fluid -->
         </footer>
 
       </div> <!-- (Closes .container-fluid) -->

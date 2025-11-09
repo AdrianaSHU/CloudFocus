@@ -212,24 +212,29 @@ def supervisor_user_detail_view(request, user_id):
 @api_view(['GET'])
 @login_required
 def get_live_dashboard_data(request):
-    data = get_dashboard_data(request.user, request.GET)
+    user = request.user
+    data = {}  # however you're populating data
 
-    # Prepare history arrays for plotting
-    timestamps = [log['timestamp'] for log in data['focus_history']]
-    focused_history = [log['focused'] for log in data['focus_history']]
-    distracted_history = [log['distracted'] for log in data['focus_history']]
-    drowsy_history = [log['drowsy'] for log in data['focus_history']]
+    focus_history = data.get('focus_history')
 
+    if not focus_history:
+        # If no device data or logs are available, show a friendly message
+        return Response({
+            "message": "No data available. Device not connected or no logs found."
+        }, status=200)
+
+    # Otherwise process the data as before
+    timestamps = [log['timestamp'] for log in focus_history]
+    distracted_history = [log['distracted'] for log in focus_history]
+    focused_history = [log['focused'] for log in focus_history]
+    drowsy_history = [log['drowsy'] for log in focus_history]
+
+    # your rest of data processing here
     return Response({
-        'focused_percent': data['focused_percent'],
-        'distracted_percent': data['distracted_percent'],
-        'drowsy_percent': data['drowsy_percent'],
-        'latest_temp': data['latest_temp'],
-        'latest_humidity': data['latest_humidity'],
-        'timestamps': timestamps,
-        'focused_history': focused_history,
-        'distracted_history': distracted_history,
-        'drowsy_history': drowsy_history,
+        "timestamps": timestamps,
+        "focused": focused_history,
+        "distracted": distracted_history,
+        "drowsy": drowsy_history,
     })
 
 

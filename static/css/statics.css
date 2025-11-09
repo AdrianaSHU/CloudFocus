@@ -344,15 +344,33 @@ form p textarea {
 
 /*
 ====================================
-(9) TEXT VISIBILITY & DARK FIXES
+(9) TEXT VISIBILITY & DARK MODE FIXES 
 ====================================
 */
+
+/* Global text */
 .lead,
 p,
-span {
+span,
+label,
+input,
+textarea,
+select {
   color: var(--text-color);
 }
 
+/* --- DARK MODE TEXT FIXES --- */
+[data-theme="dark"] {
+  /* Headings & text */
+  --text-color: #e6edf3;
+  --text-muted-color: #b9c1ca;
+
+  /* Ensure base card + inputs contrast */
+  --card-bg-color: #161b22;
+  --bg-color: #0d1117;
+}
+
+/* Typography inside dark mode */
 [data-theme="dark"] b,
 [data-theme="dark"] strong,
 [data-theme="dark"] h1,
@@ -361,14 +379,55 @@ span {
 [data-theme="dark"] h4,
 [data-theme="dark"] h5,
 [data-theme="dark"] h6 {
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .lead,
-[data-theme="dark"] p {
-  color: #e6edf3;
+[data-theme="dark"] p,
+[data-theme="dark"] span {
+  color: var(--text-color) !important;
 }
 
-[data-theme="dark"] .form-label {
-  color: #f0f6fc;
+/* Card & form readability */
+[data-theme="dark"] .card {
+  background-color: var(--card-bg-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .card * {
+  color: var(--text-color) !important;
+}
+
+/* Form elements inside dark cards */
+[data-theme="dark"] legend,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .card-title {
+  color: var(--text-color) !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: #1c2128 !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+  background-color: #22272e !important;
+  color: var(--text-color) !important;
+  border-color: var(--link-color) !important;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3) !important;
+}
+
+/* Buttons */
+[data-theme="dark"] .btn-primary {
+  background-color: var(--link-color) !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .btn-primary:hover {
+  background-color: var(--link-hover-color) !important;
 }
