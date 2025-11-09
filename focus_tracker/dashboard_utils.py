@@ -35,23 +35,19 @@ def get_date_range_from_request(request_get):
 
 def get_dashboard_data(user, request_get):
     """
-    A single, reusable function to get all data for any dashboard.
-    Filters by the given user and a dynamic time period.
+    Returns dashboard data for a user, ready for Plotly charts.
     """
     
-    # 1. Get the start and end dates from the request
     start_date, end_date = get_date_range_from_request(request_get)
     
-    # 2. Get all logs for the user within that time period
     logs = list(FocusLog.objects.filter(
         session__user=user,
-        timestamp__range=(start_date, end_date) # Use range filter
+        timestamp__range=(start_date, end_date)
     ).order_by('timestamp'))
     
-    # 3. Get the most recent log (for sensors)
     latest_log = FocusLog.objects.filter(session__user=user).order_by('-timestamp').first()
 
-    # 4. Calculate percentages
+    # Percentages
     total_logs = len(logs)
     if total_logs > 0:
         status_counts = Counter([log.status for log in logs])
@@ -59,33 +55,30 @@ def get_dashboard_data(user, request_get):
         distracted_percent = (status_counts.get('DISTRACTED', 0) / total_logs) * 100
         drowsy_percent = (status_counts.get('DROWSY', 0) / total_logs) * 100
     else:
-        focused_percent = 0
-        distracted_percent = 0
-        drowsy_percent = 0
+        focused_percent = distracted_percent = drowsy_percent = 0
 
-    # 5. Prepare sensor data
-    latest_temp = None
-    latest_humidity = None
+    latest_temp = latest_humidity = None
     if latest_log:
         latest_temp = latest_log.temperature
         latest_humidity = latest_log.humidity
 
-    # 6. Prepare chart data
-    status_map = {'FOCUSED': 2, 'DISTRACTED': 1, 'DROWSY': 0}
-    chart_data = [
-        {'x': log.timestamp.isoformat(), 'y': status_map.get(log.status, 1)} 
-        for log in logs
-    ]
+    # --- Prepare history arrays for Plotly ---
+    timestamps = [log.timestamp.isoformat() for log in logs]
+    focused_history = [1 if log.status == 'FOCUSED' else 0 for log in logs]
+    distracted_history = [1 if log.status == 'DISTRACTED' else 0 for log in logs]
+    drowsy_history = [1 if log.status == 'DROWSY' else 0 for log in logs]
 
-    # 7. Return everything in a clean dictionary
     return {
         'focused_percent': round(focused_percent, 0),
         'distracted_percent': round(distracted_percent, 0),
         'drowsy_percent': round(drowsy_percent, 0),
         'latest_temp': latest_temp,
         'latest_humidity': latest_humidity,
-        'chart_data_json': json.dumps(chart_data),
-        'start_date_str': start_date.strftime('%Y-%m-%d'), # For pre-filling the form
-        'end_date_str': end_date.strftime('%Y-%m-%d'),   # For pre-filling the form
+        'timestamps': timestamps,
+        'focused_history': focused_history,
+        'distracted_history': distracted_history,
+        'drowsy_history': drowsy_history,
+        'start_date_str': start_date.strftime('%Y-%m-%d'),
+        'end_date_str': end_date.strftime('%Y-%m-%d'),
         'chart_min_date': start_date.isoformat(),
     }

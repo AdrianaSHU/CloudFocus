@@ -47,9 +47,9 @@ class UserUpdateForm(forms.ModelForm):
 # (4) We update ProfileUpdateForm to add styling
 class ProfileUpdateForm(forms.ModelForm):
     profile_picture = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
-
     class Meta:
         model = Profile
         fields = ['profile_picture']
+
 
 

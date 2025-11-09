@@ -17,6 +17,8 @@ from django.conf import settings
 from django.views.decorators.http import require_POST
 import os
 from django.utils import timezone
+from cloudfocus_project.custom_storage import LocalMediaStorage, AzureMediaStorage
+
 import uuid 
 from rest_framework.decorators import api_view
 from datetime import timedelta 
@@ -130,22 +132,32 @@ def profile_view(request):
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
+
+            # Choose storage: local or Azure
+            storage_backend = AzureMediaStorage() if request.POST.get('storage_backend') == 'azure' else LocalMediaStorage()
             
             profile_picture = request.FILES.get('profile_picture')
             if profile_picture:
-                request.user.profile.profile_picture.save(profile_picture.name, profile_picture)
+                # Assign the storage backend
+                request.user.profile.profile_picture.storage = storage_backend
+                request.user.profile.profile_picture.save(profile_picture.name, profile_picture, save=False)
+            
             request.user.profile.save()
-
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
+    
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
-    context = {'user_form': user_form, 'profile_form': profile_form}
+    
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form
+    }
     return render(request, 'profile.html', context)
-
 
 
 # --- (2) UPDATED dashboard_view ---
@@ -202,24 +214,26 @@ def supervisor_user_detail_view(request, user_id):
 @api_view(['GET'])
 @login_required
 def get_live_dashboard_data(request):
-    """
-    A lightweight API endpoint to be polled.
-    Returns stats from the user-selected time period.
-    """
-    
-    # --- NEW: Pass the request.GET to the util function ---
     data = get_dashboard_data(request.user, request.GET)
-    
-    # We only need to return the keys that are being updated
-    live_data = {
+
+    # Prepare history arrays for plotting
+    timestamps = [log['timestamp'] for log in data['focus_history']]
+    focused_history = [log['focused'] for log in data['focus_history']]
+    distracted_history = [log['distracted'] for log in data['focus_history']]
+    drowsy_history = [log['drowsy'] for log in data['focus_history']]
+
+    return Response({
         'focused_percent': data['focused_percent'],
         'distracted_percent': data['distracted_percent'],
         'drowsy_percent': data['drowsy_percent'],
         'latest_temp': data['latest_temp'],
         'latest_humidity': data['latest_humidity'],
-    }
-    
-    return Response(live_data)
+        'timestamps': timestamps,
+        'focused_history': focused_history,
+        'distracted_history': distracted_history,
+        'drowsy_history': drowsy_history,
+    })
+
 
 # --- Session Views (Unchanged) ---
 @user_passes_test(is_supervisor)

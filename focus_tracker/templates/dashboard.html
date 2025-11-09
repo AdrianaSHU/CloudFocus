@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -111,33 +113,29 @@
   </div>
 </div>
 
-<!-- CHART -->
+<!-- PLOTLY FOCUS CHART -->
 <div class="card border-0 shadow-sm mb-5">
   <div class="card-header bg-secondary text-white fw-semibold">
     <i class="bi bi-graph-up"></i> Your Focus Timeline ({{ start_date_str }} – {{ end_date_str }})
   </div>
   <div class="card-body">
-    <div style="height: 400px;">
-      <canvas id="focusChart" 
-              data-start-date="{{ start_date_str }}" 
-              data-end-date="{{ end_date_str }}"
-              data-chart-min-date="{{ chart_min_date }}">
-      </canvas>
-    </div>
+    <div id="focusChart" style="height: 400px;"></div>
   </div>
 </div>
 
+<!-- PLOTLY.JS -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
+  // --- Dashboard Cards ---
   const focusedCard = document.getElementById('focused-percent');
   const distractedCard = document.getElementById('distracted-percent');
   const drowsyCard = document.getElementById('drowsy-percent');
   const tempCard = document.getElementById('temp-value');
   const humidityCard = document.getElementById('humidity-value');
-  
+
   function updateDashboardData() {
-      const canvas = document.getElementById('focusChart');
-      const startDate = canvas.dataset.startDate;
-      const endDate = canvas.dataset.endDate;
+      const startDate = '{{ start_date_str }}';
+      const endDate = '{{ end_date_str }}';
       fetch(`{% url 'api-live-data' %}?start=${startDate}&end=${endDate}`)
           .then(response => response.json())
           .then(data => {
@@ -150,46 +148,36 @@
           .catch(error => console.error('Error fetching live data:', error));
   }
 
-  const chartData = {{ chart_data_json|safe }};
-  const ctx = document.getElementById('focusChart');
-  const minDate = ctx.dataset.chartMinDate;
-
-  const myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      datasets: [{
-        label: 'Focus Level',
-        data: chartData,
-        borderColor: '#42a5f5',
-        backgroundColor: 'rgba(66,165,245,0.2)',
-        tension: 0.3,
-        stepped: true,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: 'time',
-          time: { unit: 'hour', tooltipFormat: 'HH:mm - dd MMM' },
-          min: minDate,
-          title: { display: true, text: 'Time' }
-        },
-        y: {
-          title: { display: true, text: 'Focus State' },
-          ticks: {
-            stepSize: 1,
-            callback: value => ({ 0: 'Drowsy', 1: 'Distracted', 2: 'Focused' }[value])
-          },
-          min: 0,
-          max: 2
-        }
-      }
-    }
-  });
-
   setInterval(updateDashboardData, 10000);
+
+  // --- Plotly Chart ---
+  const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
+  const trace = {
+    x: chartData.map(d => d.x),
+    y: chartData.map(d => d.y),
+    mode: 'lines+markers',
+    line: { color: '#42a5f5', shape: 'hv' },
+    marker: { size: 6 },
+    name: 'Focus Level'
+  };
+
+  const layout = {
+    margin: { t: 20, b: 40, l: 50, r: 20 },
+    xaxis: {
+      title: 'Time',
+      type: 'date',
+      tickformat: '%H:%M - %d %b'
+    },
+    yaxis: {
+      title: 'Focus State',
+      tickvals: [0, 1, 2],
+      ticktext: ['Drowsy', 'Distracted', 'Focused'],
+      range: [-0.2, 2.2]
+    },
+    responsive: true
+  };
+
+  Plotly.newPlot('focusChart', [trace], layout, {responsive: true});
 </script>
 
 {% endblock %}

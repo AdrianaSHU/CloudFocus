@@ -1,15 +1,32 @@
 from storages.backends.azure_storage import AzureStorage
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 from decouple import config
 
+# -----------------------------
+# Local Storage (MEDIA_ROOT)
+# -----------------------------
+class LocalMediaStorage(FileSystemStorage):
+    """
+    Saves files to the local MEDIA_ROOT.
+    """
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('location', settings.MEDIA_ROOT)
+        kwargs.setdefault('base_url', settings.MEDIA_URL)
+        super().__init__(*args, **kwargs)
+
+
+# -----------------------------
+# Azure Blob Storage
+# -----------------------------
 class AzureMediaStorage(AzureStorage):
     """
-    This is a custom storage class for all user-uploaded media files.
-    It reads its settings directly from the Azure environment variables.
+    Custom storage class for Azure Blob Storage.
+    Reads settings from environment variables.
     """
-    # Read the 3 environment variables you set in the Azure App Service
     account_name = config('AZURE_STORAGE_ACCOUNT_NAME')
     account_key = config('AZURE_STORAGE_ACCOUNT_KEY')
     azure_container = config('AZURE_STORAGE_CONTAINER')
     
-    # This ensures files are not auto-deleted and links do not expire
+    # Ensure uploaded files are permanent and URLs do not expire
     expiration_secs = None
