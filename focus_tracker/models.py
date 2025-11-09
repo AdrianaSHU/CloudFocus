@@ -8,7 +8,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
     profile_picture = models.ImageField(
-    upload_to='', 
+    upload_to='profile_pics', 
     null=True, 
     blank=True
 )
