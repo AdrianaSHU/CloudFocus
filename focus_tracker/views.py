@@ -17,7 +17,7 @@ from django.conf import settings
 from django.views.decorators.http import require_POST
 import os
 from django.utils import timezone
-from cloudfocus_project.custom_storage import LocalMediaStorage, AzureMediaStorage
+from .image_utils import handle_profile_picture_upload
 
 import uuid 
 from rest_framework.decorators import api_view
@@ -136,15 +136,20 @@ def profile_view(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
 
-            profile_picture = request.FILES.get('profile_picture')
-            if profile_picture:
-                # Choose storage (Azure or Local)
-                storage = AzureMediaStorage()  # Or LocalMediaStorage()
-                request.user.profile.profile_picture.save(profile_picture.name, profile_picture, storage=storage)
+            image_file = request.FILES.get('profile_picture')
+            if image_file:
+                # Choose storage: True = Azure, False = local
+                saved_file_name = handle_profile_picture_upload(
+                    image_file, 
+                    min_size=(256, 256),
+                    use_azure=True  # <-- change to False if you want local storage
+                )
+                request.user.profile.profile_picture.name = saved_file_name
 
-            request.user.profile.save()
+            profile_form.save()  # saves profile instance
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
+
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
