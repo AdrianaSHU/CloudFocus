@@ -136,27 +136,20 @@ def profile_view(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
 
-            # Choose storage: local or Azure
-            storage_backend = AzureMediaStorage() if request.POST.get('storage_backend') == 'azure' else LocalMediaStorage()
-            
             profile_picture = request.FILES.get('profile_picture')
             if profile_picture:
-                # Assign the storage backend
-                request.user.profile.profile_picture.storage = storage_backend
-                request.user.profile.profile_picture.save(profile_picture.name, profile_picture, save=False)
-            
+                # Choose storage (Azure or Local)
+                storage = AzureMediaStorage()  # Or LocalMediaStorage()
+                request.user.profile.profile_picture.save(profile_picture.name, profile_picture, storage=storage)
+
             request.user.profile.save()
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
-    
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
-    
-    context = {
-        'user_form': user_form,
-        'profile_form': profile_form
-    }
+
+    context = {'user_form': user_form, 'profile_form': profile_form}
     return render(request, 'profile.html', context)
 
 
