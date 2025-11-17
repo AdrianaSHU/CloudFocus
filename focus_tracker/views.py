@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 import json
 from collections import Counter
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -359,3 +360,45 @@ def correct_log_view(request, log_id):
 
     # Send the user back to the dashboard
     return redirect('dashboard')
+
+
+
+@login_required
+def dashboard_view(request):
+    """ 
+    The main dashboard, now with period filters and pagination.
+    """
+    # --- Data Retrieval ---
+    data = get_dashboard_data(request.user, request.GET)
+    logs = data.pop('logs') # Get the raw logs list and remove it from 'data' context
+    
+    # --- Pagination Logic ---
+    # We will show 15 logs per page
+    paginator = Paginator(logs, 15) 
+    
+    # Get the page number from the URL, defaulting to 1
+    page = request.GET.get('page', 1)
+    
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        page_obj = paginator.page(paginator.num_pages)
+    
+    # --- Context Assembly ---
+    active_session = Session.objects.filter(
+        user=request.user, 
+        is_active=True
+    ).first() 
+    all_devices = Device.objects.all()
+    
+    context = {
+        'active_session': active_session,
+        'all_devices': all_devices,
+        'page_obj': page_obj,  # <-- NEW: The paginated log results
+        **data # This unpacks all the other keys (percentages, dates, etc.)
+    }
+    return render(request, 'dashboard.html', context)

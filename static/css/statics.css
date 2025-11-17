@@ -261,6 +261,7 @@ form p textarea {
     height: 100%;
     transition: left 0.3s ease;
     z-index: 3000;
+    overflow-y: auto;
   }
 
   .sidebar.mobile-show {
