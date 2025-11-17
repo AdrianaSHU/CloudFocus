@@ -4,3 +4,6 @@ from django.apps import AppConfig
 class FocusTrackerConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'focus_tracker'
+
+    def ready(self):
+        import focus_tracker.signals
