@@ -52,16 +52,43 @@ class Session(models.Model):
 class FocusLog(models.Model):
     """
     A single data point, linked to an active session.
+    
+    CORRECTED VERSION:
+    1. Added 'NO FACE' to STATUS_CHOICES.
+    2. Added EMOTION_CHOICES and the 'emotion_detected' field.
     """
+    
+    # --- (1) CORRECTED STATUS_CHOICES ---
     STATUS_CHOICES = [
         ('FOCUSED', 'Focused'),
         ('DISTRACTED', 'Distracted'),
         ('DROWSY', 'Drowsy'),
+        ('NO FACE', 'No Face'), # <-- Added this to match the Pi
+    ]
+    
+    # --- (2) ADDED EMOTION_CHOICES (for ethical mitigation) ---
+    EMOTION_CHOICES = [
+        ('Neutral', 'Neutral'),
+        ('Happy', 'Happy'),
+        ('Sad', 'Sad'),
+        ('Angry', 'Angry'),
+        ('Surprise', 'Surprise'),
+        ('Fear', 'Fear'),
+        ('Disgust', 'Disgust'),
+        ('No Face', 'No Face'),
+        ('No ROI', 'No ROI'),
     ]
     
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='logs')
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+
+    # --- (3) ADDED 'emotion_detected' FIELD ---
+    emotion_detected = models.CharField(
+        max_length=20, 
+        choices=EMOTION_CHOICES,
+        default='No Face'
+    )
 
     temperature = models.FloatField(null=True, blank=True)
     humidity = models.FloatField(null=True, blank=True)

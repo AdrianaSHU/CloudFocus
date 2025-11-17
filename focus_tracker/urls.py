@@ -1,8 +1,8 @@
 from django.urls import path
 from .views import (
     LogFocusView, register_view, home_view, dashboard_view, about_view, contact_view, profile_view, 
-    supervisor_dashboard_view, supervisor_user_detail_view, start_session_view, end_session_view, 
-    get_live_dashboard_data
+    supervisor_dashboard_view, start_session_view, end_session_view, 
+    get_live_dashboard_data, correct_log_view
 )
 from django.contrib.auth import views as auth_views
 
@@ -24,6 +24,9 @@ urlpatterns = [
 
     path('session/start/<int:device_id>/', start_session_view, name='start_session'),
     path('session/end/', end_session_view, name='end_session'),
+
+    # --- THIS NEW LINE IS FOR THE FEEDBACK BUTTON ---
+    path('log/correct/<int:log_id>/', correct_log_view, name='correct_log'),
 
     # --- THIS BLOCK IS FOR PASSWORD CHANGE ---
     path('password-change/', 
@@ -65,6 +68,5 @@ urlpatterns = [
 
     # Supervisor
     path('supervisor/', supervisor_dashboard_view, name='supervisor_dashboard'),
-    path('supervisor/user/<int:user_id>/', supervisor_user_detail_view, 
-         name='supervisor_user_detail'),
+    
 ]

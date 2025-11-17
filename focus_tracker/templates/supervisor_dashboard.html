@@ -1,17 +1,105 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-  <h2 class="mb-4">Supervisor Panel</h2>
-  <p>Select a user to view their focus dashboard.</p>
 
-  <div class="list-group">
-    {% for user in users %}
-      <a href="{% url 'supervisor_user_detail' user.id %}" class="list-group-item list-group-item-action">
-        {{ user.first_name }} {{ user.last_name }}
-        <small class="text-muted">(@{{ user.username }})</small>
-      </a>
-    {% empty %}
-      <div class="list-group-item">No users found.</div>
-    {% endfor %}
-  </div>
+<h2 class="mb-4">Classroom Review Panel</h2>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body text-center">
+        <h3 class="display-4 fw-bold">{{ participant_count }}</h3>
+        <h5 class="card-title text-muted">Students Currently "Opted-In"</h5>
+        <p class="fs-6">
+            This is an anonymous count of all active participants.
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="summary-card card-focused">
+            <h3>{{ focused_percent|floatformat:0 }}%</h3>
+            <p>Class Focus</p>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="summary-card card-distracted">
+            <h3>{{ distracted_percent|floatformat:0 }}%</h3>
+            <p>Class Distraction</p>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="summary-card card-drowsy">
+            <h3>{{ drowsy_percent|floatformat:0 }}%</h3>
+            <p>Class Drowsiness</p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        Live Classroom Focus (Recent Activity)
+    </div>
+    <div class="card-body">
+        {% if total_logs > 0 %}
+        <div style="height: 400px;">
+            <canvas id="focusChart"></canvas>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No data is being recorded. This chart will update when students start a session.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<script>
+    const chartData = {{ chart_data_json|safe }};
+    const ctx = document.getElementById('focusChart');
+    
+    if (chartData.length > 0 && ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Class Focus Level',
+                    data: chartData,
+                    borderColor: 'rgb(75, 192, 192)',
+                    stepped: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'minute',
+                            tooltipFormat: 'HH:mm - dd MMM'
+                        },
+                        title: { display: true, text: 'Time' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Focus State' },
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                switch (value) {
+                                    case 0: return 'Drowsy';
+                                    case 1: return 'Distracted';
+                                    case 2: return 'Focused';
+                                }
+                            }
+                        },
+                        min: 0,
+                        max: 2
+                    }
+                }
+            }
+        });
+    }
+</script>
 {% endblock %}

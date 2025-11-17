@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 import json
 from collections import Counter
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings 
@@ -186,65 +186,102 @@ def dashboard_view(request):
     return render(request, 'dashboard.html', context)
 
 
-# --- (3) UPDATED supervisor_user_detail_view ---
-@user_passes_test(is_supervisor)
-def supervisor_user_detail_view(request, user_id):
-    """
-    Shows the detailed dashboard for a specific user, with period filters.
-    """
-    try:
-        target_user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        messages.error(request, 'User not found.')
-        return redirect('supervisor_dashboard')
-        
-    # --- NEW: Pass the request.GET to the util function ---
-    data = get_dashboard_data(target_user, request.GET)
-    
-    context = {
-        'target_user': target_user,
-        **data # This unpacks all the keys from get_dashboard_data
-    }
-    return render(request, 'supervisor_user_detail.html', context)
+# We are removing supervisor_user_detail_view
+# It violates the "blind to the teacher" mitigation.
+# @user_passes_test(is_supervisor)
+# def supervisor_user_detail_view(request, user_id):
+
 
 
 # --- (4) UPDATED get_live_dashboard_data ---
 @api_view(['GET'])
 @login_required
 def get_live_dashboard_data(request):
-    user = request.user
-    data = {}  # however you're populating data
+    """
+    FIXED: This view now correctly fetches data using the
+    dashboard util, just like the main dashboard view.
+    """
+    try:
+        # (1) Get the data using the same util as the dashboard
+        # This gets percentages, chart data, temps, etc.
+        data = get_dashboard_data(request.user, request.GET)
+        
+        # (2) We can't return the raw 'logs' object (model objects) 
+        # in JSON, so we safely remove it.
+        if 'logs' in data:
+            del data['logs']
+            
+        # (3) Return the whole data dictionary as JSON
+        return Response(data, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        return Response(
+            {'error': f'An error occurred: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-    focus_history = data.get('focus_history')
-
-    if not focus_history:
-        # If no device data or logs are available, show a friendly message
-        return Response({
-            "message": "No data available. Device not connected or no logs found."
-        }, status=200)
-
-    # Otherwise process the data as before
-    timestamps = [log['timestamp'] for log in focus_history]
-    distracted_history = [log['distracted'] for log in focus_history]
-    focused_history = [log['focused'] for log in focus_history]
-    drowsy_history = [log['drowsy'] for log in focus_history]
-
-    # your rest of data processing here
-    return Response({
-        "timestamps": timestamps,
-        "focused": focused_history,
-        "distracted": distracted_history,
-        "drowsy": drowsy_history,
-    })
-
-
-# --- Session Views (Unchanged) ---
+# --- REWRITE THIS VIEW ---
 @user_passes_test(is_supervisor)
 def supervisor_dashboard_view(request):
-    all_users = User.objects.filter(is_staff=False)
+    """
+    ETHICAL FIX:
+    This view is now "blind" to the supervisor.
+    It shows ONLY aggregated, anonymous class-level data.
+    It no longer shows a list of students.
+    """
+    
+    # --- (A) Get participant count (Ethical Mitigation) ---
+    # This finds the number of *distinct* users who have an active session
+    participant_count = Session.objects.filter(is_active=True).values('user').distinct().count()
+    
+    # --- (B) Get aggregated stats ---
+    # Get all logs from all active sessions
+    logs = FocusLog.objects.filter(session__is_active=True)
+    
+    total_logs = logs.count()
+    
+    if total_logs > 0:
+        # Calculate percentages
+        focus_count = logs.filter(status='FOCUSED').count()
+        distract_count = logs.filter(status='DISTRACTED').count()
+        drowsy_count = logs.filter(status='DROWSY').count()
+        
+        focused_percent = (focus_count / total_logs) * 100
+        distracted_percent = (distract_count / total_logs) * 100
+        drowsy_percent = (drowsy_count / total_logs) * 100
+
+        # --- (C) Get data for a simple chart ---
+        # (This is a simplified version of your dashboard util)
+        # We are just showing the last 100 logs as an example
+        recent_logs = logs.order_by('-timestamp')[:100]
+        
+        # We map status to a number for the chart
+        status_map = {'DROWSY': 0, 'DISTRACTED': 1, 'FOCUSED': 2, 'NO FACE': None}
+        
+        chart_data = [
+            {
+                'x': log.timestamp.isoformat(), 
+                'y': status_map.get(log.status)
+            }
+            for log in recent_logs if status_map.get(log.status) is not None
+        ]
+        
+    else:
+        # Default values if no one is active
+        focused_percent = 0
+        distracted_percent = 0
+        drowsy_percent = 0
+        chart_data = []
+
     context = {
-        'users': all_users
+        'participant_count': participant_count,
+        'total_logs': total_logs,
+        'focused_percent': focused_percent,
+        'distracted_percent': distracted_percent,
+        'drowsy_percent': drowsy_percent,
+        'chart_data_json': json.dumps(chart_data),
     }
+    
     return render(request, 'supervisor_dashboard.html', context)
 
 @login_required
@@ -284,4 +321,41 @@ def end_session_view(request):
     except Session.DoesNotExist:
         messages.error(request, "You have no active session to end.")
         
+    return redirect('dashboard')
+
+
+@login_required
+@require_POST # This view only accepts POST requests
+def correct_log_view(request, log_id):
+    """
+    Handles the 'This was wrong' feedback button.
+    Finds the log, verifies the user owns it, and updates its
+    status to 'FOCUSED'.
+    """
+    try:
+        # Find the log the user clicked on
+        log_to_correct = get_object_or_404(FocusLog, id=log_id)
+
+        # --- SECURITY CHECK ---
+        # Verify that the user clicking the button is the
+        # user who owns the session this log belongs to.
+        if log_to_correct.session.user != request.user:
+            # If not, deny permission
+            messages.error(request, "You do not have permission to change this log.")
+            return redirect('dashboard')
+
+        # --- SUCCESS ---
+        # Update the log's status
+        log_to_correct.status = 'FOCUSED'
+        # Note: We leave 'emotion_detected' as-is, so you can 
+        # later analyze how often 'Angry' was misclassified.
+        
+        log_to_correct.save()
+
+        messages.success(request, "Log successfully corrected to 'Focused'.")
+        
+    except Exception as e:
+        messages.error(request, f"An error occurred: {e}")
+
+    # Send the user back to the dashboard
     return redirect('dashboard')

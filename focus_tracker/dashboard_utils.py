@@ -4,6 +4,7 @@ from datetime import timedelta, datetime
 from collections import Counter
 import json
 
+# --- get_date_range_from_request is unchanged ---
 def get_date_range_from_request(request_get):
     """
     Gets start/end dates from the URL query.
@@ -33,6 +34,7 @@ def get_date_range_from_request(request_get):
     start_date = end_date - timedelta(hours=24)
     return start_date, end_date
 
+# --- get_dashboard_data is UPDATED ---
 def get_dashboard_data(user, request_get):
     """
     Returns dashboard data for a user, ready for Plotly charts.
@@ -40,11 +42,13 @@ def get_dashboard_data(user, request_get):
     
     start_date, end_date = get_date_range_from_request(request_get)
     
+    # We query the logs here
     logs = list(FocusLog.objects.filter(
         session__user=user,
         timestamp__range=(start_date, end_date)
-    ).order_by('timestamp'))
+    ).order_by('timestamp')) # Changed to ascending for the log table
     
+    # Get the latest log, regardless of date range, for temp/humidity
     latest_log = FocusLog.objects.filter(session__user=user).order_by('-timestamp').first()
 
     # Percentages
@@ -64,9 +68,14 @@ def get_dashboard_data(user, request_get):
 
     # --- Prepare history arrays for Plotly ---
     timestamps = [log.timestamp.isoformat() for log in logs]
-    focused_history = [1 if log.status == 'FOCUSED' else 0 for log in logs]
-    distracted_history = [1 if log.status == 'DISTRACTED' else 0 for log in logs]
-    drowsy_history = [1 if log.status == 'DROWSY' else 0 for log in logs]
+    
+    # This logic creates the stepped chart data
+    status_map = {'DROWSY': 0, 'DISTRACTED': 1, 'FOCUSED': 2, 'NO FACE': None}
+    chart_data = []
+    for log in logs:
+        y_val = status_map.get(log.status)
+        if y_val is not None:
+            chart_data.append({'x': log.timestamp.isoformat(), 'y': y_val})
 
     return {
         'focused_percent': round(focused_percent, 0),
@@ -74,11 +83,15 @@ def get_dashboard_data(user, request_get):
         'drowsy_percent': round(drowsy_percent, 0),
         'latest_temp': latest_temp,
         'latest_humidity': latest_humidity,
-        'timestamps': timestamps,
-        'focused_history': focused_history,
-        'distracted_history': distracted_history,
-        'drowsy_history': drowsy_history,
+        
+        # We use json.dumps here to make it safe for Plotly
+        'chart_data_json': json.dumps(chart_data),
+        
         'start_date_str': start_date.strftime('%Y-%m-%d'),
         'end_date_str': end_date.strftime('%Y-%m-%d'),
         'chart_min_date': start_date.isoformat(),
+        
+        # --- (1) THE ONLY CHANGE IS ADDING THIS LINE ---
+        # This passes the full list of log objects to the template
+        'logs': logs,
     }
