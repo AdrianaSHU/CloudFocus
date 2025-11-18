@@ -432,3 +432,40 @@ select {
 [data-theme="dark"] .btn-primary:hover {
   background-color: var(--link-hover-color) !important;
 }
+
+/*
+====================================
+(11) THEME-AWARE TABLE OVERRIDES
+====================================
+*/
+
+/* --- GLOBAL TABLE FIXES --- */
+.table {
+    --bs-table-color: var(--text-color); /* Table text color uses theme's main text */
+    --bs-table-bg: var(--card-bg-color); /* Table background uses theme's card color */
+    border-color: var(--border-color);
+}
+.table > :not(caption) > * > * {
+    border-bottom-color: var(--border-color); /* Ensures separation lines are themed */
+}
+
+/* --- TABLE HEAD (thead) FIX --- */
+/* This targets the <thead> element to ensure the header background and text contrast */
+.table-light, .table-light thead, [data-theme="dark"] .table-light, [data-theme="soft-teal"] .table-light {
+    --bs-table-bg-type: var(--border-color); /* Uses a muted color for header background */
+    --bs-table-color: var(--text-color); /* Uses main text color for header text */
+    --bs-table-hover-color: var(--text-color);
+}
+/* Force darker/lighter text where Bootstrap might struggle (e.g., table header) */
+.table thead th {
+    color: var(--text-color); 
+    background-color: var(--border-color);
+}
+
+/* --- STRIPED/HOVER FIXES --- */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-bg-type: var(--bg-color); /* Uses the main background color (slightly different from card) */
+}
+.table-hover > tbody > tr:hover > * {
+    --bs-table-hover-bg: var(--border-color); /* Use border color as a hover highlight */
+}
