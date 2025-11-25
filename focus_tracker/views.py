@@ -1,5 +1,3 @@
-# focus_tracker/views.py
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -311,9 +309,41 @@ def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            # (Your existing email logic here - omitted for brevity but keeping the flow)
-            messages.success(request, 'Your message has been sent successfully!')
-            return redirect('home')
+            # Extract data
+            name = form.cleaned_data['name']
+            email_address = form.cleaned_data['email']
+            subject = form.cleaned_data['subject']
+            message_content = form.cleaned_data['message']
+
+            email_body = f"Name: {name}\nEmail: {email_address}\n\nMessage:\n{message_content}"
+
+            # --- 2. Dynamic Admin Lookup Logic ---
+            # Try to find the first Superuser (Admin) in the database
+            admin_user = User.objects.filter(is_superuser=True).first()
+            
+            # Decide where to send the email
+            if admin_user and admin_user.email:
+                # If an admin exists and has an email, send it there
+                recipient_email = admin_user.email
+            else:
+                # Fallback: If no admin found, send to the default email from settings
+                recipient_email = settings.DEFAULT_FROM_EMAIL
+
+            # --- 3. Send Email ---
+            try:
+                send_mail(
+                    subject=f"CloudFocus Enquiry: {subject}",
+                    message=email_body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[recipient_email], # <--- Use the dynamic email
+                    fail_silently=False,
+                )
+                messages.success(request, 'Your message has been sent successfully!')
+                return redirect('contact')
+            except Exception as e:
+                messages.error(request, f"Error sending email: {e}")
+                
     else:
         form = ContactForm()
+        
     return render(request, 'contact.html', {'form': form})
