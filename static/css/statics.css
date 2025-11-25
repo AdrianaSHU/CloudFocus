@@ -1,10 +1,15 @@
 /*
 ====================================
-CLOUDFOCUS THEME SYSTEM (IMPROVED + FIXED)
+CLOUDFOCUS THEME SYSTEM (FINAL REFACTOR)
 ====================================
 */
 
-/* --- (1) ROOT VARIABLES (Default Light Theme) --- */
+/* ====================================
+   (1) THEME VARIABLES
+   ====================================
+*/
+
+/* --- DEFAULT LIGHT THEME --- */
 :root {
   --bg-color: #f4f7f6;
   --bg-image: url("/static/images/root.webp");
@@ -28,7 +33,41 @@ CLOUDFOCUS THEME SYSTEM (IMPROVED + FIXED)
   --mobile-toggle-bg: var(--sidebar-bg);
 }
 
-/* --- (2) GLOBAL STYLES --- */
+/* --- DARK MODE --- */
+[data-theme="dark"] {
+  --bg-color: #28292b;
+  --bg-image: url("/static/images/dark.webp");
+  --sidebar-bg-image: url("/static/images/sidebar_dark.webp");
+  --card-bg-color: #161b22;
+  --text-color: #e6edf3;
+  --text-muted-color: #b9c1ca;
+  --border-color: #30363d;
+  --link-color: #58a6ff;
+  --link-hover-color: #79c0ff;
+  --sidebar-bg: linear-gradient(180deg, #616464 0%, #020303 100%);
+  --sidebar-link-active: #58a6ff;
+  --mobile-toggle-bg: var(--sidebar-bg);
+}
+
+/* --- SOFT TEAL THEME --- */
+[data-theme="soft-teal"] {
+  --bg-color: #e9f9f7;
+  --bg-image: url("/static/images/soft_teal.webp");
+  --sidebar-bg-image: url("/static/images/sidebar_root.webp");
+  --card-bg-color: #ffffff;
+  --text-color: #1e3d39;
+  --text-muted-color: #6c757d;
+  --border-color: #b2dfdb;
+  --link-color: #009688;
+  --link-hover-color: #019684;
+  --sidebar-bg: linear-gradient(180deg, #43e9cd 0%, #00695c 100%);
+  --mobile-toggle-bg: #00695b;
+}
+
+/* ====================================
+   (2) GLOBAL RESET & BASE
+   ====================================
+*/
 * {
   transition: background-color var(--transition), color var(--transition),
               border-color var(--transition), box-shadow var(--transition);
@@ -47,10 +86,14 @@ body {
   line-height: 1.6;
 }
 
-/*
-====================================
-(3) SIDEBAR STYLING
-====================================
+/* Global text inheritance */
+.lead, p, span, label, input, textarea, select {
+  color: var(--text-color);
+}
+
+/* ====================================
+   (3) SIDEBAR LAYOUT
+   ====================================
 */
 .sidebar {
   position: fixed;
@@ -93,23 +136,26 @@ body {
   white-space: normal;
   word-break: break-word;
 }
+
 .sidebar .nav-link:hover {
   color: var(--sidebar-link-hover);
   background-color: rgba(255, 255, 255, 0.1);
 }
+
 .sidebar .nav-link.active {
   color: var(--sidebar-link-active);
   background-color: rgba(255, 255, 255, 0.15);
   border-left: 4px solid var(--sidebar-link-active);
 }
-.sidebar .nav-item form {
-  margin: 0;
-}
+
+.sidebar .nav-item form { margin: 0; }
+
 .sidebar .nav-link.btn-link {
   text-align: left;
   width: 100%;
   color: var(--sidebar-link-color);
 }
+
 .sidebar .nav-link.btn-link:hover {
   color: var(--sidebar-link-hover);
   background-color: rgba(255, 255, 255, 0.1);
@@ -136,16 +182,16 @@ body {
   text-align: center;
   font-size: 1.1rem;
 }
+
 .sidebar-user-handle {
   color: var(--sidebar-user-handle);
   font-size: 0.9rem;
   text-align: center;
 }
 
-/*
-====================================
-(4) MAIN CONTENT & CARDS
-====================================
+/* ====================================
+   (4) MAIN CONTENT & LAYOUT
+   ====================================
 */
 .main-content {
   margin-left: 260px;
@@ -164,21 +210,30 @@ body {
   z-index: 1
 }
 
-/*
-====================================
-(5) FORMS & BUTTONS
-====================================
+.footer {
+  padding: 20px 0;
+  margin-top: 30px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--card-bg-color);
+  text-align: center;
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(6px);
+}
+.footer .text-muted {
+  color: var(--text-muted-color) !important;
+}
+
+/* ====================================
+   (5) FORMS, BUTTONS & LISTS
+   ====================================
 */
-.form-label,
-form p label {
+.form-label, form p label {
   font-weight: 500;
   color: var(--text-color);
 }
 
-.form-control,
-form p input,
-form p select,
-form p textarea {
+.form-control, form p input, form p select, form p textarea {
   width: 100%;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
@@ -209,29 +264,184 @@ form p textarea {
   box-shadow: 0 4px 12px rgba(0, 121, 107, 0.3);
 }
 
-/*
-====================================
-(6) FOOTER
-====================================
-*/
-.footer {
-  padding: 20px 0;
-  margin-top: 30px;
-  border-top: 1px solid var(--border-color);
-  background-color: var(--card-bg-color);
-  text-align: center;
-  border-radius: var(--radius) var(--radius) 0 0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(6px);
+/* --- LIST GROUP (TRANSPARENT FIX) --- */
+.list-group-item {
+  background-color: transparent !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color) !important;
 }
-.footer .text-muted {
-  color: var(--text-muted-color) !important;
+
+.list-group-item:hover {
+  background-color: rgba(0,0,0,0.05) !important;
+}
+
+[data-theme="dark"] .list-group-item:hover {
+  background-color: rgba(255,255,255,0.05) !important;
+}
+
+/* ====================================
+   (6) TABLES & PAGINATION
+   ====================================
+*/
+
+/* General Table Styling */
+.table {
+  --bs-table-color: var(--text-color);
+  --bs-table-bg: var(--card-bg-color);
+  border-color: var(--border-color);
+}
+.table > :not(caption) > * > * {
+  border-bottom-color: var(--border-color);
+}
+
+/* Table Head Styling */
+.table-light, .table-light thead, [data-theme="dark"] .table-light, [data-theme="soft-teal"] .table-light {
+  --bs-table-bg-type: var(--border-color);
+  --bs-table-color: var(--text-color);
+  --bs-table-hover-color: var(--text-color);
+}
+.table thead th {
+  color: var(--text-color); 
+  background-color: var(--border-color);
+}
+
+/* Striped & Hover Effects */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-bg-type: var(--bg-color);
+}
+.table-hover > tbody > tr:hover > * {
+  --bs-table-hover-bg: var(--border-color);
+}
+
+/* Pagination Styling */
+.pagination .page-link {
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  border-color: var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+  background-color: var(--bg-color);
+  color: var(--link-color);
+  border-color: var(--link-color);
+  z-index: 2;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--link-color);
+  border-color: var(--link-color);
+  color: #ffffff !important;
+  z-index: 3;
+}
+
+.pagination .page-item.disabled .page-link {
+  background-color: var(--bg-color);
+  color: var(--text-muted-color);
+  border-color: var(--border-color);
+  opacity: 0.6;
 }
 
 /*
 ====================================
-(7) MOBILE RESPONSIVENESS
+(7) DARK MODE SPECIFIC OVERRIDES (FIXED)
 ====================================
+*/
+
+/* 1. Set global dark mode colors */
+[data-theme="dark"] {
+  --text-color: #e6edf3;
+  --text-muted-color: #b9c1ca;
+  --card-bg-color: #161b22;
+  --bg-color: #0d1117;
+}
+
+/* 2. Force Headings and Bold text to White */
+[data-theme="dark"] b,
+[data-theme="dark"] strong,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+  color: #ffffff !important;
+}
+
+/* 3. General text color */
+[data-theme="dark"] .lead,
+[data-theme="dark"] p,
+[data-theme="dark"] span {
+  color: var(--text-color) !important;
+}
+
+/* 4. AGGRESSIVE CARD BACKGROUND FIX 
+   We now EXCLUDE the Chart and Header so they don't break.
+   - :not(.btn) -> Keeps buttons green/red
+   - :not(.card-header) -> Keeps the grey header background visible
+   - :not(.js-plotly-plot *) -> Keeps the chart transparent so lines show up
+*/
+[data-theme="dark"] .card,
+[data-theme="dark"] .card *:not(.btn):not(.btn *):not(.card-header):not(.js-plotly-plot):not(.js-plotly-plot *) {
+  background-color: var(--card-bg-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* 5. Fix Inputs inside Dark Cards */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: #1c2128 !important;
+  color: #ffffff !important; /* Force white text in inputs */
+  border-color: #30363d !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+  background-color: #22272e !important;
+  color: #ffffff !important;
+  border-color: var(--link-color) !important;
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3) !important;
+}
+
+/* 6. EXPLICITLY RESTORE BUTTON COLORS IN DARK MODE */
+[data-theme="dark"] .btn-success {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+    color: white !important;
+}
+
+[data-theme="dark"] .btn-outline-danger {
+    background-color: transparent !important; /* Keep transparent initially */
+    border-color: #dc3545 !important;
+    color: #dc3545 !important;
+}
+
+[data-theme="dark"] .btn-outline-danger:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+
+/* ====================================
+   (8) UTILITIES
+   ====================================
+*/
+
+/* Use this class to force text to be the Theme's Link Color 
+   (Teal in Light mode, Blue in Dark mode). 
+   This override is essential for device names in list items.
+*/
+.theme-text-bold {
+    color: var(--link-color) !important;
+    font-weight: 700;
+}
+
+/* ====================================
+   (9) MOBILE RESPONSIVENESS
+   ====================================
 */
 .mobile-nav-toggle {
   display: none;
@@ -265,9 +475,7 @@ form p textarea {
     overflow-y: auto;
   }
 
-  .sidebar.mobile-show {
-    left: 0;
-  }
+  .sidebar.mobile-show { left: 0; }
 
   .main-content {
     margin-left: 0;
@@ -276,21 +484,21 @@ form p textarea {
   }
 
   .sidebar .nav-link {
-    font-size: 1,rem;
+    font-size: 1rem;
     padding: 8px 12px;
     margin-bottom: 6px;
   }
 
   .sidebar-brand .app-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--sidebar-brand-color);
-  text-align: center;
-}
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--sidebar-brand-color);
+    text-align: center;
+  }
 
-.sidebar .sidebar-brand {
-    margin-top: 100px; /* Adjust this value as needed */
-}
+  .sidebar .sidebar-brand {
+    margin-top: 100px;
+  }
 
   .sidebar-profile-pic {
     width: 60px;
@@ -298,175 +506,46 @@ form p textarea {
     margin-bottom: 0.5rem;
   }
 
-  .sidebar-user-name {
-    font-size: 1rem;
-  }
-
-  .sidebar-user-handle {
-    font-size: 0.8rem;
-  }
+  .sidebar-user-name { font-size: 1rem; }
+  .sidebar-user-handle { font-size: 0.8rem; }
 }
 
-
-/*
-====================================
-(8) THEMES
-====================================
-*/
-/* --- DARK MODE --- */
-[data-theme="dark"] {
-  --bg-color: #28292b;
-  --bg-image: url("/static/images/dark.webp");
-  --sidebar-bg-image: url("/static/images/sidebar_dark.webp");
-  --card-bg-color: #161b22;
-  --text-color: #e6edf3;
-  --text-muted-color: #b9c1ca;
-  --border-color: #30363d;
-  --link-color: #58a6ff;
-  --link-hover-color: #79c0ff;
-  --sidebar-bg: linear-gradient(180deg, #616464 0%, #020303 100%);
-  --sidebar-link-active: #58a6ff;
-  --mobile-toggle-bg: var(--sidebar-bg);
-}
-
-/* --- SOFT TEAL THEME --- */
-[data-theme="soft-teal"] {
-  --bg-color: #e9f9f7;
-  --bg-image:url("/static/images/soft_teal.webp");
-  --sidebar-bg-image: url("/static/images/sidebar_root.webp");
-  --card-bg-color: #ffffff;
-  --text-color: #1e3d39;
-  --text-muted-color: #6c757d;
-  --border-color: #b2dfdb;
-  --link-color: #009688;
-  --link-hover-color: #019684;
-  --sidebar-bg: linear-gradient(180deg, #43e9cd 0%, #00695c 100%);
-  --mobile-toggle-bg: #00695b;
-}
-
-/*
-====================================
-(9) TEXT VISIBILITY & DARK MODE FIXES 
-====================================
+/* ====================================
+   (10) FORCE BUTTON COLORS (Overrides Theme)
+   ====================================
 */
 
-/* Global text */
-.lead,
-p,
-span,
-label,
-input,
-textarea,
-select {
-  color: var(--text-color);
+/* START SESSION BUTTON (Always Green) */
+.btn-success {
+    background-color: #198754 !important; /* Bootstrap Green */
+    border-color: #198754 !important;
+    color: #ffffff !important;
 }
 
-/* --- DARK MODE TEXT FIXES --- */
-[data-theme="dark"] {
-  /* Headings & text */
-  --text-color: #e6edf3;
-  --text-muted-color: #b9c1ca;
-
-  /* Ensure base card + inputs contrast */
-  --card-bg-color: #161b22;
-  --bg-color: #0d1117;
+.btn-success:hover {
+    background-color: #157347 !important; /* Darker Green on Hover */
+    border-color: #146c43 !important;
+    color: #ffffff !important;
 }
 
-/* Typography inside dark mode */
-[data-theme="dark"] b,
-[data-theme="dark"] strong,
-[data-theme="dark"] h1,
-[data-theme="dark"] h2,
-[data-theme="dark"] h3,
-[data-theme="dark"] h4,
-[data-theme="dark"] h5,
-[data-theme="dark"] h6 {
-  color: #ffffff !important;
+/* END SESSION BUTTON (Always Red Outline) */
+.btn-outline-danger {
+    color: #dc3545 !important; /* Bootstrap Red */
+    border-color: #dc3545 !important;
+    background-color: transparent !important; /* Transparent background initially */
 }
 
-[data-theme="dark"] .lead,
-[data-theme="dark"] p,
-[data-theme="dark"] span {
-  color: var(--text-color) !important;
+/* END SESSION HOVER (Solid Red) */
+.btn-outline-danger:hover {
+    color: #ffffff !important;
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
 }
 
-/* Card & form readability */
-[data-theme="dark"] .card {
-  background-color: var(--card-bg-color) !important;
-  color: var(--text-color) !important;
-  border-color: var(--border-color) !important;
+/* Ensure icons inside these buttons stay white/red respectively */
+.btn-success i {
+    color: #ffffff !important;
 }
-
-[data-theme="dark"] .card * {
-  color: var(--text-color) !important;
-}
-
-/* Form elements inside dark cards */
-[data-theme="dark"] legend,
-[data-theme="dark"] .form-label,
-[data-theme="dark"] .card-title {
-  color: var(--text-color) !important;
-}
-
-[data-theme="dark"] input,
-[data-theme="dark"] textarea,
-[data-theme="dark"] select {
-  background-color: #1c2128 !important;
-  color: var(--text-color) !important;
-  border-color: var(--border-color) !important;
-}
-
-[data-theme="dark"] input:focus,
-[data-theme="dark"] textarea:focus,
-[data-theme="dark"] select:focus {
-  background-color: #22272e !important;
-  color: var(--text-color) !important;
-  border-color: var(--link-color) !important;
-  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3) !important;
-}
-
-/* Buttons */
-[data-theme="dark"] .btn-primary {
-  background-color: var(--link-color) !important;
-  color: #fff !important;
-}
-[data-theme="dark"] .btn-primary:hover {
-  background-color: var(--link-hover-color) !important;
-}
-
-/*
-====================================
-(11) THEME-AWARE TABLE OVERRIDES
-====================================
-*/
-
-/* --- GLOBAL TABLE FIXES --- */
-.table {
-    --bs-table-color: var(--text-color); /* Table text color uses theme's main text */
-    --bs-table-bg: var(--card-bg-color); /* Table background uses theme's card color */
-    border-color: var(--border-color);
-}
-.table > :not(caption) > * > * {
-    border-bottom-color: var(--border-color); /* Ensures separation lines are themed */
-}
-
-/* --- TABLE HEAD (thead) FIX --- */
-/* This targets the <thead> element to ensure the header background and text contrast */
-.table-light, .table-light thead, [data-theme="dark"] .table-light, [data-theme="soft-teal"] .table-light {
-    --bs-table-bg-type: var(--border-color); /* Uses a muted color for header background */
-    --bs-table-color: var(--text-color); /* Uses main text color for header text */
-    --bs-table-hover-color: var(--text-color);
-}
-/* Force darker/lighter text where Bootstrap might struggle (e.g., table header) */
-.table thead th {
-    color: var(--text-color); 
-    background-color: var(--border-color);
-}
-
-/* --- STRIPED/HOVER FIXES --- */
-.table-striped > tbody > tr:nth-of-type(odd) > * {
-    --bs-table-bg-type: var(--bg-color); /* Uses the main background color (slightly different from card) */
-}
-.table-hover > tbody > tr:hover > * {
-    --bs-table-hover-bg: var(--border-color); /* Use border color as a hover highlight */
+.btn-outline-danger i {
+    color: inherit !important; /* Inherits red normally, white on hover */
 }
