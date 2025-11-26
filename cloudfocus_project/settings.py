@@ -23,6 +23,10 @@ ALLOWED_HOSTS = [
     '10.0.0.22', # Your VM's local IP
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://cloudfocus-d8frducfd6fjgdbx.uksouth-01.azurewebsites.net',
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
