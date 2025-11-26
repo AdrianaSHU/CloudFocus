@@ -48,6 +48,8 @@ class LogFocusView(APIView):
             return Response({'error': 'API-Key header is required.'}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             device = Device.objects.get(api_key=api_key)
+            device.last_seen = timezone.now() 
+            device.save()
         except Device.DoesNotExist:
             return Response({'error': 'Invalid API-Key. This device is not registered.'}, status=status.HTTP_401_UNAUTHORIZED)
         try:
@@ -274,27 +276,49 @@ def register_view(request):
 
 @login_required
 def profile_view(request):
+    # --- FIX 1: Ensure the Profile exists ---
+    # Superusers created via CLI sometimes miss the signal. 
+    # We check if it exists; if not, we create it on the fly.
+    try:
+        profile = request.user.profile
+    except:
+        # Import Profile inside the function to avoid circular imports if necessary
+        from .models import Profile 
+        profile = Profile.objects.create(user=request.user)
+
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
         
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
+            
+            # --- FIX 2: Use commit=False ---
+            # Stop the form from saving to DB immediately.
+            # This allows us to inject our custom Azure filename first.
+            profile_obj = profile_form.save(commit=False)
+            
             image_file = request.FILES.get('profile_picture')
             if image_file:
-                saved_file_name = handle_profile_picture_upload(
-                    image_file, 
-                    min_size=(256, 256),
-                    use_azure=True 
-                )
-                request.user.profile.profile_picture.name = saved_file_name
-
-            profile_form.save() 
+                try:
+                    saved_file_name = handle_profile_picture_upload(
+                        image_file, 
+                        min_size=(256, 256),
+                        use_azure=True 
+                    )
+                    # Manually assign the string name returned by your utility
+                    profile_obj.profile_picture.name = saved_file_name
+                except Exception as e:
+                    messages.error(request, f"Error uploading image: {e}")
+            
+            # Now save the object with the correct image link
+            profile_obj.save() 
+            
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
     else:
         user_form = UserUpdateForm(instance=request.user)
-        profile_form = ProfileUpdateForm(instance=request.user.profile)
+        profile_form = ProfileUpdateForm(instance=profile)
 
     context = {'user_form': user_form, 'profile_form': profile_form}
     return render(request, 'profile.html', context)

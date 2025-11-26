@@ -2,16 +2,18 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-import uuid # For generating unique API keys
+import uuid
+from django.utils import timezone # <--- (1) Import for time calculations
+import datetime # <--- (2) Import for time difference
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
     profile_picture = models.ImageField(
-    upload_to='profile_pics', 
-    null=True, 
-    blank=True
-)
+        upload_to='profile_pics', 
+        null=True, 
+        blank=True
+    )
     has_seen_security_update = models.BooleanField(default=False)
 
     def __str__(self):
@@ -26,19 +28,34 @@ def create_user_profile(sender, instance, created, **kwargs):
 class Device(models.Model):
     """
     Represents a physical device/station (e.g., "Classroom RPi").
-    Created by an admin.
+    Includes heartbeat logic to track if it is Online/Offline.
     """
     name = models.CharField(max_length=100, default='Classroom RPi')
     device_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     api_key = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
+    # --- (3) New Field: Tracks when the Pi last sent data ---
+    last_seen = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_active(self):
+        """
+        Returns True if the device has been seen in the last 2 minutes.
+        Used by the dashboard to show Green/Red badges.
+        """
+        if not self.last_seen:
+            return False
+        
+        now = timezone.now()
+        # Check if the time difference is less than 2 minutes
+        return (now - self.last_seen) < datetime.timedelta(minutes=2)
+
     def __str__(self):
         return self.name
 
 class Session(models.Model):
     """
     Links a User to a Device for a period of time.
-    Created when the user clicks "Start Session".
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='sessions')
@@ -52,21 +69,14 @@ class Session(models.Model):
 class FocusLog(models.Model):
     """
     A single data point, linked to an active session.
-    
-    CORRECTED VERSION:
-    1. Added 'NO FACE' to STATUS_CHOICES.
-    2. Added EMOTION_CHOICES and the 'emotion_detected' field.
     """
-    
-    # --- (1) CORRECTED STATUS_CHOICES ---
     STATUS_CHOICES = [
         ('FOCUSED', 'Focused'),
         ('DISTRACTED', 'Distracted'),
         ('DROWSY', 'Drowsy'),
-        ('NO FACE', 'No Face'), # <-- Added this to match the Pi
+        ('NO FACE', 'No Face'),
     ]
     
-    # --- (2) ADDED EMOTION_CHOICES (for ethical mitigation) ---
     EMOTION_CHOICES = [
         ('Neutral', 'Neutral'),
         ('Happy', 'Happy'),
@@ -83,7 +93,6 @@ class FocusLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
 
-    # --- (3) ADDED 'emotion_detected' FIELD ---
     emotion_detected = models.CharField(
         max_length=20, 
         choices=EMOTION_CHOICES,
