@@ -1,6 +1,22 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 from .models import Device, Session, FocusLog, Profile
 
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Profile'
+    fk_name = 'user'
+
+class CustomUserAdmin(UserAdmin):
+    inlines = (ProfileInline, )
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'get_is_active')
+    
+    def get_is_active(self, instance):
+        return instance.is_active
+    get_is_active.boolean = True
+    get_is_active.short_description = 'Active'
 
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'has_seen_security_update')
@@ -10,7 +26,7 @@ class ProfileAdmin(admin.ModelAdmin):
 # We are creating a custom admin view for the Device model
 class DeviceAdmin(admin.ModelAdmin):
     # This will display the API key in the list view (very helpful)
-    list_display = ('name', 'api_key', 'device_id')
+    list_display = ('name', 'api_key', 'device_id', 'last_seen', 'is_active')
     
     # This makes the API key read-only (so you don't accidentally change it)
     readonly_fields = ('api_key', 'device_id')
@@ -25,7 +41,13 @@ class FocusLogAdmin(admin.ModelAdmin):
     list_filter = ('status', 'session__device')
 
 
-# --- Register your models ---
+# --- 3. Register your models ---
+
+# Unregister the default User admin and register a Custom one
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
+
+# Register your other models
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Session, SessionAdmin)
 admin.site.register(FocusLog, FocusLogAdmin)
