@@ -13,7 +13,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings 
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-
+import logging
 import json
 import os
 import uuid 
@@ -21,7 +21,7 @@ from collections import Counter
 from datetime import timedelta 
 
 # --- Import Models & Forms ---
-from .models import Device, Session, FocusLog
+from .models import Device, Session, FocusLog, Profile
 from .serializers import FocusLogSerializer
 from .forms import (
     CustomUserCreationForm, 
@@ -291,19 +291,53 @@ def supervisor_dashboard_view(request):
 #           USER ACCOUNTS & PAGES
 # ==========================================
 
+logger = logging.getLogger(__name__)
+
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST, request.FILES)
+        
         if form.is_valid():
-            user = form.save()
-            profile_picture = form.cleaned_data.get('profile_picture')
-            if profile_picture:
-                user.profile.profile_picture.save(profile_picture.name, profile_picture)
-                user.profile.save()
-            login(request, user)
-            return redirect('dashboard')
+            try:
+                # 1. Save User (Atomic transaction recommended but keeping simple)
+                user = form.save()
+                
+                # 2. Handle Profile Image (Defensive Coding)
+                image_file = request.FILES.get('profile_picture')
+                if image_file:
+                    try:
+                        # Ensure profile exists
+                        if not hasattr(user, 'profile'):
+                            Profile.objects.create(user=user)
+
+                        # Attempt upload
+                        saved_file_name = handle_profile_picture_upload(image_file)
+                        
+                        if saved_file_name:
+                            user.profile.profile_picture.name = saved_file_name
+                            user.profile.save()
+                            
+                    except Exception as e:
+                        # LOG the error, but DO NOT crash the registration
+                        logger.error(f"Azure Upload Failed: {str(e)}")
+                        print(f"WARNING: Profile picture failed to upload: {e}")
+                        # User is still created, just without the picture
+            
+                # 3. Login and Redirect
+                login(request, user)
+                messages.success(request, f"Account created! Welcome, {user.first_name}.")
+                return redirect('dashboard')
+
+            except Exception as e:
+                # Catch generic database/server errors
+                logger.error(f"Registration Error: {str(e)}")
+                messages.error(request, "A system error occurred during registration. Please try again.")
+                
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = CustomUserCreationForm()
+        
     return render(request, 'register.html', {'form': form})
 
 @login_required

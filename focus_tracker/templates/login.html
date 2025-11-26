@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container mt-5 mb-5">
   <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-6">
+    <div class="col-md-6 col-lg-10">
       
       <div class="card shadow-lg border-0 rounded-3">
         
@@ -26,14 +26,14 @@
             </div>
           {% endif %}
 
-          <form method="post" novalidate>
+          <form method="post" novalidate autocomplete="off">
             {% csrf_token %}
             
             <div class="mb-4">
               <label for="id_username" class="form-label fw-semibold">Username</label>
               <div class="input-group">
                 <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                <input type="text" name="username" autofocus class="form-control" required id="id_username" placeholder="Enter username">
+                <input type="text" name="username" autofocus class="form-control" required id="id_username" placeholder="Enter username" autocomplete="off">
               </div>
               {% if form.username.errors %}
                 <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
@@ -44,7 +44,7 @@
               <label for="id_password" class="form-label fw-semibold">Password</label>
               <div class="input-group">
                 <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
-                <input type="password" name="password" class="form-control" required id="id_password" placeholder="Enter password">
+                <input type="password" name="password" class="form-control" required id="id_password" placeholder="Enter password" autocomplete="new-password">
                 
                 <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('id_password', this)">
                     <i class="bi bi-eye"></i>

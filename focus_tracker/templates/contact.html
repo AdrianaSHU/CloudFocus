@@ -1,51 +1,91 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-8 offset-md-2">
-    <div class="card">
-      <div class="card-body">
-        <h2 class="card-title text-center">Contact Us</h2>
-        <p class="text-center">Have a question? Fill out the form below.</p>
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-10">
+      
+      <div class="card shadow-lg border-0 rounded-3">
         
-        <form method="post" novalidate>
-          {% csrf_token %}
-          
-          <div class="mb-3">
-            <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
-            {{ form.name }}
-            {% if form.name.errors %} <div class="text-danger small">{{ form.name.errors.0 }}</div> {% endif %}
-          </div>
+        <div class="card-header card-header-themed text-center py-4">
+          <h3 class="mb-0 fw-bold">
+            <i class="bi bi-envelope-paper-fill me-2"></i>Contact Us
+          </h3>
+          <p class="mb-0 opacity-75 text-light">Have a question? Send us a message.</p>
+        </div>
 
-          <div class="mb-3">
-            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-            {{ form.email }}
-            {% if form.email.errors %} <div class="text-danger small">{{ form.email.errors.0 }}</div> {% endif %}
-          </div>
+        <div class="card-body p-4 p-md-5">
 
-          <div class="mb-3">
-            <label for="{{ form.subject.id_for_label }}" class="form-label">Subject</label>
-            {{ form.subject }}
-            {% if form.subject.errors %} <div class="text-danger small">{{ form.subject.errors.0 }}</div> {% endif %}
-          </div>
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          
+          <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="mb-4">
+              <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">Name</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                {{ form.name }}
+              </div>
+              {% if form.name.errors %} 
+                <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div> 
+              {% endif %}
+            </div>
 
-          <div class="mb-3">
-            <label for="{{ form.message.id_for_label }}" class="form-label">Message</label>
-            {{ form.message }}
-            {% if form.message.errors %} <div class="text-danger small">{{ form.message.errors.0 }}</div> {% endif %}
-          </div>
-          
-          <div class="mb-3">
-             {{ form.captcha }}
-             {% if form.captcha.errors %}
-               <div class="text-danger small mt-1">{{ form.captcha.errors.0 }}</div>
-             {% endif %}
-          </div>
-          
-          <div class="d-grid">
-            <button type="submit" class="btn btn-primary">Send Message</button>
-          </div>
-        </form>
+            <div class="mb-4">
+              <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">Email</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                {{ form.email }}
+              </div>
+              {% if form.email.errors %} 
+                <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div> 
+              {% endif %}
+            </div>
+
+            <div class="mb-4">
+              <label for="{{ form.subject.id_for_label }}" class="form-label fw-semibold">Subject</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-chat-dots"></i></span>
+                {{ form.subject }}
+              </div>
+              {% if form.subject.errors %} 
+                <div class="text-danger small mt-1">{{ form.subject.errors.0 }}</div> 
+              {% endif %}
+            </div>
+
+            <div class="mb-4">
+              <label for="{{ form.message.id_for_label }}" class="form-label fw-semibold">Message</label>
+              {{ form.message }}
+              {% if form.message.errors %} 
+                <div class="text-danger small mt-1">{{ form.message.errors.0 }}</div> 
+              {% endif %}
+            </div>
+            
+            <div class="mb-4 d-flex justify-content-center">
+               <div>
+                 {{ form.captcha }}
+                 {% if form.captcha.errors %}
+                   <div class="text-danger small mt-1 text-center">{{ form.captcha.errors.0 }}</div>
+                 {% endif %}
+               </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                <i class="bi bi-send-fill me-2"></i>Send Message
+              </button>
+            </div>
+
+          </form>
+        </div>
       </div>
     </div>
   </div>

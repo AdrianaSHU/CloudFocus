@@ -26,7 +26,7 @@
             </div>
           {% endif %}
 
-          <form method="post" enctype="multipart/form-data" novalidate>
+          <form method="post" enctype="multipart/form-data" novalidate autocomplete="off">
             {% csrf_token %}
             
             <div class="row g-4">
@@ -84,7 +84,7 @@
                     <div class="mb-3">
                       <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold">Password</label>
                       <div class="input-group">
-                          <input type="password" name="password1" class="form-control" required id="id_password1">
+                          <input type="password" name="password1" class="form-control" required id="id_password1" autocomplete="new-password">
                           <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('id_password1', this)">
                               <i class="bi bi-eye"></i>
                           </button>
@@ -100,7 +100,7 @@
                     <div class="mb-3">
                       <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold">Confirm Password</label>
                       <div class="input-group">
-                          <input type="password" name="password2" class="form-control" required id="id_password2">
+                          <input type="password" name="password2" class="form-control" required id="id_password2" autocomplete="new-password">
                           <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('id_password2', this)">
                               <i class="bi bi-eye"></i>
                           </button>

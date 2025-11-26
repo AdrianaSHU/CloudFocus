@@ -68,7 +68,6 @@
         {% if user.is_authenticated %}
 
           <li class="nav-item text-center my-2">
-            <!-- === (2) FIX: Corrected the img tag formatting === -->
             <img src="
               {% if user.profile.profile_picture %}
                 {{ user.profile.profile_picture.url }}
