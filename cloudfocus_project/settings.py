@@ -83,7 +83,21 @@ if DEBUG:
     }
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+    # --- (FIX) reCAPTCHA keys only in production ---
+    RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
+    RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
+
+    # Use SendGrid for emails
+    EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+    EMAIL_HOST = 'smtp.sendgrid.net'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    SENDGRID_API_KEY = config('SENDGRID_API_KEY')
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
+    DEFAULT_FROM_EMAIL = config('YOUR_EMAIL_ADDRESS')
 
 else:
     # --- PRODUCTION (AZURE) SETTINGS ---
@@ -112,24 +126,11 @@ else:
     # Build the MEDIA_URL
     MEDIA_URL = f"https://{config('AZURE_STORAGE_ACCOUNT_NAME')}.blob.core.windows.net/{config('AZURE_STORAGE_CONTAINER')}/"
     
-    # Use SendGrid for emails
-    EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-    EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    SENDGRID_API_KEY = config('SENDGRID_API_KEY')
-    EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
-    DEFAULT_FROM_EMAIL = config('YOUR_EMAIL_ADDRESS')
-    
     # Production-only security settings
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
-    # --- (FIX) reCAPTCHA keys only in production ---
-    RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
-    RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
 
 
 # --- (3) STATIC FILES (Same for both) ---

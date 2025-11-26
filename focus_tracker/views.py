@@ -9,6 +9,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.conf import settings 
 from django.views.decorators.http import require_POST
 from django.utils import timezone
@@ -276,13 +277,9 @@ def register_view(request):
 
 @login_required
 def profile_view(request):
-    # --- FIX 1: Ensure the Profile exists ---
-    # Superusers created via CLI sometimes miss the signal. 
-    # We check if it exists; if not, we create it on the fly.
     try:
         profile = request.user.profile
     except:
-        # Import Profile inside the function to avoid circular imports if necessary
         from .models import Profile 
         profile = Profile.objects.create(user=request.user)
 
@@ -292,24 +289,16 @@ def profile_view(request):
         
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
-            
-            # --- FIX 2: Use commit=False ---
-            # Stop the form from saving to DB immediately.
-            # This allows us to inject our custom Azure filename first.
             profile_obj = profile_form.save(commit=False)
-            
+            image_file = request.FILES.get('profile_picture')
             image_file = request.FILES.get('profile_picture')
             if image_file:
-                try:
-                    saved_file_name = handle_profile_picture_upload(
-                        image_file, 
-                        min_size=(256, 256),
-                        use_azure=True 
-                    )
-                    # Manually assign the string name returned by your utility
+                saved_file_name = handle_profile_picture_upload(image_file)
+                
+                if saved_file_name:
                     profile_obj.profile_picture.name = saved_file_name
-                except Exception as e:
-                    messages.error(request, f"Error uploading image: {e}")
+            
+            profile_obj.save()
             
             # Now save the object with the correct image link
             profile_obj.save() 
@@ -332,40 +321,55 @@ def about_view(request):
 def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
+        
+        # 1. Check if the form is valid
         if form.is_valid():
+            # --- SUCCESS LOGIC ---
+            
             # Extract data
             name = form.cleaned_data['name']
-            email_address = form.cleaned_data['email']
+            user_email = form.cleaned_data['email']
             subject = form.cleaned_data['subject']
             message_content = form.cleaned_data['message']
 
-            email_body = f"Name: {name}\nEmail: {email_address}\n\nMessage:\n{message_content}"
-
-            # --- 2. Dynamic Admin Lookup Logic ---
-            # Try to find the first Superuser (Admin) in the database
+            # Find the Admin (Superuser) to send the email TO
             admin_user = User.objects.filter(is_superuser=True).first()
             
-            # Decide where to send the email
             if admin_user and admin_user.email:
-                # If an admin exists and has an email, send it there
                 recipient_email = admin_user.email
+                print(f"DEBUG: Found Admin User: {admin_user.username}, Email: {recipient_email}")
             else:
-                # Fallback: If no admin found, send to the default email from settings
                 recipient_email = settings.DEFAULT_FROM_EMAIL
+                print(f"DEBUG: No Admin email found. Using fallback: {recipient_email}")
 
-            # --- 3. Send Email ---
+            # Prepare the Email
+            email_subject = f"CloudFocus Enquiry: {subject}"
+            email_body = f"Message from: {name}\nUser Email: {user_email}\n\nMessage:\n{message_content}"
+
+            # Send the Email
             try:
-                send_mail(
-                    subject=f"CloudFocus Enquiry: {subject}",
-                    message=email_body,
+                email = EmailMessage(
+                    subject=email_subject,
+                    body=email_body,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[recipient_email], # <--- Use the dynamic email
-                    fail_silently=False,
+                    to=[recipient_email],
+                    reply_to=[user_email],
                 )
+                email.send(fail_silently=False)
+                
+                print(f"DEBUG: Email successfully sent to {recipient_email}")
                 messages.success(request, 'Your message has been sent successfully!')
                 return redirect('contact')
+                
             except Exception as e:
+                print(f"DEBUG: Error sending email: {e}")
                 messages.error(request, f"Error sending email: {e}")
+
+        else:
+            # --- FAILURE LOGIC (Validation Errors) ---
+            print("❌ FORM IS INVALID!")
+            print(form.errors) # <--- Check your terminal for this!
+            messages.error(request, "Please correct the errors below.")
                 
     else:
         form = ContactForm()
