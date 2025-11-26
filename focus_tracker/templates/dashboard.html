@@ -4,26 +4,33 @@
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="fw-bold text-primary">Welcome to your Dashboard, {{ user.username }}!</h2>
+  <h2 class="fw-bold" style="color: var(--header-bg);">Welcome to your Dashboard, {{ user.username }}!</h2>
 </div>
 
 <div class="card shadow-sm border-0 mb-4">
-  <div class="card-header bg-gradient bg-primary text-white fw-semibold">
+  
+  <div class="card-header card-header-themed fw-semibold">
     <i class="bi bi-person-check me-2"></i> Session Management
   </div>
+
   <div class="card-body">
     {% if active_session %}
       <h5 class="text-success fw-bold">Session Active</h5>
+      
       <p>
         You are currently <strong>"Checked In"</strong> to the device: 
-        <strong class="text-primary">{{ active_session.device.name }}</strong>
+        <strong style="color: var(--link-color); font-size: 1.1rem;">
+            {{ active_session.device.name }}
+        </strong>
       </p>
+      
       <form method="POST" action="{% url 'end_session' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-outline-danger btn-sm px-4">
           <i class="bi bi-power"></i> End My Session
         </button>
       </form>
+
     {% else %}
       <h5 class="text-danger fw-bold">No Active Session</h5>
       <p class="fs-6">Select an available device to start recording data.</p>
@@ -34,6 +41,7 @@
             
             <div>
                 <span class="theme-text-bold">{{ device.name }}</span>
+                
                 {% if device.is_active %}
                     <span class="badge bg-success ms-2" style="font-size: 0.7rem;">Online</span>
                 {% else %}
@@ -264,23 +272,13 @@
   const getThemeColors = () => {
       const root = document.documentElement;
       const styles = getComputedStyle(root);
-      const currentTheme = root.getAttribute('data-theme');
       
-      let textColor = styles.getPropertyValue('--text-color').trim();
-      let lineColor = styles.getPropertyValue('--link-color').trim();
-      let borderColor = styles.getPropertyValue('--border-color').trim();
-
-      if (!textColor || currentTheme === 'dark') {
-          textColor = (currentTheme === 'dark') ? '#ffffff' : '#333333';
-      }
-      if (!lineColor) {
-          lineColor = (currentTheme === 'dark') ? '#58a6ff' : '#00796b';
-      }
-      if (!borderColor) {
-          borderColor = (currentTheme === 'dark') ? '#30363d' : '#e0e0e0';
-      }
-
-      return { textColor, lineColor, borderColor };
+      // Fetch the CSS variables directly from your styles.css
+      return {
+          textColor: styles.getPropertyValue('--text-color').trim(),
+          lineColor: styles.getPropertyValue('--link-color').trim(),
+          borderColor: styles.getPropertyValue('--border-color').trim()
+      };
   };
 
   const chartDataRaw = '{{ chart_data_json|escapejs }}';

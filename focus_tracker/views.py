@@ -41,30 +41,61 @@ from .dashboard_utils import get_dashboard_data
 
 class LogFocusView(APIView):
     """
-    Receives data from the Python Script/Camera
+    Receives data from the Python Script/Camera.
+    1. Updates Device 'last_seen' (Heartbeat).
+    2. Saves the Log.
+    3. Auto-ends session if 'NO FACE' persists for 30 minutes.
     """
     def post(self, request, *args, **kwargs):
+        # 1. Validate API Key
         api_key = request.headers.get('API-Key')
         if not api_key:
             return Response({'error': 'API-Key header is required.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
         try:
             device = Device.objects.get(api_key=api_key)
-            device.last_seen = timezone.now() 
+            device.last_seen = timezone.now() # Update Heartbeat
             device.save()
         except Device.DoesNotExist:
-            return Response({'error': 'Invalid API-Key. This device is not registered.'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'Invalid API-Key.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # 2. Find Active Session
         try:
             active_session = Session.objects.get(device=device, is_active=True)
         except Session.DoesNotExist:
-            return Response({'error': 'No active session found. Please "Start Session" on the website.'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'No active session.'}, status=status.HTTP_403_FORBIDDEN)
         except Session.MultipleObjectsReturned:
-            # Handle edge case where db has multiple active sessions
             active_session = Session.objects.filter(device=device, is_active=True).last()
 
+        # 3. Save the Log
         serializer = FocusLogSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(session=active_session)
+            new_log = serializer.save(session=active_session)
+            
+            # --- (A) AUTO-END LOGIC (30 Mins No Face) ---
+            if new_log.status == 'NO FACE':
+                # Calculate time 30 minutes ago
+                time_threshold = timezone.now() - timedelta(minutes=30)
+                
+                # Only check if session is actually older than 30 mins
+                if active_session.start_time < time_threshold:
+                    
+                    # Check: Has there been ANY 'FOCUSED', 'DISTRACTED', or 'DROWSY' log 
+                    # in the last 30 minutes?
+                    has_recent_activity = FocusLog.objects.filter(
+                        session=active_session,
+                        timestamp__gte=time_threshold
+                    ).exclude(status='NO FACE').exists()
+                    
+                    # If NO activity found (meaning 100% NO FACE for 30 mins)
+                    if not has_recent_activity:
+                        active_session.is_active = False
+                        active_session.end_time = timezone.now()
+                        active_session.save()
+                        print(f"AUTO-END: Session {active_session.id} closed due to 30 mins of inactivity.")
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

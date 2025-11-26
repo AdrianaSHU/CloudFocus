@@ -1,28 +1,102 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-      <div class="card">
-        <div class="card-body">
-          <h2 class="card-title text-center">Login</h2>
-          <form method="post">
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-6">
+      
+      <div class="card shadow-lg border-0 rounded-3">
+        
+        <div class="card-header card-header-themed text-center py-4">
+          <h3 class="mb-0 fw-bold">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+          </h3>
+          <p class="mb-0 opacity-75 text-light">Welcome back to CloudFocus</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              {% for error in form.non_field_errors %}
+                {{ error }}
+              {% endfor %}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endif %}
+
+          <form method="post" novalidate>
             {% csrf_token %}
             
-            <div class="mb-3">
-              {{ form.as_p }}
+            <div class="mb-4">
+              <label for="id_username" class="form-label fw-semibold">Username</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                <input type="text" name="username" autofocus class="form-control" required id="id_username" placeholder="Enter username">
+              </div>
+              {% if form.username.errors %}
+                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+              {% endif %}
             </div>
             
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary">Login</button>
+            <div class="mb-4">
+              <label for="id_password" class="form-label fw-semibold">Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
+                <input type="password" name="password" class="form-control" required id="id_password" placeholder="Enter password">
+                
+                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('id_password', this)">
+                    <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              {% if form.password.errors %}
+                <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+              {% endif %}
             </div>
+            
+            <div class="d-grid gap-2 mt-5">
+              <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                Login
+              </button>
+            </div>
+
           </form>
-          
-          <div class="text-center mt-3 border-top pt-3">
-            <a href="{% url 'password_reset' %}">Forgot Password?</a>
+        </div>
+
+        <div class="card-footer text-center py-3 bg-light border-0">
+          <div class="mb-2">
+            <a href="{% url 'password_reset' %}" class="text-decoration-none small text-muted">
+                Forgot Password?
+            </a>
           </div>
+          <div>
+            <span class="text-muted small">Don't have an account?</span>
+            <a href="{% url 'register' %}" class="text-decoration-none fw-bold theme-text-bold ms-1 small">
+                Register here
+            </a>
           </div>
+        </div>
+
       </div>
     </div>
   </div>
+</div>
+
+<script>
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+        
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        }
+    }
+</script>
 {% endblock %}

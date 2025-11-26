@@ -216,6 +216,7 @@
         // --- (FIX) Theme Switcher Logic ---
         function setTheme(themeName) {
         localStorage.setItem('theme', themeName);
+        window.location.reload();
 
         // Apply theme
         if (themeName === 'light') {
@@ -251,6 +252,24 @@
             }
         });
     </script>
+    {% if user.is_authenticated %}
+    <script>
+        (function() {
+            // Get seconds remaining from Django session
+            const sessionAgeSeconds = {{ request.session.get_expiry_age }};
+            const homeUrl = "{% url 'home' %}";
+
+            console.log(`Session expires in: ${sessionAgeSeconds} seconds`);
+
+            if (sessionAgeSeconds > 0) {
+                setTimeout(function() {
+                    // When timer hits zero, redirect to Home
+                    window.location.href = homeUrl;
+                }, (sessionAgeSeconds * 1000) + 1000); // Add 1s buffer
+            }
+        })();
+    </script>
+    {% endif %}
   </body>
 </html>
 

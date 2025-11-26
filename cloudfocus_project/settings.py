@@ -70,34 +70,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'cloudfocus_project.wsgi.application'
 
 
-# --- (2) DUAL-MODE SETTINGS (DATABASE, MEDIA, EMAIL) ---
+# --- DUAL-MODE SETTINGS (DATABASE, MEDIA, EMAIL) ---
 
 if DEBUG:
     # --- LOCAL DEVELOPMENT SETTINGS ---
     print("Running in LOCAL DEBUG mode")
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-    # --- (FIX) reCAPTCHA keys only in production ---
-    RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
-    RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
-
-    # Use SendGrid for emails
-    EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-    EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    SENDGRID_API_KEY = config('SENDGRID_API_KEY')
-    EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
-    DEFAULT_FROM_EMAIL = config('YOUR_EMAIL_ADDRESS')
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 
 else:
     # --- PRODUCTION (AZURE) SETTINGS ---
@@ -132,16 +121,31 @@ else:
     SESSION_COOKIE_SECURE = True
 
 
+# --- SHARED SETTINGS (Work in BOTH Local and Production) ---
 
-# --- (3) STATIC FILES (Same for both) ---
+# Local .env should have TEST KEYS.
+# Azure Env Vars should have REAL KEYS.
+RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
+
+# Use SendGrid for emails
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+SENDGRID_API_KEY = config('SENDGRID_API_KEY')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
+DEFAULT_FROM_EMAIL = config('YOUR_EMAIL_ADDRESS')
+
+# ---  STATIC FILES (Same for both) ---
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-# --- (4.A) AXES (BRUTE FORCE) SETTINGS ---
-# This is the new, correct setting.
+# ---  AXES (BRUTE FORCE) SETTINGS ---
 # It locks out based on USERNAME only.
 AXES_LOCK_OUT_BY = "username"
 AXES_FAILURE_LIMIT = 5  # Lock out after 5 failed attempts
@@ -153,7 +157,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# --- (4.B) OTHER SETTINGS (Same for both) ---
+# --- OTHER SETTINGS (Same for both) ---
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -168,7 +172,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
-SESSION_COOKIE_AGE = 60 * 10
+SESSION_COOKIE_AGE = 900
+
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
 

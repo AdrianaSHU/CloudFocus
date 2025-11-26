@@ -1,67 +1,111 @@
 /*
 ====================================
-CLOUDFOCUS THEME SYSTEM (FINAL REFACTOR)
+CLOUDFOCUS THEME SYSTEM 
 ====================================
 */
 
-/* ====================================
-   (1) THEME VARIABLES
-   ====================================
-*/
-
-/* --- DEFAULT LIGHT THEME --- */
 :root {
-  --bg-color: #f4f7f6;
-  --bg-image: url("/static/images/root.webp");
-  --sidebar-bg-image: none;
+  /* Backgrounds */
+  --bg-color: #f0f7ff; /* Very pale blue-grey base */
+  --bg-image: url("/static/images/root.webp"); 
+  --sidebar-bg-image: none; 
+  
   --card-bg-color: #ffffff;
-  --text-color: #212529;
-  --text-muted-color: #6c757d;
-  --border-color: #e0e0e0;
-  --link-color: #00796b;
-  --link-hover-color: #004d40;
-  --sidebar-bg: linear-gradient(180deg, #153a33 0%, #baebe5 100%);
-  --sidebar-link-color: rgba(255, 255, 255, 0.7);
+  
+  /* Text */
+  --text-color: #000000; /* Pure Black for contrast */
+  --text-muted-color: #546e7a;
+  --border-color: #bbdefb; /* Light Blue Border */
+  
+  /* Links & Actions (Blue) */
+  --link-color: #1976d2; /* Medium Blue */
+  --link-hover-color: #0d47a1; /* Dark Blue */
+  
+  /* Header (Blue) */
+  --header-bg: #1565c0; /* Strong Blue */
+  --header-text: #ffffff;
+  
+  /* Sidebar (Blue Gradient - Deep to Sky) */
+  --sidebar-bg: linear-gradient(180deg, #7ca9ed 0%, #043965 100%);
+  
+  /* Sidebar Elements */
+  --sidebar-link-color: rgba(255, 255, 255, 0.8);
   --sidebar-link-hover: #ffffff;
-  --sidebar-link-active: #00bfa5;
+  --sidebar-link-active: #e3f2fd; /* Very light blue for active state */
   --sidebar-brand-color: #ffffff;
   --sidebar-user-name: #ffffff;
-  --sidebar-user-handle: rgba(255, 255, 255, 0.7);
-  --sidebar-hr-color: rgba(255, 255, 255, 0.2);
+  --sidebar-user-handle: rgba(255, 255, 255, 0.8);
+  --sidebar-hr-color: rgba(255, 255, 255, 0.3);
+  
   --radius: 12px;
   --transition: 0.25s ease;
-  --mobile-toggle-bg: var(--sidebar-bg);
-}
-
-/* --- DARK MODE --- */
-[data-theme="dark"] {
-  --bg-color: #28292b;
-  --bg-image: url("/static/images/dark.webp");
-  --sidebar-bg-image: url("/static/images/sidebar_dark.webp");
-  --card-bg-color: #161b22;
-  --text-color: #e6edf3;
-  --text-muted-color: #b9c1ca;
-  --border-color: #30363d;
-  --link-color: #58a6ff;
-  --link-hover-color: #79c0ff;
-  --sidebar-bg: linear-gradient(180deg, #616464 0%, #020303 100%);
-  --sidebar-link-active: #58a6ff;
-  --mobile-toggle-bg: var(--sidebar-bg);
+  --mobile-toggle-bg: #1565c0;
 }
 
 /* --- SOFT TEAL THEME --- */
 [data-theme="soft-teal"] {
-  --bg-color: #e9f9f7;
+  /* Backgrounds */
+  --bg-color: #e0f2f1; /* Very pale teal base */
   --bg-image: url("/static/images/soft_teal.webp");
   --sidebar-bg-image: url("/static/images/sidebar_root.webp");
+  
   --card-bg-color: #ffffff;
-  --text-color: #1e3d39;
-  --text-muted-color: #6c757d;
-  --border-color: #b2dfdb;
-  --link-color: #009688;
-  --link-hover-color: #019684;
-  --sidebar-bg: linear-gradient(180deg, #43e9cd 0%, #00695c 100%);
-  --mobile-toggle-bg: #00695b;
+  
+  /* Text */
+  --text-color: #00251a; /* Very Dark Teal (High Contrast) */
+  --text-muted-color: #4db6ac;
+  --border-color: #80cbc4; /* Light Teal Border */
+  
+  /* Links & Actions (Teal) */
+  --link-color: #00897b; /* Medium Teal */
+  --link-hover-color: #004d40; /* Dark Teal */
+  
+  /* Header (Teal) */
+  --header-bg: #00796b; /* Strong Teal */
+  --header-text: #ffffff;
+  
+  /* Sidebar (Teal Gradient - Deep to Mint) */
+  --sidebar-bg: linear-gradient(180deg, #004d40 0%, #4db6ac 100%);
+  
+  /* Sidebar Elements */
+  --sidebar-link-color: rgba(255, 255, 255, 0.8);
+  --sidebar-link-hover: #ffffff;
+  --sidebar-link-active: #e0f2f1; /* Light Mint for active state */
+  --sidebar-brand-color: #ffffff;
+  --sidebar-user-name: #ffffff;
+  --sidebar-user-handle: rgba(255, 255, 255, 0.8);
+  --sidebar-hr-color: rgba(255, 255, 255, 0.3);
+  
+  --mobile-toggle-bg: #00695c;
+}
+
+/* --- DARK MODE --- */
+[data-theme="dark"] {
+  --bg-color: #0d1117;
+  --bg-image: url("/static/images/dark.webp");
+  --sidebar-bg-image: url("/static/images/sidebar_dark.webp");
+  --card-bg-color: #161b22;
+  
+  --text-color: #ffffff;
+  --text-muted-color: #b9c1ca;
+  --border-color: #30363d;
+  
+  --link-color: #58a6ff;
+  --link-hover-color: #79c0ff;
+  
+  --header-bg: #21262d;
+  --header-text: #e6edf3;
+  
+  --sidebar-bg: linear-gradient(180deg, #21262d 0%, #0d1117 100%);
+  --sidebar-link-color: rgba(255, 255, 255, 0.7);
+  --sidebar-link-hover: #ffffff;
+  --sidebar-link-active: #58a6ff;
+  --sidebar-brand-color: #ffffff;
+  --sidebar-user-name: #ffffff;
+  --sidebar-user-handle: rgba(255, 255, 255, 0.7);
+  --sidebar-hr-color: rgba(255, 255, 255, 0.2);
+  
+  --mobile-toggle-bg: #21262d;
 }
 
 /* ====================================
@@ -75,9 +119,10 @@ CLOUDFOCUS THEME SYSTEM (FINAL REFACTOR)
 
 body {
   background-color: var(--bg-color);
-  background-image: var(--bg-image), linear-gradient(var(--bg-color), var(--bg-color));
+  background-image: var(--bg-image);
   background-size: cover;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   background-position: center;
   color: var(--text-color);
   font-family: "Inter", "Segoe UI", Roboto, sans-serif;
@@ -142,9 +187,11 @@ body {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Active link style for sidebar - Uses color specific to theme */
 .sidebar .nav-link.active {
-  color: var(--sidebar-link-active);
-  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--sidebar-link-active); 
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: 700;
   border-left: 4px solid var(--sidebar-link-active);
 }
 
@@ -210,6 +257,16 @@ body {
   z-index: 1
 }
 
+/* THEME SPECIFIC CARD HEADER */
+.card-header-themed {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  border-bottom: 1px solid var(--border-color);
+  padding: 15px;
+  margin: -20px -20px 20px -20px; /* Flush with card edges */
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
 .footer {
   padding: 20px 0;
   margin-top: 30px;
@@ -246,25 +303,27 @@ body {
 .form-control:focus {
   background-color: var(--card-bg-color);
   border-color: var(--link-color);
-  box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   outline: none;
 }
 
+/* Primary Button adapts to theme color */
 .btn-primary {
   background-color: var(--link-color);
-  border: none;
+  border-color: var(--link-color);
   color: #fff;
   border-radius: var(--radius);
   padding: 10px 20px;
   font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0, 121, 107, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 .btn-primary:hover {
   background-color: var(--link-hover-color);
-  box-shadow: 0 4px 12px rgba(0, 121, 107, 0.3);
+  border-color: var(--link-hover-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* --- LIST GROUP (TRANSPARENT FIX) --- */
+/* --- LIST GROUP --- */
 .list-group-item {
   background-color: transparent !important;
   border-color: var(--border-color) !important;
@@ -344,19 +403,11 @@ body {
 
 /*
 ====================================
-(7) DARK MODE SPECIFIC OVERRIDES (FIXED)
+(7) DARK MODE SPECIFIC OVERRIDES
 ====================================
 */
 
-/* 1. Set global dark mode colors */
-[data-theme="dark"] {
-  --text-color: #e6edf3;
-  --text-muted-color: #b9c1ca;
-  --card-bg-color: #161b22;
-  --bg-color: #0d1117;
-}
-
-/* 2. Force Headings and Bold text to White */
+/* Force Headings and Bold text to White */
 [data-theme="dark"] b,
 [data-theme="dark"] strong,
 [data-theme="dark"] h1,
@@ -368,27 +419,22 @@ body {
   color: #ffffff !important;
 }
 
-/* 3. General text color */
+/*  General text color */
 [data-theme="dark"] .lead,
 [data-theme="dark"] p,
 [data-theme="dark"] span {
   color: var(--text-color) !important;
 }
 
-/* 4. AGGRESSIVE CARD BACKGROUND FIX 
-   We now EXCLUDE the Chart and Header so they don't break.
-   - :not(.btn) -> Keeps buttons green/red
-   - :not(.card-header) -> Keeps the grey header background visible
-   - :not(.js-plotly-plot *) -> Keeps the chart transparent so lines show up
-*/
+/*  AGGRESSIVE CARD BACKGROUND  */
 [data-theme="dark"] .card,
-[data-theme="dark"] .card *:not(.btn):not(.btn *):not(.card-header):not(.js-plotly-plot):not(.js-plotly-plot *) {
+[data-theme="dark"] .card *:not(.btn):not(.btn *):not(.card-header-themed):not(.js-plotly-plot):not(.js-plotly-plot *) {
   background-color: var(--card-bg-color) !important;
   color: var(--text-color) !important;
   border-color: var(--border-color) !important;
 }
 
-/* 5. Fix Inputs inside Dark Cards */
+/* Inputs inside Dark Cards */
 [data-theme="dark"] input,
 [data-theme="dark"] textarea,
 [data-theme="dark"] select {
@@ -406,7 +452,7 @@ body {
   box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3) !important;
 }
 
-/* 6. EXPLICITLY RESTORE BUTTON COLORS IN DARK MODE */
+/*  EXPLICITLY RESTORE BUTTON COLORS IN DARK MODE */
 [data-theme="dark"] .btn-success {
     background-color: #198754 !important;
     border-color: #198754 !important;
@@ -414,7 +460,7 @@ body {
 }
 
 [data-theme="dark"] .btn-outline-danger {
-    background-color: transparent !important; /* Keep transparent initially */
+    background-color: transparent !important;
     border-color: #dc3545 !important;
     color: #dc3545 !important;
 }
@@ -430,10 +476,7 @@ body {
    ====================================
 */
 
-/* Use this class to force text to be the Theme's Link Color 
-   (Teal in Light mode, Blue in Dark mode). 
-   This override is essential for device names in list items.
-*/
+/* Use this class to force text to be the Theme's Link Color */
 .theme-text-bold {
     color: var(--link-color) !important;
     font-weight: 700;

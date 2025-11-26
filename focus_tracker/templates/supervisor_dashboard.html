@@ -1,105 +1,149 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
-<h2 class="mb-4">Classroom Review Panel</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold" style="color: var(--header-bg);">
+      <i class="bi bi-speedometer2 me-2"></i>Classroom Review Panel
+  </h2>
+  <span class="badge bg-secondary fs-6">Live Analytics</span>
+</div>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body text-center">
-        <h3 class="display-4 fw-bold">{{ participant_count }}</h3>
-        <h5 class="card-title text-muted">Students Currently "Opted-In"</h5>
-        <p class="fs-6">
-            This is an anonymous count of all active participants.
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header card-header-themed fw-semibold">
+        <i class="bi bi-people-fill me-2"></i> Active Session Overview
+    </div>
+    <div class="card-body text-center p-4">
+        <h3 class="display-4 fw-bold text-primary">{{ participant_count }}</h3>
+        <h5 class="text-muted">Students Currently "Opted-In"</h5>
+        <p class="text-muted mb-0">
+            This is an anonymous count of all active participants sending data right now.
         </p>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-lg-4">
-        <div class="summary-card card-focused">
-            <h3>{{ focused_percent|floatformat:0 }}%</h3>
-            <p>Class Focus</p>
+<div class="row mb-4">
+    <div class="col-lg-4 mb-3">
+        <div class="card border-0 shadow-sm text-white text-center h-100" 
+             style="background: linear-gradient(135deg, #2196f3, #64b5f6);">
+            <div class="card-body p-4">
+                <h3 class="fw-bold display-5">{{ focused_percent|floatformat:0 }}%</h3>
+                <p class="mb-0 fs-5"> Focused</p>
+            </div>
         </div>
     </div>
-    <div class="col-lg-4">
-        <div class="summary-card card-distracted">
-            <h3>{{ distracted_percent|floatformat:0 }}%</h3>
-            <p>Class Distraction</p>
+
+    <div class="col-lg-4 mb-3">
+        <div class="card border-0 shadow-sm text-white text-center h-100" 
+             style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+            <div class="card-body p-4">
+                <h3 class="fw-bold display-5">{{ distracted_percent|floatformat:0 }}%</h3>
+                <p class="mb-0 fs-5"> Distracted</p>
+            </div>
         </div>
     </div>
-    <div class="col-lg-4">
-        <div class="summary-card card-drowsy">
-            <h3>{{ drowsy_percent|floatformat:0 }}%</h3>
-            <p>Class Drowsiness</p>
+
+    <div class="col-lg-4 mb-3">
+        <div class="card border-0 shadow-sm text-white text-center h-100" 
+             style="background: linear-gradient(135deg, #9c27b0, #ba68c8);">
+            <div class="card-body p-4">
+                <h3 class="fw-bold display-5">{{ drowsy_percent|floatformat:0 }}%</h3>
+                <p class="mb-0 fs-5"> Drowsy</p>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="card mt-4">
-    <div class="card-header">
-        Live Classroom Focus (Recent Activity)
+<div class="card border-0 shadow-sm mb-5">
+    <div class="card-header card-header-themed fw-semibold">
+        <i class="bi bi-graph-up"></i> Live Classroom Trends (Last 100 Logs)
     </div>
     <div class="card-body">
         {% if total_logs > 0 %}
-        <div style="height: 400px;">
-            <canvas id="focusChart"></canvas>
-        </div>
+            <div id="supervisorChart" style="height: 400px;"></div>
         {% else %}
-        <div class="alert alert-info">
-            No data is being recorded. This chart will update when students start a session.
-        </div>
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle me-2"></i> 
+                No data is being recorded. This chart will update when students start a session.
+            </div>
         {% endif %}
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
-    const chartData = {{ chart_data_json|safe }};
-    const ctx = document.getElementById('focusChart');
-    
-    if (chartData.length > 0 && ctx) {
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'Class Focus Level',
-                    data: chartData,
-                    borderColor: 'rgb(75, 192, 192)',
-                    stepped: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'minute',
-                            tooltipFormat: 'HH:mm - dd MMM'
-                        },
-                        title: { display: true, text: 'Time' }
-                    },
-                    y: {
-                        title: { display: true, text: 'Focus State' },
-                        ticks: {
-                            stepSize: 1,
-                            callback: function(value) {
-                                switch (value) {
-                                    case 0: return 'Drowsy';
-                                    case 1: return 'Distracted';
-                                    case 2: return 'Focused';
-                                }
-                            }
-                        },
-                        min: 0,
-                        max: 2
-                    }
-                }
-            }
-        });
-    }
+  // --- Theme Logic (Same as Student Dashboard) ---
+  const getThemeColors = () => {
+      const root = document.documentElement;
+      const styles = getComputedStyle(root);
+      const currentTheme = root.getAttribute('data-theme');
+      
+      let textColor = '#000000'; 
+      let borderColor = styles.getPropertyValue('--border-color').trim();
+      
+      if (currentTheme === 'dark') {
+          textColor = '#ffffff'; 
+          if (!borderColor || borderColor === '#30363d') borderColor = '#444444'; 
+      }
+      let lineColor = styles.getPropertyValue('--link-color').trim();
+      return { textColor, lineColor, borderColor };
+  };
+
+  // --- Chart Logic ---
+  // 1. Get data passed from views.py
+  const chartDataRaw = '{{ chart_data_json|escapejs }}';
+  const chartData = chartDataRaw ? JSON.parse(chartDataRaw) : [];
+  
+  if (chartData.length > 0) {
+      const colors = getThemeColors();
+
+      // 2. Create Scatter Plot
+      const trace = {
+        x: chartData.map(d => d.x),
+        y: chartData.map(d => d.y),
+        mode: 'markers',
+        type: 'scatter',
+        marker: { 
+            size: 10,
+            // Color code points based on status (Green/Yellow/Red)
+            color: chartData.map(d => {
+                if(d.y === 2) return '#2ecc71'; // Focused (Green)
+                if(d.y === 1) return '#f1c40f'; // Distracted (Yellow)
+                return '#e74c3c';               // Drowsy (Red)
+            }),
+            opacity: 0.7,
+            line: { width: 1, color: colors.borderColor }
+        },
+        name: 'Student State'
+      };
+      
+      const layout = {
+        paper_bgcolor: 'rgba(0,0,0,0)', 
+        plot_bgcolor: 'rgba(0,0,0,0)',  
+        font: { 
+            color: colors.textColor, 
+            family: '"Inter", sans-serif'
+        },
+        margin: { t: 30, b: 40, l: 60, r: 20 }, 
+        xaxis: { 
+          title: 'Time', 
+          type: 'date', 
+          gridcolor: colors.borderColor, 
+          tickfont: { color: colors.textColor }
+        },
+        yaxis: { 
+          title: 'Class State',
+          tickvals: [0, 1, 2], 
+          ticktext: ['Drowsy', 'Distracted', 'Focused'], 
+          range: [-0.5, 2.5], 
+          gridcolor: colors.borderColor,
+          tickfont: { color: colors.textColor }
+        }
+      };
+
+      Plotly.newPlot('supervisorChart', [trace], layout, {responsive: true});
+  }
 </script>
+
 {% endblock %}
