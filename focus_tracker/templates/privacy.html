@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header card-header-themed py-4 text-center">
+                    <h2 class="fw-bold mb-0">
+                        <i class="bi bi-shield-check me-2"></i>Privacy & Support
+                    </h2>
+                </div>
+                
+                <div class="card-body p-5">
+                    
+                    {% if user.is_authenticated and show_form %}
+                    <div class="alert alert-warning border-0 shadow-sm mb-4 d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                        <div>
+                            <strong>Action Required:</strong> Please review the policy and FAQs below, then accept the terms to unlock your Dashboard.
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <h4 class="fw-bold theme-text-bold mb-3">1. What We Collect</h4>
+                    <p>The CloudFocus system processes video from your local camera to detect facial landmarks.</p>
+                    <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4">
+                        <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                        <div>
+                            <strong>No video or images are ever saved or transmitted.</strong>
+                        </div>
+                    </div>
+                    <p>The system only saves metadata: text status (e.g., "Focused") and environmental sensor data.</p>
+
+                    <hr class="my-4">
+
+                    <h4 class="fw-bold theme-text-bold mb-3">2. How the AI Works</h4>
+                    <p>This system uses artificial intelligence to estimate focus based on eye movement. AI is not perfect and is for <strong>self-reflection only</strong>, not for grading.</p>
+
+                    <hr class="my-4">
+
+                    <h4 class="fw-bold theme-text-bold mb-3">3. Who Sees My Data</h4>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="bg-light p-3 rounded text-center h-100">
+                                <i class="bi bi-person-check-fill fs-1 text-success mb-2"></i>
+                                <h6 class="fw-bold">You</h6>
+                                <p class="small text-muted mb-0">Full access to your detailed timeline and logs.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light p-3 rounded text-center h-100">
+                                <i class="bi bi-person-badge-fill fs-1 text-primary mb-2"></i>
+                                <h6 class="fw-bold">Instructor</h6>
+                                <p class="small text-muted mb-0">Sees only <strong>class-wide averages</strong>. No individual logs.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h4 class="fw-bold theme-text-bold mb-3">4. Your Rights</h4>
+                    <p>Participation is <strong>100% voluntary</strong>. You may unplug the device or delete your account at any time without penalty.</p>
+
+                    <hr class="my-4">
+
+                    <h4 class="fw-bold theme-text-bold mb-3">5. Frequently Asked Questions</h4>
+                    <div class="accordion shadow-sm mb-4" id="faqAccordion">
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    <strong>Is my video recorded?</strong>
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    No. CloudFocus uses <strong>Edge AI</strong> processing. Your video is analyzed locally on the Raspberry Pi. Only the text status is sent to the cloud.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    <strong>How does the wellness AI work?</strong>
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Our AI Chatbot analyses your focus trends to suggest break times and mindfulness exercises. It is designed to prevent burnout, not to police your work.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    <strong>Can I delete my data?</strong>
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes. Contact an administrator via the <a href="{% url 'contact' %}">Contact Page</a> to request a full data wipe.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <hr class="my-4">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

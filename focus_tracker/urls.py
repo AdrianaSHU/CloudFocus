@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     LogFocusView, register_view, home_view, dashboard_view, about_view, contact_view, profile_view, 
     supervisor_dashboard_view, start_session_view, end_session_view, 
-    get_live_dashboard_data, correct_log_view
+    get_live_dashboard_data, correct_log_view, privacy_view, chat_api_view
 )
 from django.contrib.auth import views as auth_views
 
@@ -10,6 +10,7 @@ urlpatterns = [
     # API Endpoint
     path('api/log_focus/', LogFocusView.as_view(), name='api-log-focus'),
     path('api/live_data/', get_live_dashboard_data, name='api-live-data'),
+    path('api/chat/', chat_api_view, name='chat_api'),
 
     # Web Pages
     path('', home_view, name='home'),
@@ -21,6 +22,9 @@ urlpatterns = [
     path('about/', about_view, name='about'),
     path('contact/', contact_view, name='contact'),
     path('profile/', profile_view, name='profile'),
+    
+    # New Pages
+    path('privacy/', privacy_view, name='privacy'),
 
     path('session/start/<int:device_id>/', start_session_view, name='start_session'),
     path('session/end/', end_session_view, name='end_session'),
@@ -66,7 +70,6 @@ urlpatterns = [
          ), 
          name='password_reset_complete'),
 
-    # Supervisor
+    # Supervisor Actions
     path('supervisor/', supervisor_dashboard_view, name='supervisor_dashboard'),
-    
 ]

@@ -112,13 +112,46 @@
                 </div>
               </div>
 
-            </div> <div class="row mt-4">
+            </div> 
+
+            <div class="row mt-4">
               <div class="col-12">
                 <div class="card border bg-white shadow-sm">
-                  <div class="card-body text-center">
+                  <div class="card-body">
                     
-                    <div class="d-flex justify-content-center mb-3">
-                       <div>
+                    <h5 class="card-title fw-bold mb-3 text-danger text-center">
+                        <i class="bi bi-shield-check"></i> Consent Declaration
+                    </h5>
+                    <p class="text-center text-muted small mb-4">
+                        Please review the <a href="{% url 'privacy' %}" target="_blank" class="text-primary fw-bold text-decoration-underline">Privacy Policy & FAQ</a>.
+                    </p>
+
+                    <div class="mb-2 ms-3"> 
+                       <div class="form-check">
+                         {{ form.check_read }}
+                         <label class="form-check-label small text-muted" for="{{ form.check_read.id_for_label }}">
+                            {{ form.check_read.label }}
+                         </label>
+                         {% if form.check_read.errors %}
+                           <div class="text-danger small d-block">{{ form.check_read.errors.0 }}</div>
+                         {% endif %}
+                       </div>
+                    </div>
+
+                    <div class="mb-4 ms-3">
+                       <div class="form-check">
+                         {{ form.check_consent }}
+                         <label class="form-check-label small text-muted" for="{{ form.check_consent.id_for_label }}">
+                            {{ form.check_consent.label }}
+                         </label>
+                         {% if form.check_consent.errors %}
+                           <div class="text-danger small d-block">{{ form.check_consent.errors.0 }}</div>
+                         {% endif %}
+                       </div>
+                    </div>
+
+                    <div class="mb-4 ms-1">
+                       <div style="transform: scale(0.85); transform-origin: 0 0;">
                          {{ form.captcha }}
                          {% if form.captcha.errors %}
                            <div class="text-danger mt-1 small">{{ form.captcha.errors.0 }}</div>
@@ -137,21 +170,6 @@
               </div>
             </div>
 
-          </form>
-        </div>
-
-        <div class="card-footer text-center py-3 bg-light border-0">
-          <span class="text-muted">Already have an account?</span>
-          <a href="{% url 'login' %}" class="text-decoration-none fw-bold theme-text-bold ms-1">
-            Login here
-          </a>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
     function togglePassword(fieldId, btn) {
         const input = document.getElementById(fieldId);
@@ -159,12 +177,10 @@
         
         if (input.type === "password") {
             input.type = "text";
-            icon.classList.remove("bi-eye");
-            icon.classList.add("bi-eye-slash"); // Change icon to 'eye-slash'
+            icon.classList.replace("bi-eye", "bi-eye-slash");
         } else {
             input.type = "password";
-            icon.classList.remove("bi-eye-slash");
-            icon.classList.add("bi-eye"); // Change icon back to 'eye'
+            icon.classList.replace("bi-eye-slash", "bi-eye");
         }
     }
 </script>

@@ -164,6 +164,7 @@
                           <li><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
                           <li><a href="{% url 'about' %}" class="text-decoration-none">About</a></li>
                           <li><a href="{% url 'contact' %}" class="text-decoration-none">Contact</a></li>
+                          <li><a href="{% url 'privacy' %}" class="text-decoration-none">Privacy Policy</a></li>
                           {% if user.is_authenticated %}
                               <li><a href="{% url 'dashboard' %}" class="text-decoration-none">Dashboard</a></li>
                           {% endif %}
@@ -212,7 +213,7 @@
     
     <!-- === (E) NEW JavaScript for Mobile & Themes === -->
     <script>
-        // --- (FIX) Theme Switcher Logic ---
+        // --- Theme Switcher Logic ---
         function setTheme(themeName) {
         localStorage.setItem('theme', themeName);
         window.location.reload();
@@ -251,8 +252,107 @@
             }
         });
     </script>
+
     {% if user.is_authenticated %}
+    <div id="chatbot-container" class="card shadow-lg border-0" 
+         style="position: fixed; bottom: 80px; right: 20px; width: 350px; z-index: 9999; display: none; border-radius: 15px; overflow: hidden;">
+        
+        <div class="card-header card-header-themed d-flex justify-content-between align-items-center text-white">
+            <span><i class="bi bi-robot me-2"></i>CloudFocus Assistant</span>
+            <button onclick="toggleChat()" class="btn btn-sm btn-link text-white p-0">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="card-body p-3 bg-light" style="height: 300px; overflow-y: auto;" id="chat-history">
+            <div class="d-flex justify-content-start mb-3">
+                <div class="bg-white border p-2 rounded shadow-sm text-muted small" style="max-width: 85%;">
+                    Hi {{ user.first_name }}! <br>
+                    I'm here to help with wellness tips, app questions, and focus advice.
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer p-2 bg-white border-top">
+            <div class="input-group">
+                <input type="text" id="chat-input" class="form-control form-control-sm border-0" 
+                       placeholder="Type a message..." onkeypress="handleEnter(event)">
+                <button class="btn btn-primary btn-sm rounded-circle ms-2" onclick="sendMessage()" style="width: 35px; height: 35px;">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="toggleChat()" 
+            class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" 
+            style="position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; z-index: 9998;">
+        <i class="bi bi-chat-dots-fill fs-4"></i>
+    </button>
+
     <script>
+        function toggleChat() {
+            const chat = document.getElementById('chatbot-container');
+            if (chat.style.display === 'none' || chat.style.display === '') {
+                chat.style.display = 'block';
+                setTimeout(() => document.getElementById('chat-input').focus(), 100);
+            } else {
+                chat.style.display = 'none';
+            }
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const history = document.getElementById('chat-history');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // User Message
+            history.innerHTML += `
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="bg-primary text-white p-2 rounded shadow-sm small" style="max-width: 80%; border-bottom-right-radius: 0;">
+                        ${message}
+                    </div>
+                </div>`;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            // Send to Backend
+            try {
+                const response = await fetch("{% url 'chat_api' %}", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                const data = await response.json();
+
+                // Bot Response
+                history.innerHTML += `
+                    <div class="d-flex justify-content-start mb-3">
+                        <div class="bg-white border p-2 rounded shadow-sm text-dark small" style="max-width: 80%; border-top-left-radius: 0;">
+                            ${data.response}
+                        </div>
+                    </div>`;
+                history.scrollTop = history.scrollHeight;
+
+            } catch (error) {
+                console.error("Chat Error:", error);
+                history.innerHTML += `<div class="text-danger small text-center my-2">Error connecting to AI.</div>`;
+            }
+        }
+        </script>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <script>
         (function() {
             // Get seconds remaining from Django session
             const sessionAgeSeconds = {{ request.session.get_expiry_age }};

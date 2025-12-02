@@ -168,11 +168,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
 TIME_ZONE = 'Europe/London'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+GEMINI_API_KEY = config('GEMINI_API_KEY', default=None)
 
 SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 

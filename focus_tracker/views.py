@@ -13,12 +13,15 @@ from django.core.mail import EmailMessage
 from django.conf import settings 
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.http import JsonResponse
 import logging
 import json
 import os
 import uuid 
 from collections import Counter
 from datetime import timedelta 
+import google.generativeai as genai
+from django.db.models import Count, Q
 
 # --- Import Models & Forms ---
 from .models import Device, Session, FocusLog, Profile
@@ -31,7 +34,7 @@ from .forms import (
 )
 from .image_utils import handle_profile_picture_upload
 
-# --- (1) IMPORT YOUR UTILS ---
+# --- IMPORT UTILS ---
 from .dashboard_utils import get_dashboard_data
 
 
@@ -98,6 +101,108 @@ class LogFocusView(APIView):
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+@login_required
+def chat_api_view(request):
+    """
+    Role-Aware AI Chatbot (Google Gemini).
+    Now serves responses in UK English.
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_message = data.get('message', '')
+            
+            if not settings.GEMINI_API_KEY:
+                return JsonResponse({'response': "Error: AI Key not configured."}, status=200)
+
+            # --- 1. DEFINE STATIC KNOWLEDGE ---
+            faq_knowledge = """
+            OFFICIAL KNOWLEDGE BASE:
+            - Video Privacy: No video is recorded or stored. Processing is local (Edge AI).
+            - Wellness AI: Suggests breaks based on data; does not police work.
+            - Data Deletion: Contact admin to wipe data.
+            """
+
+            # --- 2. BUILD DYNAMIC CONTEXT ---
+            
+            if request.user.is_staff:
+                # === TEACHER MODE ===
+                # A. Define the time window (Last 30 mins)
+                time_window = timezone.now() - timedelta(minutes=30)
+                
+                # B. Find logs for currently active sessions
+                active_sessions = Session.objects.filter(is_active=True)
+                active_logs = FocusLog.objects.filter(
+                    session__in=active_sessions,
+                    timestamp__gte=time_window
+                )
+                
+                # C. Calculate Class Percentages
+                total_class = active_logs.count()
+                
+                if total_class > 0:
+                    distracted_count = active_logs.filter(status='DISTRACTED').count()
+                    drowsy_count = active_logs.filter(status='DROWSY').count()
+                    focused_count = active_logs.filter(status='FOCUSED').count()
+                    
+                    # Calculate percentages
+                    distracted_pct = int((distracted_count / total_class) * 100)
+                    drowsy_pct = int((drowsy_count / total_class) * 100)
+                    focused_pct = int((focused_count / total_class) * 100)
+                    
+                    context_str = f"LIVE CLASS STATUS: {focused_pct}% Focused, {distracted_pct}% Distracted, {drowsy_pct}% Drowsy."
+                else:
+                    context_str = "Class is currently inactive."
+
+                # D. Build Teacher Prompt (UK English)
+                system_instruction = (
+                    "You are an expert Pedagogical Assistant for a teacher. "
+                    "Analyze the class statistics below. "
+                    "CRITICAL: Use British English spelling and terminology (e.g. 'Maths', 'Module', 'Programme'). " 
+                    "Keep advice professional, actionable, and concise (under 50 words)."
+                    f"\n\n{faq_knowledge}\n\n{context_str}"
+                )
+
+            else:
+                # === STUDENT MODE ===
+                # A. Get today's logs for this specific user
+                today_logs = FocusLog.objects.filter(
+                    session__user=request.user,
+                    timestamp__date=timezone.now().date()
+                )
+                total = today_logs.count()
+                
+                stats_str = "No data yet."
+                if total > 0:
+                    focused = today_logs.filter(status='FOCUSED').count()
+                    pct = int((focused / total) * 100)
+                    stats_str = f"Focus Score: {pct}%."
+
+                # B. Build Student Prompt (UK English)
+                system_instruction = (
+                    "You are a supportive Wellness Coach for a student. "
+                    "Use their recent data to give specific advice. "
+                    "CRITICAL: Use British English spelling and terminology (e.g. 'minimise', 'colour', 'wellbeing'). "
+                    "If they were recently 'Drowsy', suggest a specific break (water, stretch). "
+                    "Never be judgmental."
+                    f"\n\n{faq_knowledge}\n\nUSER DATA: {stats_str}"
+                )
+
+            # --- 3. CALL AI ---
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel('gemini-2.0-flash')
+            
+            full_prompt = f"{system_instruction}\n\nUser Question: {user_message}"
+            response = model.generate_content(full_prompt)
+            
+            return JsonResponse({'response': response.text})
+
+        except Exception as e:
+            print(f"AI Error: {e}")
+            return JsonResponse({'response': "I'm analysing the data but hit a snag. Ask me again in a moment!"}, status=200)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @api_view(['GET'])
 @login_required
@@ -215,22 +320,31 @@ def end_session_view(request):
 @require_POST
 def correct_log_view(request, log_id):
     """
-    Allows user to correct a log entry (e.g., from 'Distracted' to 'Focused')
+    Allows a user to correct a log entry.
+    Example: User was reading a book (looking down), AI thought they were 'Drowsy'.
+    User clicks 'Correct', status changes to 'FOCUSED'.
     """
     try:
         log_to_correct = get_object_or_404(FocusLog, id=log_id)
 
-        # Security: User must own the session
+        # Security Check: Ensure the log belongs to the current user
         if log_to_correct.session.user != request.user:
-            messages.error(request, "You do not have permission to change this log.")
+            messages.error(request, "You do not have permission to modify this log.")
             return redirect('dashboard')
 
+        # Logic: If 'Drowsy' or 'Distracted', flip it to 'Focused'
+        original_status = log_to_correct.get_status_display()
         log_to_correct.status = 'FOCUSED'
+        
+        #  Flag to indicate manual correction
+        log_to_correct.manual_correction = True
+        
         log_to_correct.save()
-        messages.success(request, "Log successfully corrected to 'Focused'.")
+        
+        messages.success(request, f"Log updated: '{original_status}' changed to 'Focused'.")
         
     except Exception as e:
-        messages.error(request, f"An error occurred: {e}")
+        messages.error(request, f"Error correcting log: {e}")
 
     return redirect('dashboard')
 
@@ -287,58 +401,80 @@ def supervisor_dashboard_view(request):
     return render(request, 'supervisor_dashboard.html', context)
 
 
+@login_required
+@require_POST
+def delete_user_view(request, user_id):
+    """
+    Allows ONLY a Superuser (Admin) to delete a user account.
+    Teachers (Staff) will be denied access.
+    """
+    # 1. STRICT SECURITY CHECK: Is the current user a Superuser?
+    # If they are just a Teacher (is_staff=True but is_superuser=False), they get rejected.
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied: Only Administrators can delete accounts.")
+        return redirect('supervisor_dashboard')
+
+    user_to_delete = get_object_or_404(User, id=user_id)
+    
+    # 2. Safety check: Prevent Admin from deleting themselves
+    if user_to_delete == request.user:
+        messages.error(request, "You cannot delete your own administrator account.")
+    else:
+        username = user_to_delete.username
+        user_to_delete.delete()
+        messages.success(request, f"User '{username}' has been successfully deleted.")
+        
+    return redirect('supervisor_dashboard')
+
+
 # ==========================================
 #           USER ACCOUNTS & PAGES
 # ==========================================
 
 logger = logging.getLogger(__name__)
 
+# focus_tracker/views.py
+
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST, request.FILES)
-        
         if form.is_valid():
             try:
-                # 1. Save User (Atomic transaction recommended but keeping simple)
                 user = form.save()
                 
-                # 2. Handle Profile Image (Defensive Coding)
+                # Ensure profile exists
+                if not hasattr(user, 'profile'):
+                    Profile.objects.create(user=user)
+
+                # Auto-approve consent (since they checked the boxes)
+                user.profile.consent_agreed = True
+                
+                # Handle Image Upload
                 image_file = request.FILES.get('profile_picture')
                 if image_file:
-                    try:
-                        # Ensure profile exists
-                        if not hasattr(user, 'profile'):
-                            Profile.objects.create(user=user)
+                    saved_name = handle_profile_picture_upload(image_file)
+                    if saved_name:
+                        user.profile.profile_picture.name = saved_name
+                
+                user.profile.save()
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
-                        # Attempt upload
-                        saved_file_name = handle_profile_picture_upload(image_file)
-                        
-                        if saved_file_name:
-                            user.profile.profile_picture.name = saved_file_name
-                            user.profile.save()
-                            
-                    except Exception as e:
-                        # LOG the error, but DO NOT crash the registration
-                        logger.error(f"Azure Upload Failed: {str(e)}")
-                        print(f"WARNING: Profile picture failed to upload: {e}")
-                        # User is still created, just without the picture
-            
-                # 3. Login and Redirect
-                login(request, user)
                 messages.success(request, f"Account created! Welcome, {user.first_name}.")
                 return redirect('dashboard')
-
-            except Exception as e:
-                # Catch generic database/server errors
-                logger.error(f"Registration Error: {str(e)}")
-                messages.error(request, "A system error occurred during registration. Please try again.")
                 
+            except Exception as e:
+                logger.error(f"Registration Error: {e}")
+                messages.error(request, "System error. Please try again.")
         else:
             messages.error(request, "Please correct the errors below.")
     else:
         form = CustomUserCreationForm()
         
     return render(request, 'register.html', {'form': form})
+
+# Simplified Privacy View (Read Only)
+def privacy_view(request):
+    return render(request, 'privacy.html')
 
 @login_required
 def profile_view(request):
@@ -440,3 +576,50 @@ def contact_view(request):
         form = ContactForm()
         
     return render(request, 'contact.html', {'form': form})
+
+
+def privacy_view(request):
+    """
+    Combined Privacy Page.
+    - Public: Anyone can read the text.
+    - Logged In: Users can submit the Consent Form.
+    """
+    
+    # 1. Handle Form Submission (POST)
+    if request.method == 'POST':
+        # SECURITY FIX: Prevent anonymous users from submitting
+        if not request.user.is_authenticated:
+            messages.error(request, "You must be logged in to save your consent.")
+            return redirect('login')
+
+        read_checked = request.POST.get('check_read')
+        consent_checked = request.POST.get('check_consent')
+
+        if read_checked and consent_checked:
+            try:
+                profile = request.user.profile
+            except:
+                # Create profile if it doesn't exist for the logged-in user
+                from .models import Profile
+                profile = Profile.objects.create(user=request.user)
+
+            profile.consent_agreed = True
+            profile.save()
+            
+            messages.success(request, "Thank you! You now have full access to CloudFocus.")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "You must agree to all terms to proceed.")
+
+    # 2. Determine if we should show the form (GET)
+    show_form = False
+    if request.user.is_authenticated:
+        try:
+            # Show form only if they haven't agreed yet
+            if not request.user.profile.consent_agreed:
+                show_form = True
+        except:
+            # If profile is missing, they need to agree/setup
+            show_form = True
+
+    return render(request, 'privacy.html', {'show_form': show_form})

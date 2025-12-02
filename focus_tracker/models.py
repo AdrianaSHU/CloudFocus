@@ -15,6 +15,8 @@ class Profile(models.Model):
         blank=True
     )
     has_seen_security_update = models.BooleanField(default=False)
+    consent_agreed = models.BooleanField(default=False, verbose_name="Agreed to Privacy Policy")
+    consent_date = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return self.user.username
@@ -92,6 +94,7 @@ class FocusLog(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='logs')
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    manual_correction = models.BooleanField(default=False, verbose_name="Manually Corrected")
 
     emotion_detected = models.CharField(
         max_length=20, 

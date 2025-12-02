@@ -18,36 +18,50 @@ class CustomUserAdmin(UserAdmin):
     get_is_active.boolean = True
     get_is_active.short_description = 'Active'
 
+    # These methods ensure ONLY Superusers can see/edit Users in the Admin Panel.
+    # Supervisors (Staff) will NOT see the "Users" table at all.
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+    # ----------------------------
+
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'has_seen_security_update')
-    # Make the field editable from the admin panel
     list_editable = ('has_seen_security_update',)
 
-# We are creating a custom admin view for the Device model
+    # Hide Profiles from non-superusers too (optional, but recommended for privacy)
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
 class DeviceAdmin(admin.ModelAdmin):
-    # This will display the API key in the list view (very helpful)
     list_display = ('name', 'api_key', 'device_id', 'last_seen', 'is_active')
-    
-    # This makes the API key read-only (so you don't accidentally change it)
     readonly_fields = ('api_key', 'device_id')
 
-# We are creating a custom admin view for the Session model
 class SessionAdmin(admin.ModelAdmin):
     list_display = ('user', 'device', 'start_time', 'end_time', 'is_active')
-    list_filter = ('is_active', 'device') # Lets you filter by device
+    list_filter = ('is_active', 'device')
 
 class FocusLogAdmin(admin.ModelAdmin):
     list_display = ('session', 'timestamp', 'status', 'temperature', 'humidity')
     list_filter = ('status', 'session__device')
 
 
-# --- 3. Register your models ---
-
-# Unregister the default User admin and register a Custom one
+# --- Register your models ---
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 
-# Register your other models
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Session, SessionAdmin)
 admin.site.register(FocusLog, FocusLogAdmin)

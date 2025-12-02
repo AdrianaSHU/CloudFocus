@@ -171,13 +171,17 @@
 
                     <td>
                         <span class="badge 
-                            {% if log.status == 'FOCUSED' %} badge-themed-success
-                            {% elif log.status == 'DISTRACTED' %} badge-themed-warning
-                            {% elif log.status == 'DROWSY' %} badge-themed-danger
-                            {% else %} badge-themed-secondary
+                            {% if log.status == 'FOCUSED' %} bg-success
+                            {% elif log.status == 'DISTRACTED' %} bg-warning text-dark
+                            {% elif log.status == 'DROWSY' %} bg-danger
+                            {% else %} bg-secondary
                             {% endif %}">
                             {{ log.get_status_display }}
                         </span>
+                        
+                        {% if log.manual_correction %}
+                            <i class="bi bi-pencil-fill text-muted ms-1" title="Manually Corrected" style="font-size: 0.8rem;"></i>
+                        {% endif %}
                     </td>
                     
                     <td>
