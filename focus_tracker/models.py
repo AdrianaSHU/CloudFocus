@@ -2,19 +2,23 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
+import datetime
 import uuid
-from django.utils import timezone # <--- (1) Import for time calculations
-import datetime # <--- (2) Import for time difference
 
+# The Profile model is linked to the built-in User model
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
+    # Profile Picture is stored in Azure Blob Storage
     profile_picture = models.ImageField(
         upload_to='profile_pics', 
         null=True, 
         blank=True
     )
     has_seen_security_update = models.BooleanField(default=False)
+    
+    # Critical ethical field required to prove informed consent (Appendix A2)
     consent_agreed = models.BooleanField(default=False, verbose_name="Agreed to Privacy Policy")
     consent_date = models.DateTimeField(auto_now_add=True, null=True)
 
@@ -23,42 +27,33 @@ class Profile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
+    """Signal to automatically create a Profile instance when a new User is created."""
     if created:
         Profile.objects.create(user=instance)
 
-
+# The Device model is essential for the Edge Device Layer
 class Device(models.Model):
-    """
-    Represents a physical device/station (e.g., "Classroom RPi").
-    Includes heartbeat logic to track if it is Online/Offline.
-    """
-    name = models.CharField(max_length=100, default='Classroom RPi')
+    name = models.CharField(max_length=100, default='Raspberry Pi Unit')
     device_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    
+    # API key enables secure authentication (NFR2) for data logging
     api_key = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
-    # --- (3) New Field: Tracks when the Pi last sent data ---
+    # 'last_seen' implements the Heartbeat mechanism for device health monitoring
     last_seen = models.DateTimeField(null=True, blank=True)
 
     @property
     def is_active(self):
-        """
-        Returns True if the device has been seen in the last 2 minutes.
-        Used by the dashboard to show Green/Red badges.
-        """
+        """Returns True if the device has been seen in the last 2 minutes."""
         if not self.last_seen:
             return False
-        
-        now = timezone.now()
-        # Check if the time difference is less than 2 minutes
-        return (now - self.last_seen) < datetime.timedelta(minutes=2)
+        return (timezone.now() - self.last_seen) < datetime.timedelta(minutes=2)
 
     def __str__(self):
         return self.name
 
+# The Session model links a User to a Device over a defined period.
 class Session(models.Model):
-    """
-    Links a User to a Device for a period of time.
-    """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sessions')
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='sessions')
     start_time = models.DateTimeField(auto_now_add=True)
@@ -68,10 +63,9 @@ class Session(models.Model):
     def __str__(self):
         return f"{self.user.username} @ {self.device.name} (Active: {self.is_active})"
 
+# FocusLog is the core data model fulfilling FR5 (Data Storage)
 class FocusLog(models.Model):
-    """
-    A single data point, linked to an active session.
-    """
+    # Statuses derived from Edge AI classification (FR3)
     STATUS_CHOICES = [
         ('FOCUSED', 'Focused'),
         ('DISTRACTED', 'Distracted'),
@@ -79,21 +73,24 @@ class FocusLog(models.Model):
         ('NO FACE', 'No Face'),
     ]
     
+    # Emotion categories based on CNN model output
     EMOTION_CHOICES = [
-        ('Neutral', 'Neutral'),
-        ('Happy', 'Happy'),
-        ('Sad', 'Sad'),
+        ('Neutral', 'Neutral'), 
+        ('Happy', 'Happy'), 
+        ('Sad', 'Sad'), 
         ('Angry', 'Angry'),
-        ('Surprise', 'Surprise'),
-        ('Fear', 'Fear'),
+        ('Surprise', 'Surprise'), 
+        ('Fear', 'Fear'), 
         ('Disgust', 'Disgust'),
-        ('No Face', 'No Face'),
+        ('No Face', 'No Face'), 
         ('No ROI', 'No ROI'),
     ]
     
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='logs')
     timestamp = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    
+    # Flag enables user to correct misclassifications (Self-reflection tool)
     manual_correction = models.BooleanField(default=False, verbose_name="Manually Corrected")
 
     emotion_detected = models.CharField(
@@ -101,7 +98,8 @@ class FocusLog(models.Model):
         choices=EMOTION_CHOICES,
         default='No Face'
     )
-
+    
+    # Environmental data (optional sensor integration)
     temperature = models.FloatField(null=True, blank=True)
     humidity = models.FloatField(null=True, blank=True)
 

@@ -46,7 +46,19 @@ CLOUDFOCUS THEME SYSTEM
 [data-theme="soft-teal"] {
   /* Backgrounds */
   --bg-color: #e0f2f1; /* Very pale teal base */
+  /*
+  Image Attribution: Rounded Lines Edge Background (Sidebar Background)
+  Source URL: https://www.freepik.com/free-vector/rounded-lines-edge-background-creative-lines-business-brochure-banner-poster-background_34430918.htm
+  License: Image by upklyak on Freepik
+  Use Context: Used as a subtle background texture for the dynamic theme sidebar.
+*/
   --bg-image: url("/static/images/soft_teal.webp");
+  /*
+  Image Attribution: Mobile Screen (Likely for Sidebar Background)
+  Source URL: https://www.freepik.com/free-vector/mobile_143796359.htm
+  License: Image by upklyak on Freepik
+  Use Context: Used as a background texture/image for the dynamic theme sidebar.
+*/
   --sidebar-bg-image: url("/static/images/sidebar_root.webp");
   
   --card-bg-color: #ffffff;
