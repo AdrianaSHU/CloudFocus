@@ -401,31 +401,6 @@ def supervisor_dashboard_view(request):
     return render(request, 'supervisor_dashboard.html', context)
 
 
-@login_required
-@require_POST
-def delete_user_view(request, user_id):
-    """
-    Allows ONLY a Superuser (Admin) to delete a user account.
-    Teachers (Staff) will be denied access.
-    """
-    # 1. STRICT SECURITY CHECK: Is the current user a Superuser?
-    # If they are just a Teacher (is_staff=True but is_superuser=False), they get rejected.
-    if not request.user.is_superuser:
-        messages.error(request, "Access Denied: Only Administrators can delete accounts.")
-        return redirect('supervisor_dashboard')
-
-    user_to_delete = get_object_or_404(User, id=user_id)
-    
-    # 2. Safety check: Prevent Admin from deleting themselves
-    if user_to_delete == request.user:
-        messages.error(request, "You cannot delete your own administrator account.")
-    else:
-        username = user_to_delete.username
-        user_to_delete.delete()
-        messages.success(request, f"User '{username}' has been successfully deleted.")
-        
-    return redirect('supervisor_dashboard')
-
 
 # ==========================================
 #           USER ACCOUNTS & PAGES
