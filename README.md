@@ -77,8 +77,7 @@ Self-Healing Service: Custom systemd scripts ensure the device automatically rec
 1. Edge Device Setup (Raspberry Pi)
 Prerequisites: Raspberry Pi OS (Bookworm 64-bit), Python 3.11.
 
-Bash
-
+```text
 # 1. Clone the repository to your home folder
 cd ~
 git clone [https://github.com/YOUR_USERNAME/CloudFocus.git](https://github.com/YOUR_USERNAME/CloudFocus.git)
@@ -95,6 +94,8 @@ pip install -r requirements.txt
 sudo cp service_files/cloudfocus.service /etc/systemd/system/
 sudo systemctl enable cloudfocus.service
 sudo systemctl start cloudfocus.service
+```
+
 2. Cloud Backend Setup (Azure)
 Prerequisites: Azure App Service (B1 Plan), Azure Database for PostgreSQL.
 
@@ -110,10 +111,11 @@ AZURE_OPENAI_KEY: For the RAG Chatbot
 
 Migrations:
 
-Bash
-
+```text
 python manage.py migrate
 python manage.py createsuperuser
+```
+
 🎮 Usage Guide
 Start a Session: Log in to the CloudFocus Dashboard and click "Start Session".
 
@@ -140,3 +142,11 @@ DevOps: Git, Systemd, Udev.
 
 🛡 Ethical Note
 This project strictly adheres to GDPR guidelines. The "Check-In" mechanism ensures data is only logged when explicit user consent is active. No biometric identifiers are stored permanently.
+
+```text
+### ⚠️ Important Action:
+Before you save, look at the line inside the code block that says:
+`git clone https://github.com/YOUR_USERNAME/CloudFocus.git`
+
+**Manually replace** `YOUR_USERNAME` with your actual GitHub username (which seems to be `CloudFocus` or similar based on your screenshot, but verify the exact URL). Do **not** put brackets `[]` around it in the code block!
+```
