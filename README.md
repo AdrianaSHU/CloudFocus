@@ -38,11 +38,18 @@ CloudFocus/
 ├── templates/                # ☁️ HTML Templates (Dashboard & Chatbot)
 │
 ├── edge_device/              # ⚡ Raspberry Pi Source Code
-│   ├── main_edge.py          # Main inference loop (Face + Emotion + Drowsiness)
+│   ├── Model/                # TFLite Model & Training Artifacts
+│   │   ├── Confusion Matrxix.png
+│   │   ├── rafdb_fusion.tflite
+│   │   ├── results.txt
+│   │   └── v2_colab.ipynb
+│   ├── check_camera.py       # Camera diagnostics script
+│   ├── detect_drowsiness.py  # Drowsiness (EAR) logic
+│   ├── detect_face.py        # Face detection logic
+│   ├── main_edge.py          # Main application loop
+│   ├── requirements.txt      # RPi-specific dependencies
 │   ├── sense_hat_manager.py  # Controls LED Matrix & Env Sensors
-│   ├── requirements.txt      # Python dependencies for the Pi
-│   ├── models/               # TFLite Model files (Fusion-Lite)
-│   └── service_files/        # Systemd & Udev configuration for auto-start
+│   └── test.py               # Testing script
 │
 ├── manage.py                 # Django entry point
 └── requirements.txt          # Python dependencies for Azure Cloud
