@@ -46,7 +46,7 @@ CloudFocus/
 │
 ├── manage.py                 # Django entry point
 └── requirements.txt          # Python dependencies for Azure Cloud
-
+```
 🛠 Hardware Architecture
 The system is optimized for the following hardware configuration:
 
@@ -60,7 +60,7 @@ Feedback/Env Sensor: Raspberry Pi Sense HAT
 
 Used for visual feedback (LED Matrix) and temperature/humidity logging.
 
-✨ Key Features
+## ✨ Key Features
 Privacy-by-Design: No images or video ever leave the Raspberry Pi. Only text metadata is stored.
 
 Real-Time Drowsiness Detection: Uses Eye Aspect Ratio (EAR) to detect micro-sleeps and fatigue.
