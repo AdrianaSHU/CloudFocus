@@ -47,6 +47,7 @@ CloudFocus/
 ├── manage.py                 # Django entry point
 └── requirements.txt          # Python dependencies for Azure Cloud
 ```
+---
 
 ## 🛠 Hardware Architecture
 
@@ -62,6 +63,8 @@ Feedback/Env Sensor: Raspberry Pi Sense HAT
 
 Used for visual feedback (LED Matrix) and temperature/humidity logging.
 
+---
+
 ## ✨ Key Features
 
 Privacy-by-Design: No images or video ever leave the Raspberry Pi. Only text metadata is stored.
@@ -75,6 +78,8 @@ Interactive Dashboard: Visualizes focus trends using Plotly.js for granular time
 Wellness Chatbot (RAG): An AI assistant that queries your personal logs to answer questions like "When was I most distracted today?".
 
 Self-Healing Service: Custom systemd scripts ensure the device automatically recovers if the camera is unplugged or the script crashes.
+
+---
 
 ## 🚀 Installation & Setup
 
@@ -120,6 +125,8 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
+---
+
 ## 🎮 Usage Guide
 
 Start a Session: Log in to the CloudFocus Dashboard and click "Start Session".
@@ -134,6 +141,8 @@ Device Feedback (Sense HAT):
 
 Analyse: View your real-time timeline on the dashboard or ask the Chatbot for a summary.
 
+---
+
 ## 💻 Tech Stack
 
 Edge AI: TensorFlow Lite, OpenCV, MediaPipe Face Mesh.
@@ -145,6 +154,8 @@ Database: PostgreSQL (Azure Managed).
 Frontend: HTML5, Bootstrap 5, Plotly.js (Visualization).
 
 DevOps: Git, Systemd, Udev.
+
+---
 
 ## 🛡 Ethical Note
 
