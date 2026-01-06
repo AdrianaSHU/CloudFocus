@@ -83,7 +83,7 @@ Self-Healing Service: Custom systemd scripts ensure the device automatically rec
 
 ## 🚀 Installation & Setup
 
-# 1. Edge Device Setup (Raspberry Pi)
+### 1. Edge Device Setup (Raspberry Pi)
 Prerequisites: Raspberry Pi OS (Bookworm 64-bit), Python 3.11.
 
 ```text
