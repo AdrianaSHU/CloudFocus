@@ -47,7 +47,9 @@ CloudFocus/
 ├── manage.py                 # Django entry point
 └── requirements.txt          # Python dependencies for Azure Cloud
 ```
+
 ## 🛠 Hardware Architecture
+
 The system is optimized for the following hardware configuration:
 
 Edge Compute: Raspberry Pi 4 Model B (4GB RAM)
@@ -61,6 +63,7 @@ Feedback/Env Sensor: Raspberry Pi Sense HAT
 Used for visual feedback (LED Matrix) and temperature/humidity logging.
 
 ## ✨ Key Features
+
 Privacy-by-Design: No images or video ever leave the Raspberry Pi. Only text metadata is stored.
 
 Real-Time Drowsiness Detection: Uses Eye Aspect Ratio (EAR) to detect micro-sleeps and fatigue.
@@ -74,6 +77,7 @@ Wellness Chatbot (RAG): An AI assistant that queries your personal logs to answe
 Self-Healing Service: Custom systemd scripts ensure the device automatically recovers if the camera is unplugged or the script crashes.
 
 ## 🚀 Installation & Setup
+
 # 1. Edge Device Setup (Raspberry Pi)
 Prerequisites: Raspberry Pi OS (Bookworm 64-bit), Python 3.11.
 
@@ -117,6 +121,7 @@ python manage.py createsuperuser
 ```
 
 ## 🎮 Usage Guide
+
 Start a Session: Log in to the CloudFocus Dashboard and click "Start Session".
 
 Device Feedback (Sense HAT):
@@ -130,6 +135,7 @@ Device Feedback (Sense HAT):
 Analyse: View your real-time timeline on the dashboard or ask the Chatbot for a summary.
 
 ## 💻 Tech Stack
+
 Edge AI: TensorFlow Lite, OpenCV, MediaPipe Face Mesh.
 
 Backend: Python Django 4.2, Django REST Framework.
@@ -141,6 +147,7 @@ Frontend: HTML5, Bootstrap 5, Plotly.js (Visualization).
 DevOps: Git, Systemd, Udev.
 
 ## 🛡 Ethical Note
+
 This project strictly adheres to GDPR guidelines. The "Check-In" mechanism ensures data is only logged when explicit user consent is active. No biometric identifiers are stored permanently.
 
 ```text
