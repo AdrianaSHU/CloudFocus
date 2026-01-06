@@ -46,3 +46,94 @@ CloudFocus/
 │
 ├── manage.py                 # Django entry point
 └── requirements.txt          # Python dependencies for Azure Cloud
+
+🛠 Hardware Architecture
+The system is optimized for the following hardware configuration:
+
+Edge Compute: Raspberry Pi 4 Model B (4GB RAM)
+
+Vision Sensor: Logitech C270 HD Webcam (USB)
+
+Chosen over CSI Camera for deployment flexibility and cable length.
+
+Feedback/Env Sensor: Raspberry Pi Sense HAT
+
+Used for visual feedback (LED Matrix) and temperature/humidity logging.
+
+✨ Key Features
+Privacy-by-Design: No images or video ever leave the Raspberry Pi. Only text metadata is stored.
+
+Real-Time Drowsiness Detection: Uses Eye Aspect Ratio (EAR) to detect micro-sleeps and fatigue.
+
+Emotion Recognition: Custom "Fusion-Lite" model (MobileNetV2+V3) trained on RAF-DB & FER-2013 datasets (86% accuracy).
+
+Interactive Dashboard: Visualizes focus trends using Plotly.js for granular time-series analysis.
+
+Wellness Chatbot (RAG): An AI assistant that queries your personal logs to answer questions like "When was I most distracted today?".
+
+Self-Healing Service: Custom systemd scripts ensure the device automatically recovers if the camera is unplugged or the script crashes.
+
+🚀 Installation & Setup
+1. Edge Device Setup (Raspberry Pi)
+Prerequisites: Raspberry Pi OS (Bookworm 64-bit), Python 3.11.
+
+# 1. Clone the repository to your home folder
+cd ~
+git clone [https://github.com/YOUR_USERNAME/CloudFocus.git](https://github.com/YOUR_USERNAME/CloudFocus.git)
+cd CloudFocus/edge_device
+
+# 2. Create and activate a virtual environment
+python -m venv env
+source env/bin/activate
+
+# 3. Install Edge dependencies
+pip install -r requirements.txt
+
+# 4. Setup the Systemd Service (Auto-start on boot)
+sudo cp service_files/cloudfocus.service /etc/systemd/system/
+sudo systemctl enable cloudfocus.service
+sudo systemctl start cloudfocus.service
+
+2. Cloud Backend Setup (Azure)
+Prerequisites: Azure App Service (B1 Plan), Azure Database for PostgreSQL.
+
+Deployment: Push the root of this repository to your Azure App Service via GitHub Actions or Local Git.
+
+Environment Variables: Configure the following in Azure Settings:
+
+DJANGO_SECRET_KEY: Your secure key
+
+DB_HOST, DB_NAME, DB_USER, DB_PASS: Database credentials
+
+AZURE_OPENAI_KEY: For the RAG Chatbot
+
+Migrations:
+python manage.py migrate
+python manage.py createsuperuser
+
+🎮 Usage Guide
+Start a Session: Log in to the CloudFocus Dashboard and click "Start Session".
+
+Device Feedback (Sense HAT):
+
+🟢 Green: State is Focused (Neutral/Happy).
+
+🟠 Orange: State is Distracted (Head turn / Phone use).
+
+🔴 Red (Flashing): State is Drowsy (Eyes closed > 1 sec).
+
+Analyze: View your real-time timeline on the dashboard or ask the Chatbot for a summary.
+
+💻 Tech Stack
+Edge AI: TensorFlow Lite, OpenCV, MediaPipe Face Mesh.
+
+Backend: Python Django 4.2, Django REST Framework.
+
+Database: PostgreSQL (Azure Managed).
+
+Frontend: HTML5, Bootstrap 5, Plotly.js (Visualization).
+
+DevOps: Git, Systemd, Udev.
+
+🛡 Ethical Note
+This project strictly adheres to GDPR guidelines. The "Check-In" mechanism ensures data is only logged when explicit user consent is active. No biometric identifiers are stored permanently.
