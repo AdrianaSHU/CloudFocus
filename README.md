@@ -105,7 +105,7 @@ sudo systemctl enable cloudfocus.service
 sudo systemctl start cloudfocus.service
 ```
 
-# 2. Cloud Backend Setup (Azure)
+### 2. Cloud Backend Setup (Azure)
 Prerequisites: Azure App Service (B1 Plan), Azure Database for PostgreSQL.
 
 Deployment: Push the root of this repository to your Azure App Service via GitHub Actions or Local Git.
