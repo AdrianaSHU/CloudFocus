@@ -47,7 +47,8 @@ CloudFocus/
 ├── manage.py                 # Django entry point
 └── requirements.txt          # Python dependencies for Azure Cloud
 
-🛠 Hardware Architecture
+
+## 🛠 Hardware Architecture
 The system is optimized for the following hardware configuration:
 
 Edge Compute: Raspberry Pi 4 Model B (4GB RAM)
@@ -59,6 +60,7 @@ Chosen over CSI Camera for deployment flexibility and cable length.
 Feedback/Env Sensor: Raspberry Pi Sense HAT
 
 Used for visual feedback (LED Matrix) and temperature/humidity logging.
+
 
 ✨ Key Features
 Privacy-by-Design: No images or video ever leave the Raspberry Pi. Only text metadata is stored.
