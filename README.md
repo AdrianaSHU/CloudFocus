@@ -47,8 +47,7 @@ CloudFocus/
 ├── manage.py                 # Django entry point
 └── requirements.txt          # Python dependencies for Azure Cloud
 
-
-## 🛠 Hardware Architecture
+🛠 Hardware Architecture
 The system is optimized for the following hardware configuration:
 
 Edge Compute: Raspberry Pi 4 Model B (4GB RAM)
@@ -60,7 +59,6 @@ Chosen over CSI Camera for deployment flexibility and cable length.
 Feedback/Env Sensor: Raspberry Pi Sense HAT
 
 Used for visual feedback (LED Matrix) and temperature/humidity logging.
-
 
 ✨ Key Features
 Privacy-by-Design: No images or video ever leave the Raspberry Pi. Only text metadata is stored.
@@ -79,6 +77,8 @@ Self-Healing Service: Custom systemd scripts ensure the device automatically rec
 1. Edge Device Setup (Raspberry Pi)
 Prerequisites: Raspberry Pi OS (Bookworm 64-bit), Python 3.11.
 
+Bash
+
 # 1. Clone the repository to your home folder
 cd ~
 git clone [https://github.com/YOUR_USERNAME/CloudFocus.git](https://github.com/YOUR_USERNAME/CloudFocus.git)
@@ -95,7 +95,6 @@ pip install -r requirements.txt
 sudo cp service_files/cloudfocus.service /etc/systemd/system/
 sudo systemctl enable cloudfocus.service
 sudo systemctl start cloudfocus.service
-
 2. Cloud Backend Setup (Azure)
 Prerequisites: Azure App Service (B1 Plan), Azure Database for PostgreSQL.
 
@@ -110,9 +109,11 @@ DB_HOST, DB_NAME, DB_USER, DB_PASS: Database credentials
 AZURE_OPENAI_KEY: For the RAG Chatbot
 
 Migrations:
+
+Bash
+
 python manage.py migrate
 python manage.py createsuperuser
-
 🎮 Usage Guide
 Start a Session: Log in to the CloudFocus Dashboard and click "Start Session".
 
