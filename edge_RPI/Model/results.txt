@@ -1,0 +1,33 @@
+Found 49779 files belonging to 7 classes.
+Using 9955 files for validation.
+Generating predictions for 9955 images (this takes a few minutes)...
+   Processed 1000 images...
+   Processed 2000 images...
+   Processed 3000 images...
+   Processed 4000 images...
+   Processed 5000 images...
+   Processed 6000 images...
+   Processed 7000 images...
+   Processed 8000 images...
+   Processed 9000 images...
+
+    CLASSIFICATION REPORT:
+              precision    recall  f1-score   support
+
+       Angry       0.61      0.56      0.59      1207
+     Disgust       0.87      0.88      0.88      1186
+        Fear       0.57      0.57      0.57      1230
+       Happy       0.87      0.89      0.88      2247
+     Neutral       0.63      0.72      0.67      1639
+         Sad       0.63      0.52      0.57      1297
+    Surprise       0.76      0.77      0.76      1149
+
+    accuracy                           0.72      9955
+   macro avg       0.71      0.70      0.70      9955
+weighted avg       0.72      0.72      0.72      9955
+
+
+Final Verified Metrics
+   Accuracy: 72.0%
+   Macro F1-Score: 0.70
+   Inference Speed: ~11 FPS (RPi 4 CPU)
