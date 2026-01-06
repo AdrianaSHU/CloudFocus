@@ -47,7 +47,7 @@ CloudFocus/
 ├── manage.py                 # Django entry point
 └── requirements.txt          # Python dependencies for Azure Cloud
 ```
-🛠 Hardware Architecture
+## 🛠 Hardware Architecture
 The system is optimized for the following hardware configuration:
 
 Edge Compute: Raspberry Pi 4 Model B (4GB RAM)
@@ -73,8 +73,8 @@ Wellness Chatbot (RAG): An AI assistant that queries your personal logs to answe
 
 Self-Healing Service: Custom systemd scripts ensure the device automatically recovers if the camera is unplugged or the script crashes.
 
-🚀 Installation & Setup
-1. Edge Device Setup (Raspberry Pi)
+## 🚀 Installation & Setup
+# 1. Edge Device Setup (Raspberry Pi)
 Prerequisites: Raspberry Pi OS (Bookworm 64-bit), Python 3.11.
 
 ```text
@@ -96,7 +96,7 @@ sudo systemctl enable cloudfocus.service
 sudo systemctl start cloudfocus.service
 ```
 
-2. Cloud Backend Setup (Azure)
+# 2. Cloud Backend Setup (Azure)
 Prerequisites: Azure App Service (B1 Plan), Azure Database for PostgreSQL.
 
 Deployment: Push the root of this repository to your Azure App Service via GitHub Actions or Local Git.
@@ -116,7 +116,7 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-🎮 Usage Guide
+## 🎮 Usage Guide
 Start a Session: Log in to the CloudFocus Dashboard and click "Start Session".
 
 Device Feedback (Sense HAT):
@@ -127,9 +127,9 @@ Device Feedback (Sense HAT):
 
 🔴 Red (Flashing): State is Drowsy (Eyes closed > 1 sec).
 
-Analyze: View your real-time timeline on the dashboard or ask the Chatbot for a summary.
+Analyse: View your real-time timeline on the dashboard or ask the Chatbot for a summary.
 
-💻 Tech Stack
+## 💻 Tech Stack
 Edge AI: TensorFlow Lite, OpenCV, MediaPipe Face Mesh.
 
 Backend: Python Django 4.2, Django REST Framework.
@@ -140,7 +140,7 @@ Frontend: HTML5, Bootstrap 5, Plotly.js (Visualization).
 
 DevOps: Git, Systemd, Udev.
 
-🛡 Ethical Note
+## 🛡 Ethical Note
 This project strictly adheres to GDPR guidelines. The "Check-In" mechanism ensures data is only logged when explicit user consent is active. No biometric identifiers are stored permanently.
 
 ```text
