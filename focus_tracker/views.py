@@ -37,6 +37,8 @@ from .image_utils import handle_profile_picture_upload
 # --- IMPORT UTILS ---
 from .dashboard_utils import get_dashboard_data
 
+logger = logging.getLogger(__name__)
+
 
 # ==========================================
 #               API VIEWS
@@ -106,7 +108,7 @@ class LogFocusView(APIView):
 def chat_api_view(request):
     """
     Role-Aware AI Chatbot (Google Gemini).
-    Now serves responses in UK English.
+    Fully integrated with Azure SQL (Logs) to provide specific, data-driven answers.
     """
     if request.method == 'POST':
         try:
@@ -124,72 +126,71 @@ def chat_api_view(request):
             - Data Deletion: Contact admin to wipe data.
             """
 
-            # --- 2. BUILD DYNAMIC CONTEXT ---
+            # --- 2. BUILD DYNAMIC CONTEXT (AZURE SQL QUERY) ---
             
             if request.user.is_staff:
                 # === TEACHER MODE ===
-                # A. Define the time window (Last 30 mins)
+                # Aggregated Class Data (Last 30 mins)
                 time_window = timezone.now() - timedelta(minutes=30)
-                
-                # B. Find logs for currently active sessions
-                active_sessions = Session.objects.filter(is_active=True)
                 active_logs = FocusLog.objects.filter(
-                    session__in=active_sessions,
+                    session__is_active=True,
                     timestamp__gte=time_window
                 )
                 
-                # C. Calculate Class Percentages
                 total_class = active_logs.count()
-                
                 if total_class > 0:
-                    distracted_count = active_logs.filter(status='DISTRACTED').count()
-                    drowsy_count = active_logs.filter(status='DROWSY').count()
-                    focused_count = active_logs.filter(status='FOCUSED').count()
+                    stats = active_logs.values('status').annotate(count=Count('status'))
+                    # Convert to dictionary for easy lookup
+                    counts = {item['status']: item['count'] for item in stats}
                     
-                    # Calculate percentages
-                    distracted_pct = int((distracted_count / total_class) * 100)
-                    drowsy_pct = int((drowsy_count / total_class) * 100)
-                    focused_pct = int((focused_count / total_class) * 100)
+                    f_pct = int((counts.get('FOCUSED', 0) / total_class) * 100)
+                    d_pct = int((counts.get('DISTRACTED', 0) / total_class) * 100)
+                    dr_pct = int((counts.get('DROWSY', 0) / total_class) * 100)
                     
-                    context_str = f"LIVE CLASS STATUS: {focused_pct}% Focused, {distracted_pct}% Distracted, {drowsy_pct}% Drowsy."
+                    context_str = f"CLASS OVERVIEW (Last 30m): {f_pct}% Focused, {d_pct}% Distracted, {dr_pct}% Drowsy."
                 else:
-                    context_str = "Class is currently inactive."
+                    context_str = "Classroom status: No active sessions detected."
 
-                # D. Build Teacher Prompt (UK English)
                 system_instruction = (
-                    "You are an expert Pedagogical Assistant for a teacher. "
-                    "Analyze the class statistics below. "
-                    "CRITICAL: Use British English spelling and terminology (e.g. 'Maths', 'Module', 'Programme'). " 
-                    "Keep advice professional, actionable, and concise (under 50 words)."
-                    f"\n\n{faq_knowledge}\n\n{context_str}"
+                    "You are an expert Pedagogical Assistant. Use British English. "
+                    "Analyze the class statistics provided below to help the teacher. "
+                    "Keep advice professional and actionable (max 50 words).\n\n"
+                    f"{faq_knowledge}\n\n{context_str}"
                 )
 
             else:
                 # === STUDENT MODE ===
-                # A. Get today's logs for this specific user
-                today_logs = FocusLog.objects.filter(
-                    session__user=request.user,
-                    timestamp__date=timezone.now().date()
-                )
-                total = today_logs.count()
+                # Fetch detailed log history from Azure SQL (Last 15 entries)
+                # This allows the AI to see the specific timeline of events
+                recent_logs = FocusLog.objects.filter(
+                    session__user=request.user
+                ).order_by('-timestamp')[:15]
                 
-                stats_str = "No data yet."
-                if total > 0:
-                    focused = today_logs.filter(status='FOCUSED').count()
-                    pct = int((focused / total) * 100)
-                    stats_str = f"Focus Score: {pct}%."
+                if recent_logs.exists():
+                    # Build a timeline string
+                    log_history = "RECENT DATA LOGS (Chronological):\n"
+                    # Reverse so the AI reads from oldest to newest
+                    for log in reversed(recent_logs):
+                        time_str = log.timestamp.strftime('%H:%M')
+                        log_history += f"- Time: {time_str} | Status: {log.status} | Emotion: {log.emotion_detected} | Temp: {log.temperature}°C\n"
+                    
+                    # Add profile context
+                    has_photo = "Yes" if hasattr(request.user, 'profile') and request.user.profile.profile_picture else "No"
+                    context_str = f"Profile Photo Set: {has_photo}\n{log_history}"
+                else:
+                    context_str = "No data logs found in Azure for this user yet."
 
-                # B. Build Student Prompt (UK English)
                 system_instruction = (
-                    "You are a supportive Wellness Coach for a student. "
-                    "Use their recent data to give specific advice. "
-                    "CRITICAL: Use British English spelling and terminology (e.g. 'minimise', 'colour', 'wellbeing'). "
-                    "If they were recently 'Drowsy', suggest a specific break (water, stretch). "
-                    "Never be judgmental."
-                    f"\n\n{faq_knowledge}\n\nUSER DATA: {stats_str}"
+                    "You are a supportive Wellness Coach. You have direct access to the user's sensor data logs (below). "
+                    "Use this data to answer their questions specifically. "
+                    "Examples:\n"
+                    "- If they ask 'When was I drowsy?', look at the logs and state the exact time.\n"
+                    "- If Temp > 25°C, suggest opening a window.\n"
+                    "CRITICAL: Use British English (minimise, colour). Be concise.\n\n"
+                    f"{faq_knowledge}\n\n{context_str}"
                 )
 
-            # --- 3. CALL AI ---
+            # --- 3. CALL GEMINI ---
             genai.configure(api_key=settings.GEMINI_API_KEY)
             model = genai.GenerativeModel('gemini-2.0-flash')
             
@@ -199,8 +200,9 @@ def chat_api_view(request):
             return JsonResponse({'response': response.text})
 
         except Exception as e:
-            print(f"AI Error: {e}")
-            return JsonResponse({'response': "I'm analysing the data but hit a snag. Ask me again in a moment!"}, status=200)
+            # Log the full error to your Azure logs for debugging
+            print(f"Chat API Error: {e}")
+            return JsonResponse({'response': "I'm having trouble retrieving your latest data from the cloud. Please try again in a moment."}, status=200)
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
 

@@ -37,7 +37,7 @@ CloudFocus/
 ├── static/                   # ☁️ CSS/JS Assets for Web Dashboard
 ├── templates/                # ☁️ HTML Templates (Dashboard & Chatbot)
 │
-├── edge_device/              # ⚡ Raspberry Pi Source Code
+├── edge_RPI/              # ⚡ Raspberry Pi Source Code
 │   ├── Model/                # TFLite Model & Training Artifacts
 │   │   ├── Confusion Matrxix.png
 │   │   ├── rafdb_fusion.tflite
